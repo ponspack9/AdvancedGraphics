@@ -1,0 +1,107 @@
+// OSCAR PONS GALLART
+
+
+#define EXERCISE 4
+
+// Global common used colors
+vec3 BLACK = vec3(0.0,0.0,0.0);
+vec3 WHITE = vec3(1.0,1.0,1.0);
+vec3 RED   = vec3(1.0,0.0,0.0);
+vec3 GREEN = vec3(0.0,1.0,0.0);    
+vec3 BLUE  = vec3(0.0,0.0,1.0);
+
+/////////////////////////////////////////////////////////////////////////////////////
+#if EXERCISE == 1
+
+// Coordinates
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    // Normalized pixel coordinates (from 0 to 1)
+    vec2 uv = fragCoord/iResolution.xy;
+    
+    // Output to screen
+    fragColor = vec4(uv.x,uv.x,uv.x, 1.0);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+#elif EXERCISE == 2
+
+// Mix
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    // Normalized pixel coordinates (from 0 to 1)
+    vec2 uv = fragCoord/iResolution.xy;
+    
+    
+    // Time varying pixel color
+    vec3 col1 = mix(RED,WHITE,uv.x);
+    vec3 col2 = mix(BLACK,GREEN,uv.x);
+    
+    vec3 col = mix(col2,col1,uv.y);
+    // Output to screen
+    fragColor = vec4(col,1.0);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+#elif EXERCISE == 3
+
+// Mod
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    // Normalized pixel coordinates (from 0 to 1)
+    /*
+    vec2 uv = fragCoord/iResolution.xy;
+    
+    //Exercise 2
+    vec3 col1 = mix(RED,WHITE,uv.x/modulus);
+    vec3 col2 = mix(BLACK,GREEN,uv.x/modulus);
+    vec3 col = mix(col2,col1,uv.y/modulus);*/
+    
+    float modulus = 0.2;
+    // Normalized pixel coordinates (from 0 to 1)
+    vec2 uv = fragCoord/iResolution.xy;
+    
+    
+    // Time varying pixel color
+    vec3 col1 = mix(RED,WHITE,uv.y);
+    vec3 col2 = mix(BLACK,GREEN,uv.x);
+    
+    vec3 col = mix(col2,col1,uv.y);
+    
+    col1 = mod(col1,modulus);
+    col2 = mod(col2, modulus);
+    
+    //col = mix(col2,col1,uv.y);
+    
+    // Output to screen
+    fragColor = vec4(col1,1.0);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+#elif EXERCISE == 4
+
+// Floor 
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    // Normalized pixel coordinates (from 0 to 1)
+    vec2 uv = fragCoord/iResolution.xy;
+    
+    //We divide the screen in some divisions
+    float divisions = 10.0;
+    // Calculate the width of each division
+    float divWidth = 1.0/divisions;
+    
+    // We want to have [0..1..2) where our division is at the center
+    // in order to make floor of the value [0..1..2) and stick to 0 and 1
+    // So we calculate where the pixel is, relative to the division width
+    float c = mod(uv.x,divWidth*2.0) / (divWidth*2.0);
+    // Then apply the floor to be black and white
+    c = floor(c*2.0);
+    
+    vec3 col = vec3(c);
+
+
+    // Output to screen
+    fragColor = vec4(col,1.0);
+}
+#endif
