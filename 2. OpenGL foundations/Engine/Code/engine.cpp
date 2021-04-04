@@ -181,13 +181,53 @@ u32 LoadTexture2D(App* app, const char* filepath)
 void Init(App* app)
 {
     // TODO: Initialize your resources here!
-    // - vertex buffers
-    // - element/index buffers
-    // - vaos
     // - programs (and retrieve uniform indices)
     // - textures
 
-    app->mode = Mode_TexturedQuad;
+    // VBO
+    glGenBuffers(1, &app->embeddedVertices);
+    glBindBuffer(VBO, app->embeddedVertices);
+    glBufferData(VBO, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBindBuffer(VBO, 0);
+
+    // EBO
+    glGenBuffers(1, &app->embeddedElements);
+    glBindBuffer(EBO, app->embeddedElements);
+    glBufferData(EBO, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBindBuffer(EBO, 0);
+
+    // VAO
+    // Element 0, has 3 components, that are floats, no need to normalize, 
+    glGenVertexArrays(1, &app->vao);
+    glBindVertexArray(app->vao);
+    glBindBuffer(VBO, app->embeddedVertices);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)12);
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(EBO, app->embeddedElements);
+    glBindVertexArray(0);
+
+
+    // Programs
+    app->texturedGeometryProgramIdx = LoadProgram(app, "shaders.glsl", "TEXTURED_GEOMETRY");
+
+    Program& texturedGeometryProgram = app->programs[app->texturedGeometryProgramIdx];
+
+    app->programUniformTexture = glGetUniformLocation(texturedGeometryProgram.handle, "uTexture");
+
+    // Textures
+    app->diceTexIdx     = LoadTexture2D(app, "dice.png");
+    app->whiteTexIdx    = LoadTexture2D(app, "color_white.png");
+    app->blackTexIdx    = LoadTexture2D(app, "color_black.png");
+    app->normalTexIdx   = LoadTexture2D(app, "color_normal.png");
+    app->magentaTexIdx  = LoadTexture2D(app, "color_magenta.png");
+
+
+    app->mode = Mode::Mode_TexturedQuad;
 }
 
 void Gui(App* app)
@@ -210,10 +250,29 @@ void Render(App* app)
             {
                 // TODO: Draw your textured quad here!
                 // - clear the framebuffer
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
                 // - set the viewport
-                // - set the blending state
-                // - bind the texture into unit 0
+            glViewport(0, 0, app->displaySize.x, app->displaySize.y);
                 // - bind the program 
+            Program& programTexturedGeometry = app->programs[app->texturedGeometryProgramIdx];
+            glUseProgram(programTexturedGeometry.handle);
+            glBindVertexArray(app->vao);
+
+                // - set the blending state
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+                // - bind the texture into unit 0
+            glUniform1i(app->programUniformTexture, 0);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, app->textures[app->diceTexIdx].handle);
+
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
+
+            glBindVertexArray(0);
+            glUseProgram(0);
                 //   (...and make its texture sample from unit 0)
                 // - bind the vao
                 // - glDrawElements() !!!

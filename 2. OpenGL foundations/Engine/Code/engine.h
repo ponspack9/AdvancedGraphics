@@ -14,6 +14,9 @@ typedef glm::ivec2 ivec2;
 typedef glm::ivec3 ivec3;
 typedef glm::ivec4 ivec4;
 
+#define VBO GL_ARRAY_BUFFER 
+#define EBO GL_ELEMENT_ARRAY_BUFFER
+
 struct Image
 {
     void* pixels;
@@ -33,7 +36,7 @@ struct Program
     GLuint             handle;
     std::string        filepath;
     std::string        programName;
-    u64                lastWriteTimestamp; // What is this for?
+    u64                lastWriteTimestamp;
 };
 
 enum Mode
@@ -44,7 +47,7 @@ enum Mode
 
 struct App
 {
-    // Loop
+    // Loop - Maintained by platform
     f32  deltaTime;
     bool isRunning;
 
@@ -55,8 +58,9 @@ struct App
     char gpuName[64];
     char openGlVersion[64];
 
-    ivec2 displaySize;
+    ivec2 displaySize; // Maintained by platform
 
+    // Engine stuff
     std::vector<Texture>  textures;
     std::vector<Program>  programs;
 
@@ -84,6 +88,27 @@ struct App
     // VAO object to link our screen filling quad with our textured quad shader
     GLuint vao;
 };
+
+struct VertexV3V2
+{
+    vec3 pos;
+    vec2 uv;
+};
+
+const VertexV3V2 vertices[] =
+{
+    { vec3(-0.5, -0.5, 0.0), vec2(0.0,0.0)},
+    { vec3( 0.5, -0.5, 0.0), vec2(1.0,0.0)},
+    { vec3( 0.5,  0.5, 0.0), vec2(1.0,1.0)},
+    { vec3(-0.5,  0.5, 0.0), vec2(0.0,1.0)}
+};
+
+const u16 indices[] =
+{
+    0, 1, 2,
+    0, 2, 3
+};
+
 
 void Init(App* app);
 
