@@ -1,0 +1,151 @@
+
+vec3 camera = vec3(0.0,0.25,2.5);
+vec3 light = vec3(4.0,10.0,3.0);
+
+// colors
+vec3 planeColor = vec3(0.55, 0.55, 0.55);
+
+// defines
+#define PLANE 0
+#define SPHERE 1
+#define SKY 2
+
+struct Hit { // If castRay hits a surface, this contains the hit info
+    float t; // distance from ray origin to first intersection
+    vec3 p;  // hit surface position
+    vec3 n;  // hit surface normal
+    vec3 col;// hit surface color
+    float R0;// hit surface base reflectance
+    int type; // type of the collision object
+};
+
+struct Sphere {
+    vec3  p;   // position
+    float r;   // radius
+    vec3  col; // color
+    float R0;  // base reflectance
+};
+
+// Ex 1
+vec3 RayDirection(vec2 fragCoord)
+{
+    vec2 uv = fragCoord/iResolution.xy;
+    
+    float ar = iResolution.x / iResolution.y;
+    
+    vec2 pixel = vec2((uv.x * ar *2.0) - ar, uv.y * 2.0 - 1.0);
+    
+    vec3 ray = vec3(pixel, 0) - vec3(0.0, 0.0, 2.0);
+    
+    
+    return normalize(ray);
+}
+
+
+
+//Ex2
+vec3 Sky(vec2 fragCoord)
+{
+    vec3 baseColor = vec3(0.85, 0.8, 0.7);
+    vec3 gradientColor = vec3(0.5, 0.7,0.90);
+    
+    vec3 ray = RayDirection(fragCoord);
+    
+    vec3 skycolor = mix(baseColor, gradientColor, clamp(ray.y,0.0,1.0));
+    
+    return skycolor; 
+}
+
+
+
+void SphereCollition(out Hit endHit, vec2 fragCoord, Sphere sphere)
+{        
+
+    vec3 ray = RayDirection(fragCoord);
+    
+    // Vector camera->sphere
+    float t1 = dot(sphere.p - camera, ray);
+    
+    vec3 k = camera + ray * t1;
+    
+    float l1 = distance(sphere.p, k);
+    
+    float l2 = sqrt(sphere.r*sphere.r - l1* l1);
+    
+    float t = t1 - l2;
+    
+    vec3 p = camera + ray*t;
+    
+    
+        
+    if (sphere.r > l1 && t < endHit.t)
+    {
+        vec3 normal = normalize(p - sphere.p);
+        endHit =  Hit(t,p,normal, sphere.col,1.0, SPHERE);
+       
+    }
+}
+
+void Plane(out Hit hit, vec2 fragCoord)
+{
+    
+    float floorHeight = 2.0;
+    
+    vec3 ray = RayDirection(fragCoord);
+    
+    float t = floorHeight - camera.y / ray.y;
+    
+    vec3 p = camera + ray *t;
+    
+    vec3 normal = vec3(0.0,1.0,0.0);
+    
+    if(t>floorHeight && t<hit.t)
+        hit = Hit(t,p,normal, planeColor, 0.5, PLANE);
+  
+}
+
+
+
+
+vec3 CalculateColor(Hit hit)
+{
+    if(hit.type == SPHERE)
+    {
+        vec3 p = hit.p;
+        vec3 lightVec = normalize(light - p);
+        float cosAngle = dot(hit.n,lightVec);
+        
+        return vec3(hit.col * cosAngle);
+    }
+    else if (hit.type == PLANE)
+    {
+        // to later apply some cool stuff
+        return planeColor;
+    }
+    else
+    {
+        return hit.col;
+    }
+        
+}
+
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    Hit hit = Hit(3.402823466e+38,vec3(.0),vec3(.0),Sky(fragCoord),1.0, SKY);
+    
+    Plane(hit, fragCoord);
+    
+    Sphere spheres[3] = Sphere[3](
+    Sphere(vec3(-0.7, 0.1, -0.2), 0.5, vec3(0.6, 0.6, 0.6), 0.2),
+    Sphere(vec3(0.7, 0.1, 0.2),   0.5, vec3(0.7, 0.7, 0.7), 0.15),
+    Sphere(vec3(0.0, 0.1, -0.7),  0.4, vec3(0.8, 0.8, 0.8), 0.25)
+    );
+    
+    for(int i=0; i < spheres.length(); i++)
+    {
+        SphereCollition(hit, fragCoord, spheres[i]);
+    }
+        // Output to screen
+    fragColor = vec4(CalculateColor(hit), 1.0);    
+
+}
