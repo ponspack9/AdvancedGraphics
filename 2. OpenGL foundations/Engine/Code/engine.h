@@ -5,6 +5,8 @@
 #pragma once
 
 #include "platform.h"
+#include "Panels/Panel.h"
+#include "Panels/PanelInfo.h"
 
 
 typedef glm::vec2  vec2;
@@ -117,4 +119,7 @@ void Gui(App* app);
 void Update(App* app);
 
 void Render(App* app);
+
+
+std::vector<Panel*> panels;
 

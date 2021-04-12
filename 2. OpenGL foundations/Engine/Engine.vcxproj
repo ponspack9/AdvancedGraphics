@@ -27,7 +27,9 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Code\platform.cpp" />
-    <ClCompile Include="ThirdParty\glad\include\glad\glad.c" />
+    <ClCompile Include="ThirdParty\glad\include\glad\glad.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="ThirdParty\imgui-docking\imgui.cpp" />
     <ClCompile Include="ThirdParty\imgui-docking\imgui_demo.cpp" />
     <ClCompile Include="ThirdParty\imgui-docking\imgui_draw.cpp" />

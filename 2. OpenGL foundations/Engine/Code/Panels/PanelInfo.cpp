@@ -4,7 +4,9 @@
 PanelInfo::PanelInfo() : Panel()
 {
 	this->name = "Info";
-	glStrInfo += "OpenGL version: ";
+	
+	glStrInfo = "OpenGL version: " + (char)glGetString(GL_VERSION)
+		+ '\n';
 }
 
 PanelInfo::~PanelInfo()
@@ -13,5 +15,9 @@ PanelInfo::~PanelInfo()
 
 void PanelInfo::Draw()
 {
-	
+	ImGui::Begin(name.c_str());
+
+	ImGui::Text(glStrInfo.c_str());
+
+	ImGui::End();
 }
