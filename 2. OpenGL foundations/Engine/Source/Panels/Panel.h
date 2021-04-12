@@ -4,8 +4,8 @@
 class Panel 
 {
 public:
-	Panel();
-	virtual ~Panel() = 0;
+	Panel() {};
+	virtual ~Panel() {};
 
 	virtual void Draw() = 0;
 	bool ToggleVisibility() { enabled = !enabled; return enabled; };

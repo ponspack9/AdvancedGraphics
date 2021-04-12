@@ -1,12 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Engine">
-      <UniqueIdentifier>{f9a9780f-cc91-4f43-81f2-a71f14f8528a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Panels">
-      <UniqueIdentifier>{b5c47290-8c22-4e89-a1b4-ea8de3dbc860}</UniqueIdentifier>
-    </Filter>
     <Filter Include="External Libraries">
       <UniqueIdentifier>{98d60df6-5d73-49d8-a80a-139e110d22f8}</UniqueIdentifier>
     </Filter>
@@ -19,8 +13,11 @@
     <Filter Include="External Libraries\Glad">
       <UniqueIdentifier>{db9fd684-3058-4040-9399-cae66729442b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Engine\Shaders">
-      <UniqueIdentifier>{410f82bd-d92b-48f6-8515-3eb1c1af5b9d}</UniqueIdentifier>
+    <Filter Include="Source">
+      <UniqueIdentifier>{1c39b0df-0d7b-4432-bbcd-94ba74e24028}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Panels">
+      <UniqueIdentifier>{57a0f123-5644-45e2-ae00-a6aa05549def}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -48,14 +45,14 @@
     <ClCompile Include="ThirdParty\glad\include\glad\glad.c">
       <Filter>External Libraries\Glad</Filter>
     </ClCompile>
-    <ClCompile Include="Code\engine.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Code\platform.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="ThirdParty\stb\stb.cpp">
       <Filter>External Libraries\Stb</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\engine.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\platform.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -83,28 +80,23 @@
     <ClInclude Include="ThirdParty\imgui-docking\imstb_truetype.h">
       <Filter>External Libraries\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="Code\engine.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
     <ClInclude Include="ThirdParty\glad\include\glad\glad.h">
       <Filter>External Libraries\Glad</Filter>
     </ClInclude>
     <ClInclude Include="ThirdParty\glad\include\glad\khrplatform.h">
       <Filter>External Libraries\Glad</Filter>
     </ClInclude>
-    <ClInclude Include="Code\platform.h">
-      <Filter>Engine</Filter>
-    </ClInclude>
     <ClInclude Include="ThirdParty\stb\stb_image.h">
       <Filter>External Libraries\Stb</Filter>
     </ClInclude>
-    <ClInclude Include="Panels\Panel.h">
-      <Filter>Engine\Panels</Filter>
+    <ClInclude Include="Source\engine.h">
+      <Filter>Source</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="WorkingDir\shaders.glsl">
-      <Filter>Engine\Shaders</Filter>
-    </None>
+    <ClInclude Include="Source\platform.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Panels\Panel.h">
+      <Filter>Source\Panels</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

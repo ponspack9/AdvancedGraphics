@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Code\engine.cpp" />
-    <ClCompile Include="Code\platform.cpp" />
+    <ClCompile Include="Source\engine.cpp" />
+    <ClCompile Include="Source\platform.cpp" />
     <ClCompile Include="ThirdParty\glad\include\glad\glad.c" />
     <ClCompile Include="ThirdParty\imgui-docking\imgui.cpp" />
     <ClCompile Include="ThirdParty\imgui-docking\imgui_demo.cpp" />
@@ -32,9 +32,9 @@
     <ClCompile Include="ThirdParty\stb\stb.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Code\engine.h" />
-    <ClInclude Include="Code\platform.h" />
-    <ClInclude Include="Panels\Panel.h" />
+    <ClInclude Include="Source\engine.h" />
+    <ClInclude Include="Source\Panels\Panel.h" />
+    <ClInclude Include="Source\platform.h" />
     <ClInclude Include="ThirdParty\glad\include\glad\glad.h" />
     <ClInclude Include="ThirdParty\glad\include\glad\khrplatform.h" />
     <ClInclude Include="ThirdParty\imgui-docking\imconfig.h" />
@@ -46,9 +46,6 @@
     <ClInclude Include="ThirdParty\imgui-docking\imstb_textedit.h" />
     <ClInclude Include="ThirdParty\imgui-docking\imstb_truetype.h" />
     <ClInclude Include="ThirdParty\stb\stb_image.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="WorkingDir\shaders.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
