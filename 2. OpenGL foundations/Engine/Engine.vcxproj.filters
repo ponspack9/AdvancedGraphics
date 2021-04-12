@@ -13,14 +13,14 @@
     <Filter Include="External Libraries\Stb">
       <UniqueIdentifier>{0ac2ff0f-5f18-480a-8bd6-6aa7428166bb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="External Libraries\Shaders">
-      <UniqueIdentifier>{410f82bd-d92b-48f6-8515-3eb1c1af5b9d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="External Libraries\ImGui">
       <UniqueIdentifier>{8b6860e2-41a5-4e53-a253-6fa785cb8bfe}</UniqueIdentifier>
     </Filter>
     <Filter Include="External Libraries\Glad">
       <UniqueIdentifier>{db9fd684-3058-4040-9399-cae66729442b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Shaders">
+      <UniqueIdentifier>{410f82bd-d92b-48f6-8515-3eb1c1af5b9d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -104,7 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="WorkingDir\shaders.glsl">
-      <Filter>External Libraries\Shaders</Filter>
+      <Filter>Engine\Shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -10,7 +10,7 @@
 #include <stb_image.h>
 #include <stb_image_write.h>
 
-GLuint CreateProgramFromSource(String programSource, const char* shaderName)
+GLuint CreateProgramFromSource(std::string programSource, const char* shaderName)
 {
     GLchar  infoLogBuffer[1024] = {};
     GLsizei infoLogBufferSize = sizeof(infoLogBuffer);
@@ -27,25 +27,25 @@ GLuint CreateProgramFromSource(String programSource, const char* shaderName)
         versionString,
         shaderNameDefine,
         vertexShaderDefine,
-        programSource.str
+        programSource.c_str()
     };
     const GLint vertexShaderLengths[] = {
         (GLint) strlen(versionString),
         (GLint) strlen(shaderNameDefine),
         (GLint) strlen(vertexShaderDefine),
-        (GLint) programSource.len
+        (GLint) programSource.length()
     };
     const GLchar* fragmentShaderSource[] = {
         versionString,
         shaderNameDefine,
         fragmentShaderDefine,
-        programSource.str
+        programSource.c_str()
     };
     const GLint fragmentShaderLengths[] = {
         (GLint) strlen(versionString),
         (GLint) strlen(shaderNameDefine),
         (GLint) strlen(fragmentShaderDefine),
-        (GLint) programSource.len
+        (GLint) programSource.length()
     };
 
     GLuint vshader = glCreateShader(GL_VERTEX_SHADER);
@@ -91,7 +91,7 @@ GLuint CreateProgramFromSource(String programSource, const char* shaderName)
 
 u32 LoadProgram(App* app, const char* filepath, const char* programName)
 {
-    String programSource = ReadTextFile(filepath);
+    std::string programSource = ReadTextFile(filepath);
 
     Program program = {};
     program.handle = CreateProgramFromSource(programSource, programName);

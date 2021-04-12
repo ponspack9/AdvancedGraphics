@@ -9,6 +9,8 @@
 #define WIN32_LEAN_AND_MEAN
 #define _CRT_SECURE_NO_WARNINGS
 #include <Windows.h>
+#include <fstream>
+#include <streambuf>
 #else
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -314,65 +316,38 @@ u8* PushChar(u8 c)
     return ptr;
 }
 
-String MakeString(const char *cstr)
+
+std::string MakePath(std::string dir, std::string filename)
 {
-    String str = {};
-    str.len = Strlen(cstr);
-    str.str = (char*)PushBytes(cstr, str.len);
-              PushChar(0);
-    return str;
+
+    return dir + "/" + filename;
 }
 
-String MakePath(String dir, String filename)
+std::string GetDirectoryPart(std::string path)
 {
-    String str = {};
-    str.len = dir.len + filename.len + 1;
-    str.str = (char*)PushBytes(dir.str, dir.len);
-              PushChar('/');
-              PushBytes(filename.str, filename.len);
-              PushChar(0);
-    return str;
+    size_t pos = path.rfind('/');
+    if (pos == std::string::npos)
+        pos = path.rfind('\\');
+
+    if (pos == std::string::npos)
+        return path; // not found
+
+    return path.substr(0, path.length() - pos);
 }
 
-String GetDirectoryPart(String path)
-{
-    String str = {};
-    i32 len = (i32)path.len;
-    while (len >= 0) {
-        len--;
-        if (path.str[len] == '/' || path.str[len] == '\\')
-            break;
-    }
-    str.len = (u32)len;
-    str.str = (char*)PushBytes(path.str, str.len);
-              PushChar(0);
-    return str;
-}
 
-String ReadTextFile(const char* filepath)
-{
-    String fileText = {};
+std::string ReadTextFile(const char* filepath)
+{    
+    std::ifstream ifs (filepath);
 
-    FILE* file = fopen(filepath, "rb");
-
-    if (file)
+    if (ifs)
     {
-        fseek(file, 0, SEEK_END);
-        fileText.len = ftell(file);
-        fseek(file, 0, SEEK_SET);
-
-        fileText.str = (char*)PushSize(fileText.len + 1);
-        fread(fileText.str, sizeof(char), fileText.len, file);
-        fileText.str[fileText.len] = '\0';
-
-        fclose(file);
-    }
-    else
-    {
-        ELOG("fopen() failed reading file %s", filepath);
+        std::string fileText ((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+        return  fileText;
     }
 
-    return fileText;
+    ELOG("fopen() failed reading file %s", filepath);
+    return "ERROR";
 }
 
 u64 GetFileLastWriteTimestamp(const char* filepath)
