@@ -57,11 +57,6 @@ struct Input {
     ButtonState keys[KEY_COUNT];
 };
 
-struct String
-{
-    char* str;
-    u32   len;
-};
 
 std::string MakePath(std::string dir, std::string filename);
 

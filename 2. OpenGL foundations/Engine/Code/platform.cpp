@@ -276,45 +276,9 @@ int main()
     return 0;
 }
 
-u32 Strlen(const char* string)
-{
-    u32 len = 0;
-    while (*string++) len++;
-    return len;
-}
 
-void* PushSize(u32 byteCount)
-{
-    ASSERT(GlobalFrameArenaHead + byteCount <= GLOBAL_FRAME_ARENA_SIZE,
-           "Trying to allocate more temp memory than available");
 
-    u8* curPtr = GlobalFrameArenaMemory + GlobalFrameArenaHead;
-    GlobalFrameArenaHead += byteCount;
-    return curPtr;
-}
 
-void* PushBytes(const void* bytes, u32 byteCount)
-{
-    ASSERT(GlobalFrameArenaHead + byteCount <= GLOBAL_FRAME_ARENA_SIZE,
-            "Trying to allocate more temp memory than available");
-
-    u8* srcPtr = (u8*)bytes;
-    u8* curPtr = GlobalFrameArenaMemory + GlobalFrameArenaHead;
-    u8* dstPtr = GlobalFrameArenaMemory + GlobalFrameArenaHead;
-    GlobalFrameArenaHead += byteCount;
-    while (byteCount--) *dstPtr++ = *srcPtr++;
-    return curPtr;
-}
-
-u8* PushChar(u8 c)
-{
-    ASSERT(GlobalFrameArenaHead + 1 <= GLOBAL_FRAME_ARENA_SIZE,
-            "Trying to allocate more temp memory than available");
-    u8* ptr = GlobalFrameArenaMemory + GlobalFrameArenaHead;
-    GlobalFrameArenaHead++;
-    *ptr = c;
-    return ptr;
-}
 
 
 std::string MakePath(std::string dir, std::string filename)
