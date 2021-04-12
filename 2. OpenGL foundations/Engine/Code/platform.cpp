@@ -4,26 +4,11 @@
 // it needs in order to create the application (e.g. window, graphics context, I/O, allocators, etc).
 //
 
-#ifdef _WIN32
-#define VC_EXTRALEAN
-#define WIN32_LEAN_AND_MEAN
-#define _CRT_SECURE_NO_WARNINGS
-#include <Windows.h>
-#include <fstream>
-#include <streambuf>
-#else
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#endif
 
-#include "engine.h"
+#include "pch.h"
 
-#include <GLFW/glfw3.h>
-#include <stdio.h>
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+
+
 
 #define WINDOW_TITLE  "Oscar Pons Gallart - AGP"
 #define WINDOW_WIDTH  800

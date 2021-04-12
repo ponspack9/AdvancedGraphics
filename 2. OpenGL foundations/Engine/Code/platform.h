@@ -5,16 +5,6 @@
 
 #pragma once
 
-#define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
-#include <assert.h>
-#include <math.h>
-#include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <vector>
-#include <string>
-
 #pragma warning(disable : 4267) // conversion from X to Y, possible loss of data
 
 typedef char                   i8;

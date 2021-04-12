@@ -5,10 +5,8 @@
 // graphics related GUI options, and so on.
 //
 
+#include "pch.h"
 #include "engine.h"
-#include <imgui.h>
-#include <stb_image.h>
-#include <stb_image_write.h>
 
 GLuint CreateProgramFromSource(std::string programSource, const char* shaderName)
 {

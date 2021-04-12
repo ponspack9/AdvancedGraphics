@@ -57,6 +57,12 @@
     <ClCompile Include="ThirdParty\stb\stb.cpp">
       <Filter>External Libraries\Stb</Filter>
     </ClCompile>
+    <ClCompile Include="Code\pch.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Code\Panels\PanelInfo.cpp">
+      <Filter>Engine\Panels</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThirdParty\imgui-docking\imconfig.h">
@@ -98,8 +104,14 @@
     <ClInclude Include="ThirdParty\stb\stb_image.h">
       <Filter>External Libraries\Stb</Filter>
     </ClInclude>
-    <ClInclude Include="Panels\Panel.h">
+    <ClInclude Include="Code\Panels\Panel.h">
       <Filter>Engine\Panels</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\Panels\PanelInfo.h">
+      <Filter>Engine\Panels</Filter>
+    </ClInclude>
+    <ClInclude Include="Code\pch.h">
+      <Filter>Engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
