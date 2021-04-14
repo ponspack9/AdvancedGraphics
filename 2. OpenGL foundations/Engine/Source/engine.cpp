@@ -184,7 +184,10 @@ u32 LoadTexture2D(App* app, const char* filepath)
 
 void Init(App* app)
 {
-
+    if (GLVersion.major > 4 || (GLVersion.major == 4 && GLVersion.minor >= 3))
+    {
+        glDebugMessageCallback(Log::OnGlError, app);
+    }
     panels.push_back(new PanelInfo());
     // TODO: Initialize your resources here!
     // - programs (and retrieve uniform indices)
