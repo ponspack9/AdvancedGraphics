@@ -104,7 +104,7 @@ void OnGlfwCloseWindow(GLFWwindow* window)
 int main()
 {
     Log::Init();
-    LOG_DEBUG("Entering application");
+    LOG_TRACE("Entering application");
 
     App app         = {};
     app.deltaTime   = 1.0f/60.0f;
@@ -190,10 +190,10 @@ int main()
 
     GlobalFrameArenaMemory = (u8*)malloc(GLOBAL_FRAME_ARENA_SIZE);
 
-    LOG_DEBUG("Initializing application");
+    LOG_TRACE("Initializing application");
     Init(&app);
 
-    LOG_DEBUG("Update loop");
+    LOG_TRACE("Update loop");
 
     while (app.isRunning)
     {
