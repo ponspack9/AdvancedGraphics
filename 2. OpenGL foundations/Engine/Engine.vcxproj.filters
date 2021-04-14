@@ -22,6 +22,9 @@
     <Filter Include="Engine\Shaders">
       <UniqueIdentifier>{410f82bd-d92b-48f6-8515-3eb1c1af5b9d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Utils">
+      <UniqueIdentifier>{ad6d2616-c31e-4f55-a0a8-2e13dd149b3a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ThirdParty\imgui-docking\imgui.cpp">
@@ -57,11 +60,14 @@
     <ClCompile Include="ThirdParty\stb\stb.cpp">
       <Filter>External Libraries\Stb</Filter>
     </ClCompile>
-    <ClCompile Include="Source\pch.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Panels\PanelInfo.cpp">
       <Filter>Engine\Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utils\pch.cpp">
+      <Filter>Engine\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Utils\Log.cpp">
+      <Filter>Engine\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -110,8 +116,11 @@
     <ClInclude Include="Source\Panels\PanelInfo.h">
       <Filter>Engine\Panels</Filter>
     </ClInclude>
-    <ClInclude Include="Source\pch.h">
-      <Filter>Engine</Filter>
+    <ClInclude Include="Source\Utils\pch.h">
+      <Filter>Engine\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utils\Log.h">
+      <Filter>Engine\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

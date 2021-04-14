@@ -59,7 +59,7 @@ GLuint CreateProgramFromSource(std::string programSource, const char* shaderName
     if (!success)
     {
         glGetShaderInfoLog(vshader, infoLogBufferSize, &infoLogSize, infoLogBuffer);
-        ELOG("glCompileShader() failed with vertex shader %s\nReported message:\n%s\n", shaderName, infoLogBuffer);
+        LOG_ERROR("glCompileShader() failed with vertex shader %s\nReported message:\n%s\n", shaderName, infoLogBuffer);
     }
 
     GLuint fshader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -69,7 +69,7 @@ GLuint CreateProgramFromSource(std::string programSource, const char* shaderName
     if (!success)
     {
         glGetShaderInfoLog(fshader, infoLogBufferSize, &infoLogSize, infoLogBuffer);
-        ELOG("glCompileShader() failed with fragment shader %s\nReported message:\n%s\n", shaderName, infoLogBuffer);
+        LOG_ERROR("glCompileShader() failed with fragment shader %s\nReported message:\n%s\n", shaderName, infoLogBuffer);
     }
 
     GLuint programHandle = glCreateProgram();
@@ -80,7 +80,7 @@ GLuint CreateProgramFromSource(std::string programSource, const char* shaderName
     if (!success)
     {
         glGetProgramInfoLog(programHandle, infoLogBufferSize, &infoLogSize, infoLogBuffer);
-        ELOG("glLinkProgram() failed with program %s\nReported message:\n%s\n", shaderName, infoLogBuffer);
+        LOG_ERROR("glLinkProgram() failed with program %s\nReported message:\n%s\n", shaderName, infoLogBuffer);
     }
 
     glUseProgram(0);
@@ -118,7 +118,7 @@ Image LoadImage(const char* filename)
     }
     else
     {
-        ELOG("Could not open file %s", filename);
+        LOG_ERROR("Could not open file %s", filename);
     }
     return img;
 }
@@ -138,7 +138,7 @@ GLuint CreateTexture2DFromImage(Image image)
     {
         case 3: dataFormat = GL_RGB; internalFormat = GL_RGB8; break;
         case 4: dataFormat = GL_RGBA; internalFormat = GL_RGBA8; break;
-        default: ELOG("LoadTexture2D() - Unsupported number of channels");
+        default: LOG_ERROR("LoadTexture2D() - Unsupported number of channels");
     }
 
     GLuint texHandle;
@@ -252,6 +252,10 @@ void Gui(App* app)
 void Update(App* app)
 {
     // You can handle app->input keyboard/mouse here
+    if (app->input.keys[K_ESCAPE] == BUTTON_PRESS)
+    {
+        app->isRunning = false;
+    }
 }
 
 void Render(App* app)

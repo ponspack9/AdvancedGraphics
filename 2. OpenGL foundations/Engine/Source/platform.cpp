@@ -103,6 +103,9 @@ void OnGlfwCloseWindow(GLFWwindow* window)
 
 int main()
 {
+    Log::Init();
+    LOG_DEBUG("Entering application");
+
     App app         = {};
     app.deltaTime   = 1.0f/60.0f;
     app.displaySize = ivec2(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -112,7 +115,7 @@ int main()
 
     if (!glfwInit())
     {
-        ELOG("glfwInit() failed\n");
+        LOG_ERROR("glfwInit() failed\n");
         return -1;
     }
 
@@ -124,7 +127,7 @@ int main()
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
     if (!window)
     {
-        ELOG("glfwCreateWindow() failed\n");
+        LOG_ERROR("glfwCreateWindow() failed\n");
         return -1;
     }
 
@@ -143,7 +146,7 @@ int main()
     // Load all OpenGL functions using the glfw loader function
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
     {
-        ELOG("Failed to initialize OpenGL context\n");
+        LOG_ERROR("Failed to initialize OpenGL context\n");
         return -1;
     }
 
@@ -159,8 +162,9 @@ int main()
     //io.ConfigViewportsNoTaskBarIcon = true;
 
     // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsDark();
     //ImGui::StyleColorsClassic();
+    ImGui::StyleColorsDarcula();
 
     // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
     ImGuiStyle& style = ImGui::GetStyle();
@@ -172,13 +176,13 @@ int main()
 
     if (!ImGui_ImplGlfw_InitForOpenGL(window, true))
     {
-        ELOG("ImGui_ImplGlfw_InitForOpenGL() failed\n");
+        LOG_ERROR("ImGui_ImplGlfw_InitForOpenGL() failed\n");
         return -1;
     }
 
     if (!ImGui_ImplOpenGL3_Init())
     {
-        ELOG("Failed to initialize ImGui OpenGL wrapper\n");
+        LOG_ERROR("Failed to initialize ImGui OpenGL wrapper\n");
         return -1;
     }
 
@@ -186,7 +190,10 @@ int main()
 
     GlobalFrameArenaMemory = (u8*)malloc(GLOBAL_FRAME_ARENA_SIZE);
 
+    LOG_DEBUG("Initializing application");
     Init(&app);
+
+    LOG_DEBUG("Update loop");
 
     while (app.isRunning)
     {
@@ -295,7 +302,7 @@ std::string ReadTextFile(const char* filepath)
         return  fileText;
     }
 
-    ELOG("fopen() failed reading file %s", filepath);
+    LOG_ERROR("fopen() failed reading file %s", filepath);
     return "ERROR";
 }
 

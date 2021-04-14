@@ -68,16 +68,16 @@ u64 GetFileLastWriteTimestamp(const char *filepath);
  * It logs a string to whichever outputs are configured in the platform layer.
  * By default, the string is printed in the output console of VisualStudio.
  */
-void LogString(const char* str);
+//void LogString(const char* str);
 
-#define ILOG(...)                 \
+#/*define ILOG(...)                 \
 {                                 \
 char logBuffer[1024] = {};        \
 sprintf(logBuffer, __VA_ARGS__);  \
 LogString(logBuffer);             \
-}
+}*/
 
-#define ELOG(...) ILOG(__VA_ARGS__)
+//#define LOG_ERROR(...) ILOG(__VA_ARGS__)
 
 #define ARRAY_COUNT(array) (sizeof(array)/sizeof(array[0]))
 
