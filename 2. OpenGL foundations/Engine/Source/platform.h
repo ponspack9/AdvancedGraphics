@@ -56,7 +56,7 @@ std::string GetDirectoryPart(std::string path);
  * Reads a whole file and returns a string with its contents. The returned string
  * is temporary and should be copied if it needs to persist for several frames.
  */
-std::string ReadTextFile(const char *filepath);
+std::string ReadTextFile(const char* filepath);
 
 /**
  * It retrieves a timestamp indicating the last time the file was modified.

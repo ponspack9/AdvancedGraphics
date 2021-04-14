@@ -14,6 +14,7 @@
 std::vector<Panel*> panels;
 
 
+
 GLuint CreateProgramFromSource(std::string programSource, const char* shaderName)
 {
     GLchar  infoLogBuffer[1024] = {};
@@ -258,6 +259,22 @@ void Update(App* app)
     if (app->input.keys[K_ESCAPE] == BUTTON_PRESS)
     {
         app->isRunning = false;
+    }
+
+    // hot reload
+    for (int i = 0; i < app->programs.size(); ++i)
+    {
+        Program& program = app->programs[i];
+        u64 currentTimeStamp = GetFileLastWriteTimestamp(program.filepath.c_str());
+
+        if (currentTimeStamp > program.lastWriteTimestamp)
+        {
+            glDeleteProgram(program.handle);
+            std::string programSource = ReadTextFile(program.filepath.c_str());
+
+            program.handle = CreateProgramFromSource(programSource, program.programName.c_str());
+            program.lastWriteTimestamp = currentTimeStamp;
+        }
     }
 }
 
