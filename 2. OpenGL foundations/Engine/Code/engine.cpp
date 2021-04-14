@@ -179,7 +179,7 @@ u32 LoadTexture2D(App* app, const char* filepath)
 void Init(App* app)
 {
 
-    panels.push_back(new PanelInfo());
+    //panels.push_back(new PanelInfo());
     // TODO: Initialize your resources here!
     // - programs (and retrieve uniform indices)
     // - textures
@@ -236,10 +236,10 @@ void Gui(App* app)
     ImGui::Text("FPS: %f", 1.0f/app->deltaTime);
     ImGui::End();
 
-    for (Panel* panel : panels)
-    {
-        panel->Draw();
-    }
+    //for (Panel* panel : panels)
+    //{
+    //    panel->Draw();
+    //}
 
 }
 

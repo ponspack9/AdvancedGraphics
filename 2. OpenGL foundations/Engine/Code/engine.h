@@ -121,5 +121,5 @@ void Update(App* app);
 void Render(App* app);
 
 
-std::vector<Panel*> panels;
+//std::vector<Panel*> panels;
 
