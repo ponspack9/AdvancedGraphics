@@ -19,14 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Code\engine.cpp" />
-    <ClCompile Include="Code\Panels\PanelInfo.cpp" />
-    <ClCompile Include="Code\pch.cpp">
+    <ClCompile Include="Source\engine.cpp" />
+    <ClCompile Include="Source\Panels\PanelInfo.cpp" />
+    <ClCompile Include="Source\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="Code\platform.cpp" />
+    <ClCompile Include="Source\platform.cpp" />
     <ClCompile Include="ThirdParty\glad\include\glad\glad.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -56,11 +56,11 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Code\engine.h" />
-    <ClInclude Include="Code\Panels\Panel.h" />
-    <ClInclude Include="Code\Panels\PanelInfo.h" />
-    <ClInclude Include="Code\pch.h" />
-    <ClInclude Include="Code\platform.h" />
+    <ClInclude Include="Source\engine.h" />
+    <ClInclude Include="Source\Panels\Panel.h" />
+    <ClInclude Include="Source\Panels\PanelInfo.h" />
+    <ClInclude Include="Source\pch.h" />
+    <ClInclude Include="Source\platform.h" />
     <ClInclude Include="ThirdParty\glad\include\glad\glad.h" />
     <ClInclude Include="ThirdParty\glad\include\glad\khrplatform.h" />
     <ClInclude Include="ThirdParty\imgui-docking\imconfig.h" />
@@ -140,7 +140,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)Code;$(ProjectDir)Code\Panels;$(ProjectDir)ThirdParty\Assimp\include;$(ProjectDir)ThirdParty\glm\include;$(ProjectDir)ThirdParty\stb;$(ProjectDir)ThirdParty\glad\include;$(ProjectDir)ThirdParty\imgui-docking;$(ProjectDir)ThirdParty\glfw\include;$(ProjectDir)ThirdParty;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)Source;$(ProjectDir)Source\Panels;$(ProjectDir)ThirdParty\Assimp\include;$(ProjectDir)ThirdParty\glm\include;$(ProjectDir)ThirdParty\stb;$(ProjectDir)ThirdParty\glad\include;$(ProjectDir)ThirdParty\imgui-docking;$(ProjectDir)ThirdParty\glfw\include;$(ProjectDir)ThirdParty;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)ThirdParty\glfw\lib-vc2019;$(ProjectDir)ThirdParty\Assimp\lib\windows;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
