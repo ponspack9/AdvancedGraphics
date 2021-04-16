@@ -111,7 +111,7 @@ int main()
     app.displaySize = ivec2(WINDOW_WIDTH, WINDOW_HEIGHT);
     app.isRunning   = true;
 
-		glfwSetErrorCallback(OnGlfwError);
+    glfwSetErrorCallback(OnGlfwError);
 
     if (!glfwInit())
     {
@@ -271,24 +271,17 @@ int main()
 
 
 
-
-
-std::string MakePath(std::string dir, std::string filename)
-{
-
-    return dir + "/" + filename;
-}
-
 std::string GetDirectoryPart(std::string path)
 {
     size_t pos = path.rfind('/');
     if (pos == std::string::npos)
         pos = path.rfind('\\');
 
-    if (pos == std::string::npos)
-        return path; // not found
+    if (pos != std::string::npos)
+        return path.substr(0, path.length() - pos);
 
-    return path.substr(0, path.length() - pos);
+    LOG_ERROR("Could not get directory part from {0}", path);
+    return path; // not found
 }
 
 
@@ -302,7 +295,7 @@ std::string ReadTextFile(const char* filepath)
         return  fileText;
     }
 
-    LOG_ERROR("fopen() failed reading file %s", filepath);
+    LOG_ERROR("fopen() failed reading file {0}", filepath);
     return "ERROR";
 }
 

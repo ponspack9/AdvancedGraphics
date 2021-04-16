@@ -25,6 +25,9 @@
     <Filter Include="Engine\Utils">
       <UniqueIdentifier>{ad6d2616-c31e-4f55-a0a8-2e13dd149b3a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Modules">
+      <UniqueIdentifier>{456b16db-aa6b-4bb8-a6d4-40536bb18c19}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ThirdParty\imgui-docking\imgui.cpp">
@@ -68,6 +71,12 @@
     </ClCompile>
     <ClCompile Include="Source\Utils\Log.cpp">
       <Filter>Engine\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\ModuleImGui.cpp">
+      <Filter>Engine\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\ModuleWindow.cpp">
+      <Filter>Engine\Modules</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -121,6 +130,15 @@
     </ClInclude>
     <ClInclude Include="Source\Utils\Log.h">
       <Filter>Engine\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Modules\Module.h">
+      <Filter>Engine\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Modules\ModuleImGui.h">
+      <Filter>Engine\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Modules\ModuleWindow.h">
+      <Filter>Engine\Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
