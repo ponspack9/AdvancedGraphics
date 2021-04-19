@@ -84,6 +84,9 @@
     <ClCompile Include="Source\Application.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Modules\ModuleResources.cpp">
+      <Filter>Engine\Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThirdParty\imgui-docking\imconfig.h">
@@ -148,6 +151,9 @@
     </ClInclude>
     <ClInclude Include="Source\Application.h">
       <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Modules\ModuleResources.h">
+      <Filter>Engine\Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

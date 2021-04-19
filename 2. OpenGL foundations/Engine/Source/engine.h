@@ -65,15 +65,3 @@ const u16 indices[] =
     0, 1, 2,
     0, 2, 3
 };
-
-
-void Init();
-
-void Gui();
-
-void Update();
-
-void Render();
-
-
-

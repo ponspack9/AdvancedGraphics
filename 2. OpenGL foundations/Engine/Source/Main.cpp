@@ -6,9 +6,7 @@
 
 
 #include "pch.h"
-#include "engine.h"
 #include "Application.h"
-#include "Modules/ModuleWindow.h"
 
 
 enum main_states {
@@ -45,7 +43,6 @@ int main()
 				state = MAIN_EXIT;
 			}
 			else {
-				Init();
 				state = MAIN_START;
 			}
 
@@ -97,64 +94,3 @@ int main()
 
 
 
-std::string GetDirectoryPart(std::string path)
-{
-    size_t pos = path.rfind('/');
-    if (pos == std::string::npos)
-        pos = path.rfind('\\');
-
-    if (pos != std::string::npos)
-        return path.substr(0, path.length() - pos);
-
-    LOG_ERROR("Could not get directory part from {0}", path);
-    return path; // not found
-}
-
-
-std::string ReadTextFile(const char* filepath)
-{
-    std::ifstream ifs(filepath);
-
-    if (ifs)
-    {
-        std::string fileText((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-        return  fileText;
-    }
-
-    LOG_ERROR("fopen() failed reading file {0}", filepath);
-    return "ERROR";
-}
-
-u64 GetFileLastWriteTimestamp(const char* filepath)
-{
-#ifdef _WIN32
-    union Filetime2u64 {
-        FILETIME filetime;
-        u64      u64time;
-    } conversor;
-
-    WIN32_FILE_ATTRIBUTE_DATA Data;
-    if (GetFileAttributesExA(filepath, GetFileExInfoStandard, &Data)) {
-        conversor.filetime = Data.ftLastWriteTime;
-        return(conversor.u64time);
-    }
-#else
-    // NOTE: This has not been tested in unix-like systems
-    struct stat attrib;
-    if (stat(filepath, &attrib) == 0) {
-        return attrib.st_mtime;
-    }
-#endif
-
-    return 0;
-}
-
-void LogString(const char* str)
-{
-#ifdef _WIN32
-    OutputDebugStringA(str);
-    OutputDebugStringA("\n");
-#else
-    fprintf(stderr, "%s\n", str);
-#endif
-}

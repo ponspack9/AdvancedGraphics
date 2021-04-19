@@ -159,7 +159,7 @@ bool ModuleWindow::Start()
 
 bool ModuleWindow::PreUpdate(float dt)
 {
-	return true;
+	return App->isRunning;
 }
 
 bool ModuleWindow::Update(float dt)
