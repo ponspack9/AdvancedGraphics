@@ -2,9 +2,27 @@
 
 #include "platform.h"
 #include "engine.h"
+#include "Module.h"
 
 class Application
 {
+public:
+    Application();
+    virtual ~Application();
+
+    bool Init();
+    bool Start();
+    bool MainUpdate();
+    bool CleanUp();
+private:
+
+    bool PreUpdate();
+    bool Update();
+    bool PostUpdate();
+
+public:
+    std::vector<Module*> modules;
+
 public:
     // Loop - Maintained by platform
     f32  deltaTime;
