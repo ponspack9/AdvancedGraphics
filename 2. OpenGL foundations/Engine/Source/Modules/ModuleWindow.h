@@ -20,6 +20,7 @@ public:
 	bool PostUpdate(float dt) override;
 	bool CleanUp() override;
 
+	GLFWwindow* window = nullptr;
 };
 
 extern ModuleWindow* M_Window;

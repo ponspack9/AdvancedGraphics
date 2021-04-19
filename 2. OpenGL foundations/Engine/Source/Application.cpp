@@ -16,7 +16,7 @@ Application::Application()
 	// END NEW MODULES
 
 	modules.push_back(M_Window);
-	modules.push_back(M_Gui);
+	//modules.push_back(M_Gui);
 	// END NEW REFERENCE MODULES
 }
 
