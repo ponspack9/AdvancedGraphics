@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "ModuleResources.h"
-#include <Application.h>
 
 #pragma region Module Overrides
 ModuleResources* M_Resources = nullptr;
@@ -8,10 +7,14 @@ ModuleResources* M_Resources = nullptr;
 ModuleResources::ModuleResources()
 {
     this->name = "ModuleResources";
+    LOG_DEBUG("Created module [{0}]", name);
+
 }
 
 ModuleResources::~ModuleResources()
 {
+    LOG_DEBUG("Deleted module [{0}]", name);
+
 }
 
 bool ModuleResources::Init()

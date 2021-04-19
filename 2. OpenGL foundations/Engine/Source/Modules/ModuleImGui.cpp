@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "ModuleImGui.h"
 #include "ModuleWindow.h"
-#include <Application.h>
 #include <PanelInfo.h>
 
 ModuleImGui* M_Gui = nullptr;

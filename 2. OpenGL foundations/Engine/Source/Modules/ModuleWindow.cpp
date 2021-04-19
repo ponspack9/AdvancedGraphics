@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "ModuleWindow.h"
-#include <Application.h>
 #include <PanelInfo.h>
 
 
@@ -102,7 +101,7 @@ bool ModuleWindow::Init()
     if (!glfwInit())
     {
         LOG_ERROR("glfwInit() failed\n");
-        return -1;
+        return false;
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -114,7 +113,7 @@ bool ModuleWindow::Init()
     if (!window)
     {
         LOG_ERROR("glfwCreateWindow() failed\n");
-        return -1;
+        return false;
     }
 
     glfwSetWindowUserPointer(window, &App);
@@ -133,7 +132,7 @@ bool ModuleWindow::Init()
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         LOG_ERROR("Failed to initialize OpenGL context\n");
-        return -1;
+        return false;
     }
 
     lastFrameTime = glfwGetTime();
