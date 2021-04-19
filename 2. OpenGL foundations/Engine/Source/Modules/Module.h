@@ -35,7 +35,7 @@ public:
 	const char* GetName() const { return name.c_str(); }
 
 	// Queries
-	virtual bool isEnabled() const { return enabled; }
+	virtual bool IsEnabled() const { return enabled; }
 
 
 };

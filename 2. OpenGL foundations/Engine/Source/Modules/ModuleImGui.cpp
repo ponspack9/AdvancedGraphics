@@ -9,8 +9,6 @@ ModuleImGui::ModuleImGui()
 {
 	this->name = "ModuleImGui";
 
-
-
 	LOG_DEBUG("Created module [{0}]", name);
 }
 ModuleImGui::~ModuleImGui()
@@ -85,7 +83,8 @@ bool ModuleImGui::Update(float dt)
 {
     for (Panel* panel : panels)
     {
-        panel->Draw();
+        if (panel->IsEnabled())
+            panel->Draw();
     }
     // You can handle App->input keyboard/mouse here
     if (App->input.keys[K_ESCAPE] == BUTTON_PRESS)

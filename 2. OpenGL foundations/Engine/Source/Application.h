@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Module.h"
+class Module;
 
 class Application
 {
@@ -12,8 +12,8 @@ public:
     bool Start();
     bool MainUpdate();
     bool CleanUp();
-private:
 
+private:
     bool PreUpdate();
     bool Update();
     bool PostUpdate();

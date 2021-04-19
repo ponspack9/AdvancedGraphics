@@ -3,6 +3,7 @@
 #include <PanelInfo.h>
 
 
+#pragma region Glfw callbacks
 
 void OnGlfwError(int errorCode, const char* errorMessage)
 {
@@ -81,6 +82,10 @@ void OnGlfwCloseWindow(GLFWwindow* window)
     App->isRunning = false;
 }
 
+#pragma endregion
+
+#pragma region Module overrides
+
 ModuleWindow* M_Window = nullptr;
 
 ModuleWindow::ModuleWindow()
@@ -95,7 +100,6 @@ ModuleWindow::~ModuleWindow()
 }
 bool ModuleWindow::Init()
 {
-
     glfwSetErrorCallback(OnGlfwError);
 
     if (!glfwInit())
@@ -201,7 +205,6 @@ bool ModuleWindow::Update(float dt)
 
 bool ModuleWindow::PostUpdate(float dt)
 {
-
     // Frame time
     f64 currentFrameTime = glfwGetTime();
     App->deltaTime = (f32)(currentFrameTime - lastFrameTime);
@@ -209,8 +212,6 @@ bool ModuleWindow::PostUpdate(float dt)
 
 	return true;
 }
-
-
 
 bool ModuleWindow::CleanUp()
 {
@@ -220,4 +221,5 @@ bool ModuleWindow::CleanUp()
 	return true;
 }
 
+#pragma endregion
 

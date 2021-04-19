@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "ModuleResources.h"
 
-#pragma region Module Overrides
+#pragma region Module overrides
 ModuleResources* M_Resources = nullptr;
 
 ModuleResources::ModuleResources()

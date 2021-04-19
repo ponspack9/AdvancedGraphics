@@ -1,6 +1,5 @@
 #include "pch.h"
 
-#include "Application.h"
 // Modules
 #include <ModuleImGui.h>
 #include <ModuleWindow.h>
@@ -35,6 +34,7 @@ bool Application::Init()
 {
 	for (Module* module : modules)
 	{
+		if (!module->IsEnabled()) continue;
 		if (!module->Init())
 		{
 			LOG_ERROR("INIT ERROR returned by module [{0}]", module->GetName());
@@ -48,6 +48,7 @@ bool Application::Start()
 {
 	for (Module* module : modules)
 	{
+		if (!module->IsEnabled()) continue;
 		if (!module->Start())
 		{
 			LOG_ERROR("START ERROR returned by module [{0}]", module->GetName());
@@ -76,6 +77,7 @@ bool Application::PreUpdate()
 	bool status = false;
 	for (Module* module : modules)
 	{
+		if (!module->IsEnabled()) continue;
 		status = module->PreUpdate(deltaTime);
 		if (!status)
 		{
@@ -91,6 +93,7 @@ bool Application::Update()
 	bool status = false;
 	for (Module* module : modules)
 	{
+		if (!module->IsEnabled()) continue;
 		status = module->Update(deltaTime);
 		if (!status)
 		{
@@ -106,6 +109,7 @@ bool Application::PostUpdate()
 	bool status = false;
 	for (Module* module : modules)
 	{
+		if (!module->IsEnabled()) continue;
 		status = module->PostUpdate(deltaTime);
 		if (!status)
 		{

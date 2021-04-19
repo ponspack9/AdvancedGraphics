@@ -6,8 +6,6 @@
 
 
 #include "pch.h"
-#include "Application.h"
-
 
 enum main_states {
     MAIN_CREATION,
@@ -32,7 +30,6 @@ int main()
 
 			LOG_TRACE("Application Creation --------------");
 			App = new Application();
-			App->deltaTime = 1.0f / 60.0f;
 			state = MAIN_INIT;
 			break;
 
