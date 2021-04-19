@@ -8,6 +8,7 @@
 #include "pch.h"
 
 #include "engine.h"
+#include "Application.h"
 
 #include "Panels/PanelInfo.h"
 
@@ -94,7 +95,7 @@ GLuint CreateProgramFromSource(std::string programSource, const char* shaderName
     return programHandle;
 }
 
-u32 LoadProgram(App* app, const char* filepath, const char* programName)
+u32 LoadProgram(const char* filepath, const char* programName)
 {
     std::string programSource = ReadTextFile(filepath);
 
@@ -103,9 +104,9 @@ u32 LoadProgram(App* app, const char* filepath, const char* programName)
     program.filepath = filepath;
     program.programName = programName;
     program.lastWriteTimestamp = GetFileLastWriteTimestamp(filepath);
-    app->programs.push_back(program);
+    App->programs.push_back(program);
 
-    return app->programs.size() - 1;
+    return App->programs.size() - 1;
 }
 
 Image LoadImage(const char* filename)
@@ -157,10 +158,10 @@ GLuint CreateTexture2DFromImage(Image image)
     return texHandle;
 }
 
-u32 LoadTexture2D(App* app, const char* filepath)
+u32 LoadTexture2D( const char* filepath)
 {
-    for (u32 texIdx = 0; texIdx < app->textures.size(); ++texIdx)
-        if (app->textures[texIdx].filepath == filepath)
+    for (u32 texIdx = 0; texIdx < App->textures.size(); ++texIdx)
+        if (App->textures[texIdx].filepath == filepath)
             return texIdx;
 
     Image image = LoadImage(filepath);
@@ -171,8 +172,8 @@ u32 LoadTexture2D(App* app, const char* filepath)
         tex.handle = CreateTexture2DFromImage(image);
         tex.filepath = filepath;
 
-        u32 texIdx = app->textures.size();
-        app->textures.push_back(tex);
+        u32 texIdx = App->textures.size();
+        App->textures.push_back(tex);
 
         FreeImage(image);
         return texIdx;
@@ -183,11 +184,11 @@ u32 LoadTexture2D(App* app, const char* filepath)
     }
 }
 
-void Init(App* app)
+void Init()
 {
     if (GLVersion.major > 4 || (GLVersion.major == 4 && GLVersion.minor >= 3))
     {
-        glDebugMessageCallback(Log::OnGlError, app);
+        glDebugMessageCallback(Log::OnGlError, App);
     }
     panels.push_back(new PanelInfo());
     // TODO: Initialize your resources here!
@@ -195,22 +196,22 @@ void Init(App* app)
     // - textures
 
     // VBO
-    glGenBuffers(1, &app->embeddedVertices);
-    glBindBuffer(VBO, app->embeddedVertices);
+    glGenBuffers(1, &App->embeddedVertices);
+    glBindBuffer(VBO, App->embeddedVertices);
     glBufferData(VBO, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glBindBuffer(VBO, 0);
 
     // EBO
-    glGenBuffers(1, &app->embeddedElements);
-    glBindBuffer(EBO, app->embeddedElements);
+    glGenBuffers(1, &App->embeddedElements);
+    glBindBuffer(EBO, App->embeddedElements);
     glBufferData(EBO, sizeof(indices), indices, GL_STATIC_DRAW);
     glBindBuffer(EBO, 0);
 
     // VAO
     // Element 0, has 3 components, that are floats, no need to normalize, 
-    glGenVertexArrays(1, &app->vao);
-    glBindVertexArray(app->vao);
-    glBindBuffer(VBO, app->embeddedVertices);
+    glGenVertexArrays(1, &App->vao);
+    glBindVertexArray(App->vao);
+    glBindBuffer(VBO, App->embeddedVertices);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)0);
     glEnableVertexAttribArray(0);
@@ -218,32 +219,32 @@ void Init(App* app)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)12);
     glEnableVertexAttribArray(1);
 
-    glBindBuffer(EBO, app->embeddedElements);
+    glBindBuffer(EBO, App->embeddedElements);
     glBindVertexArray(0);
 
 
     // Programs
-    app->texturedGeometryProgramIdx = LoadProgram(app, "shaders.glsl", "TEXTURED_GEOMETRY");
+    App->texturedGeometryProgramIdx = LoadProgram("shaders.glsl", "TEXTURED_GEOMETRY");
 
-    Program& texturedGeometryProgram = app->programs[app->texturedGeometryProgramIdx];
+    Program& texturedGeometryProgram = App->programs[App->texturedGeometryProgramIdx];
 
-    app->programUniformTexture = glGetUniformLocation(texturedGeometryProgram.handle, "uTexture");
+    App->programUniformTexture = glGetUniformLocation(texturedGeometryProgram.handle, "uTexture");
 
     // Textures
-    app->diceTexIdx     = LoadTexture2D(app, "dice.png");
-    app->whiteTexIdx    = LoadTexture2D(app, "color_white.png");
-    app->blackTexIdx    = LoadTexture2D(app, "color_black.png");
-    app->normalTexIdx   = LoadTexture2D(app, "color_normal.png");
-    app->magentaTexIdx  = LoadTexture2D(app, "color_magenta.png");
+    App->diceTexIdx     = LoadTexture2D("dice.png");
+    App->whiteTexIdx    = LoadTexture2D("color_white.png");
+    App->blackTexIdx    = LoadTexture2D("color_black.png");
+    App->normalTexIdx   = LoadTexture2D("color_normal.png");
+    App->magentaTexIdx  = LoadTexture2D("color_magenta.png");
 
 
-    app->mode = Mode::Mode_TexturedQuad;
+    App->mode = Mode::Mode_TexturedQuad;
 }
 
-void Gui(App* app)
+void Gui()
 {
     ImGui::Begin("Engine");
-    ImGui::Text("FPS: %f", 1.0f/app->deltaTime);
+    ImGui::Text("FPS: %f", 1.0f/App->deltaTime);
     ImGui::End();
 
     for (Panel* panel : panels)
@@ -253,18 +254,18 @@ void Gui(App* app)
 
 }
 
-void Update(App* app)
+void Update()
 {
-    // You can handle app->input keyboard/mouse here
-    if (app->input.keys[K_ESCAPE] == BUTTON_PRESS)
+    // You can handle App->input keyboard/mouse here
+    if (App->input.keys[K_ESCAPE] == BUTTON_PRESS)
     {
-        app->isRunning = false;
+        App->isRunning = false;
     }
 
     // hot reload
-    for (int i = 0; i < app->programs.size(); ++i)
+    for (int i = 0; i < App->programs.size(); ++i)
     {
-        Program& program = app->programs[i];
+        Program& program = App->programs[i];
         u64 currentTimeStamp = GetFileLastWriteTimestamp(program.filepath.c_str());
 
         if (currentTimeStamp > program.lastWriteTimestamp)
@@ -278,10 +279,10 @@ void Update(App* app)
     }
 }
 
-void Render(App* app)
+void Render()
 {
     glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Shaded model");
-    switch (app->mode)
+    switch (App->mode)
     {
         case Mode_TexturedQuad:
             {
@@ -291,20 +292,20 @@ void Render(App* app)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
                 // - set the viewport
-            glViewport(0, 0, app->displaySize.x, app->displaySize.y);
+            glViewport(0, 0, App->displaySize.x, App->displaySize.y);
                 // - bind the program 
-            Program& programTexturedGeometry = app->programs[app->texturedGeometryProgramIdx];
+            Program& programTexturedGeometry = App->programs[App->texturedGeometryProgramIdx];
             glUseProgram(programTexturedGeometry.handle);
-            glBindVertexArray(app->vao);
+            glBindVertexArray(App->vao);
 
                 // - set the blending state
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
                 // - bind the texture into unit 0
-            glUniform1i(app->programUniformTexture, 0);
+            glUniform1i(App->programUniformTexture, 0);
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, app->textures[app->diceTexIdx].handle);
+            glBindTexture(GL_TEXTURE_2D, App->textures[App->diceTexIdx].handle);
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
 

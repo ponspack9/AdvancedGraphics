@@ -181,23 +181,23 @@ u32 LoadModel(App* app, const char* filename)
         return UINT32_MAX;
     }
 
-    app->meshes.push_back(Mesh{});
-    Mesh& mesh = app->meshes.back();
-    u32 meshIdx = (u32)app->meshes.size() - 1u;
+    App->meshes.push_back(Mesh{});
+    Mesh& mesh = App->meshes.back();
+    u32 meshIdx = (u32)App->meshes.size() - 1u;
 
-    app->models.push_back(Model{});
-    Model& model = app->models.back();
+    App->models.push_back(Model{});
+    Model& model = App->models.back();
     model.meshIdx = meshIdx;
-    u32 modelIdx = (u32)app->models.size() - 1u;
+    u32 modelIdx = (u32)App->models.size() - 1u;
 
     String directory = GetDirectoryPart(MakeString(filename));
 
     // Create a list of materials
-    u32 baseMeshMaterialIndex = (u32)app->materials.size();
+    u32 baseMeshMaterialIndex = (u32)App->materials.size();
     for (unsigned int i = 0; i < scene->mNumMaterials; ++i)
     {
-        app->materials.push_back(Material{});
-        Material& material = app->materials.back();
+        App->materials.push_back(Material{});
+        Material& material = App->materials.back();
         ProcessAssimpMaterial(app, scene->mMaterials[i], material, directory);
     }
 
