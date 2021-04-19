@@ -89,6 +89,11 @@ bool ModuleImGui::Update(float dt)
     {
         panel->Draw();
     }
+    // You can handle App->input keyboard/mouse here
+    if (App->input.keys[K_ESCAPE] == BUTTON_PRESS)
+    {
+        return false;
+    }
 	return true;
 }
 
@@ -143,6 +148,9 @@ void ModuleImGui::Draw()
 
 bool ModuleImGui::CleanUp()
 {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+
 	return true;
 }
 

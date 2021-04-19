@@ -143,6 +143,12 @@ bool ModuleWindow::Init()
         LOG_ERROR("Failed to initialize OpenGL context\n");
         return -1;
     }
+
+    lastFrameTime = glfwGetTime();
+
+    App->deltaTime = 1.0f / 60.0f;
+    App->displaySize = ivec2(WINDOW_WIDTH, WINDOW_HEIGHT);
+    App->isRunning = true;
 	return true;
 }
 
@@ -204,6 +210,12 @@ bool ModuleWindow::Update(float dt)
 
 bool ModuleWindow::PostUpdate(float dt)
 {
+
+    // Frame time
+    f64 currentFrameTime = glfwGetTime();
+    App->deltaTime = (f32)(currentFrameTime - lastFrameTime);
+    lastFrameTime = currentFrameTime;
+
 	return true;
 }
 
@@ -211,6 +223,9 @@ bool ModuleWindow::PostUpdate(float dt)
 
 bool ModuleWindow::CleanUp()
 {
+    glfwDestroyWindow(M_Window->window);
+
+    glfwTerminate();
 	return true;
 }
 

@@ -11,14 +11,6 @@
 #include "Modules/ModuleWindow.h"
 
 
-#define WINDOW_TITLE  "Oscar Pons Gallart - AGP"
-#define WINDOW_WIDTH  800
-#define WINDOW_HEIGHT 600
-
-#define GLOBAL_FRAME_ARENA_SIZE MB(16)
-u8* GlobalFrameArenaMemory = NULL;
-u32 GlobalFrameArenaHead = 0;
-
 enum main_states {
     MAIN_CREATION,
     MAIN_INIT,
@@ -33,60 +25,73 @@ int main()
     Log::Init();
     LOG_TRACE("Entering application");
 
-    //App app = {};
-    App = new Application();
-    App->deltaTime = 1.0f / 60.0f;
-    App->displaySize = ivec2(WINDOW_WIDTH, WINDOW_HEIGHT);
-    App->isRunning = true;
+	int state = MAIN_CREATION;
+	int ret = 0;
 
-    App->Init();
+	while (state != MAIN_EXIT) {
+		switch (state) {
+		case MAIN_CREATION:
 
+			LOG_TRACE("Application Creation --------------");
+			App = new Application();
+			App->deltaTime = 1.0f / 60.0f;
+			state = MAIN_INIT;
+			break;
 
-    
+		case MAIN_INIT:
+			LOG_TRACE("Application Initialization --------------");
+			if (App->Init() == false) {
+				LOG_ERROR("Application Init exits with ERROR");
+				state = MAIN_EXIT;
+			}
+			else {
+				Init();
+				state = MAIN_START;
+			}
 
-    f64 lastFrameTime = glfwGetTime();
+			break;
 
-    GlobalFrameArenaMemory = (u8*)malloc(GLOBAL_FRAME_ARENA_SIZE);
+		case MAIN_START:
 
-    LOG_TRACE("Initializing application");
-    Init();
+			LOG_TRACE("Application Start --------------");
+			if (App->Start() == false) {
+				LOG_ERROR("Application Start exits with ERROR");
+				state = MAIN_EXIT;
+			}
+			else {
+				state = MAIN_UPDATE;
+				LOG_TRACE("Application Update --------------");
+			}
 
-    LOG_TRACE("Update loop");
+			break;
 
-    while (App->isRunning)
-    {
-        App->MainUpdate();
-        
+		case MAIN_UPDATE:
+		{
+			if (App->MainUpdate() == false) {
+				LOG_ERROR("Application Update exits with ERROR");
+				state = MAIN_FINISH;
+			}
+		}
+		break;
 
-        // Update
-        //Update();
+		case MAIN_FINISH:
 
-        
+			LOG_TRACE("Application Cleaning --------------");
+			if (App->CleanUp() == false) {
+				LOG_ERROR("Application Cleaning exits with ERROR");
+			}
+			else
+				ret = EXIT_SUCCESS;
 
-        // Render
-        //Render();
+			state = MAIN_EXIT;
 
-        
+			break;
 
-        // Frame time
-        f64 currentFrameTime = glfwGetTime();
-        App->deltaTime = (f32)(currentFrameTime - lastFrameTime);
-        lastFrameTime = currentFrameTime;
+		}
+	}
 
-        // Reset frame allocator
-        GlobalFrameArenaHead = 0;
-    }
-
-    free(GlobalFrameArenaMemory);
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-
-    glfwDestroyWindow(M_Window->window);
-
-    glfwTerminate();
-
-    return 0;
+	delete App;
+	return ret;
 }
 
 

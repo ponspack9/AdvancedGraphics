@@ -1,5 +1,6 @@
 #pragma once
 #include "Module.h"
+#include "engine.h"
 
 #define WINDOW_TITLE  "Oscar Pons Gallart - AGP"
 #define WINDOW_WIDTH  800
@@ -21,6 +22,9 @@ public:
 	bool CleanUp() override;
 
 	GLFWwindow* window = nullptr;
+
+private:
+	f64 lastFrameTime = 0;
 };
 
 extern ModuleWindow* M_Window;
