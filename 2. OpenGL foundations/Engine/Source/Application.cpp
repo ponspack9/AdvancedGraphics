@@ -12,11 +12,11 @@ Application::Application()
 {
 	App = this;
 	M_Window = new ModuleWindow();
-	//M_Gui = new ModuleImGui();
+	M_Gui = new ModuleImGui();
 	// END NEW MODULES
 
 	modules.push_back(M_Window);
-	//modules.push_back(M_Gui);
+	modules.push_back(M_Gui);
 	// END NEW REFERENCE MODULES
 }
 

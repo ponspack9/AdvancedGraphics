@@ -190,7 +190,7 @@ void Init()
     {
         glDebugMessageCallback(Log::OnGlError, App);
     }
-    panels.push_back(new PanelInfo());
+    //panels.push_back(new PanelInfo());
     // TODO: Initialize your resources here!
     // - programs (and retrieve uniform indices)
     // - textures
