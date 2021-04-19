@@ -109,7 +109,7 @@ bool Application::PostUpdate()
 		{
 			LOG_ERROR("POSTUPDATE_STOP returned by module [{0}]", module->GetName());
 			break;
-		}break;
+		}
 
 	}
 	return status;

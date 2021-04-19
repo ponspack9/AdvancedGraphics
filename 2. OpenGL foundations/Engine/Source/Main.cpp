@@ -55,55 +55,18 @@ int main()
 
     while (App->isRunning)
     {
-        // Tell GLFW to call platform callbacks
-        glfwPollEvents();
-
-        // ImGui
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-        Gui();
-        ImGui::Render();
-
-        // Clear input state if required by ImGui
-        if (ImGui::GetIO().WantCaptureKeyboard)
-            for (u32 i = 0; i < KEY_COUNT; ++i)
-                App->input.keys[i] = BUTTON_IDLE;
-
-        if (ImGui::GetIO().WantCaptureMouse)
-            for (u32 i = 0; i < MOUSE_BUTTON_COUNT; ++i)
-                App->input.mouseButtons[i] = BUTTON_IDLE;
+        App->MainUpdate();
+        
 
         // Update
-        Update();
+        //Update();
 
-        // Transition input key/button states
-        if (!ImGui::GetIO().WantCaptureKeyboard)
-            for (u32 i = 0; i < KEY_COUNT; ++i)
-                if (App->input.keys[i] == BUTTON_PRESS)   App->input.keys[i] = BUTTON_PRESSED;
-                else if (App->input.keys[i] == BUTTON_RELEASE) App->input.keys[i] = BUTTON_IDLE;
-
-        if (!ImGui::GetIO().WantCaptureMouse)
-            for (u32 i = 0; i < MOUSE_BUTTON_COUNT; ++i)
-                if (App->input.mouseButtons[i] == BUTTON_PRESS)   App->input.mouseButtons[i] = BUTTON_PRESSED;
-                else if (App->input.mouseButtons[i] == BUTTON_RELEASE) App->input.mouseButtons[i] = BUTTON_IDLE;
-
-        App->input.mouseDelta = glm::vec2(0.0f, 0.0f);
+        
 
         // Render
-        Render();
+        //Render();
 
-        // ImGui Render
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            GLFWwindow* backup_current_context = glfwGetCurrentContext();
-            ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
-            glfwMakeContextCurrent(backup_current_context);
-        }
-
-        // Present image on screen
-        glfwSwapBuffers(M_Window->window);
+        
 
         // Frame time
         f64 currentFrameTime = glfwGetTime();
