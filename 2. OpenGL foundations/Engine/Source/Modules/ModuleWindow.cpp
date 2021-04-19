@@ -1,7 +1,5 @@
 #include "pch.h"
 #include "ModuleWindow.h"
-#include "platform.h"
-#include "engine.h"
 #include <Application.h>
 #include <PanelInfo.h>
 
@@ -14,7 +12,6 @@ void OnGlfwError(int errorCode, const char* errorMessage)
 
 void OnGlfwMouseMoveEvent(GLFWwindow* window, double xpos, double ypos)
 {
-    //App* app = (App*)glfwGetWindowUserPointer(window);
     App->input.mouseDelta.x = xpos - App->input.mousePos.x;
     App->input.mouseDelta.y = ypos - App->input.mousePos.y;
     App->input.mousePos.x = xpos;
@@ -23,8 +20,6 @@ void OnGlfwMouseMoveEvent(GLFWwindow* window, double xpos, double ypos)
 
 void OnGlfwMouseEvent(GLFWwindow* window, int button, int event, int modifiers)
 {
-    //App* app = (App*)glfwGetWindowUserPointer(window);
-
     switch (event) {
     case GLFW_PRESS:
         switch (button) {
@@ -66,7 +61,6 @@ void OnGlfwKeyboardEvent(GLFWwindow* window, int key, int scancode, int action, 
     case GLFW_KEY_ENTER:  key = K_ENTER; break;
     }
 
-    //App* app = (App*)glfwGetWindowUserPointer(window);
     switch (action) {
     case GLFW_PRESS:   App->input.keys[key] = BUTTON_PRESS; break;
     case GLFW_RELEASE: App->input.keys[key] = BUTTON_RELEASE; break;
@@ -80,13 +74,11 @@ void OnGlfwCharEvent(GLFWwindow* window, unsigned int character)
 
 void OnGlfwResizeFramebuffer(GLFWwindow* window, int width, int height)
 {
-    //App* app = (App*)glfwGetWindowUserPointer(window);
     App->displaySize = vec2(width, height);
 }
 
 void OnGlfwCloseWindow(GLFWwindow* window)
 {
-    //App* app = (App*)glfwGetWindowUserPointer(window);
     App->isRunning = false;
 }
 

@@ -54,12 +54,6 @@
     <ClCompile Include="ThirdParty\glad\include\glad\glad.c">
       <Filter>External Libraries\Glad</Filter>
     </ClCompile>
-    <ClCompile Include="Source\engine.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\platform.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="ThirdParty\stb\stb.cpp">
       <Filter>External Libraries\Stb</Filter>
     </ClCompile>
@@ -113,7 +107,7 @@
     <ClInclude Include="ThirdParty\imgui-docking\imstb_truetype.h">
       <Filter>External Libraries\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="Source\engine.h">
+    <ClInclude Include="Source\Engine.h">
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="ThirdParty\glad\include\glad\glad.h">
@@ -121,9 +115,6 @@
     </ClInclude>
     <ClInclude Include="ThirdParty\glad\include\glad\khrplatform.h">
       <Filter>External Libraries\Glad</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\platform.h">
-      <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="ThirdParty\stb\stb_image.h">
       <Filter>External Libraries\Stb</Filter>

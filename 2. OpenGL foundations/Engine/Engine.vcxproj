@@ -24,9 +24,7 @@
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\Modules\ModuleWindow.cpp" />
     <ClCompile Include="Source\Modules\ModuleImGui.cpp" />
-    <ClCompile Include="Source\engine.cpp" />
     <ClCompile Include="Source\Panels\PanelInfo.cpp" />
-    <ClCompile Include="Source\platform.cpp" />
     <ClCompile Include="Source\Utils\Log.cpp" />
     <ClCompile Include="Source\Utils\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -64,11 +62,10 @@
     <ClInclude Include="Source\Application.h" />
     <ClInclude Include="Source\Modules\ModuleWindow.h" />
     <ClInclude Include="Source\Modules\ModuleImGui.h" />
-    <ClInclude Include="Source\engine.h" />
+    <ClInclude Include="Source\Engine.h" />
     <ClInclude Include="Source\Modules\Module.h" />
     <ClInclude Include="Source\Panels\Panel.h" />
     <ClInclude Include="Source\Panels\PanelInfo.h" />
-    <ClInclude Include="Source\platform.h" />
     <ClInclude Include="Source\Utils\Log.h" />
     <ClInclude Include="Source\Utils\pch.h" />
     <ClInclude Include="ThirdParty\glad\include\glad\glad.h" />

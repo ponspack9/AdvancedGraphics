@@ -1,12 +1,29 @@
 //
-// engine.h: This file contains the types and functions relative to the engine.
+// engine.h: This file contains the types and definitions relative to the engine.
 //
 
 #pragma once
+#pragma warning(disable : 4267) // conversion from X to Y, possible loss of data
 
-#include "platform.h"
+#pragma region Defines
 
+#define VBO GL_ARRAY_BUFFER 
+#define EBO GL_ELEMENT_ARRAY_BUFFER
 
+#define ARRAY_COUNT(array) (sizeof(array)/sizeof(array[0]))
+
+#define ASSERT(condition, message) assert((condition) && message)
+
+#define KB(count) (1024*(count))
+#define MB(count) (1024*KB(count))
+#define GB(count) (1024*MB(count))
+
+#define PI  3.14159265359f
+#define TAU 6.28318530718f
+
+#pragma endregion
+
+#pragma region Typedef
 
 typedef glm::vec2  vec2;
 typedef glm::vec3  vec3;
@@ -14,54 +31,101 @@ typedef glm::vec4  vec4;
 typedef glm::ivec2 ivec2;
 typedef glm::ivec3 ivec3;
 typedef glm::ivec4 ivec4;
+typedef char                   i8;
+typedef short                  i16;
+typedef int                    i32;
+typedef long long int          i64;
+typedef unsigned char          u8;
+typedef unsigned short         u16;
+typedef unsigned int           u32;
+typedef unsigned long long int u64;
+typedef float                  f32;
+typedef double                 f64;
 
-#define VBO GL_ARRAY_BUFFER 
-#define EBO GL_ELEMENT_ARRAY_BUFFER
+#pragma endregion
 
-struct Image
-{
-    void* pixels;
-    ivec2 size;
-    i32   nchannels;
-    i32   stride;
-};
-
-struct Texture
-{
-    GLuint      handle;
-    std::string filepath;
-};
-
-struct Program
-{
-    GLuint             handle;
-    std::string        filepath;
-    std::string        programName;
-    u64                lastWriteTimestamp;
-};
-
+#pragma region Enums
 enum Mode
 {
     Mode_TexturedQuad,
     Mode_Count
 };
 
-struct VertexV3V2
-{
-    vec3 pos;
-    vec2 uv;
+enum MouseButton {
+    LEFT,
+    RIGHT,
+    MOUSE_BUTTON_COUNT
 };
 
-const VertexV3V2 vertices[] =
-{
-    { vec3(-0.5, -0.5, 0.0), vec2(0.0,0.0)},
-    { vec3( 0.5, -0.5, 0.0), vec2(1.0,0.0)},
-    { vec3( 0.5,  0.5, 0.0), vec2(1.0,1.0)},
-    { vec3(-0.5,  0.5, 0.0), vec2(0.0,1.0)}
+enum Key {
+    K_SPACE,
+    K_0, K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9,
+    K_A, K_B, K_C, K_D, K_E, K_F, K_G, K_H, K_I, K_J, K_K, K_L, K_M,
+    K_N, K_O, K_P, K_Q, K_R, K_S, K_T, K_U, K_V, K_W, K_X, K_Y, K_Z,
+    K_ENTER, K_ESCAPE,
+    KEY_COUNT
 };
 
-const u16 indices[] =
-{
-    0, 1, 2,
-    0, 2, 3
+enum ButtonState {
+    BUTTON_IDLE,
+    BUTTON_PRESS,
+    BUTTON_PRESSED,
+    BUTTON_RELEASE
 };
+
+#pragma endregion
+
+#pragma region Structs
+
+    struct Image
+    {
+        void* pixels;
+        ivec2 size;
+        i32   nchannels;
+        i32   stride;
+    };
+
+    struct Texture
+    {
+        GLuint      handle;
+        std::string filepath;
+    };
+
+    struct Program
+    {
+        GLuint             handle;
+        std::string        filepath;
+        std::string        programName;
+        u64                lastWriteTimestamp;
+    };
+
+    struct Input {
+        glm::vec2   mousePos;
+        glm::vec2   mouseDelta;
+        ButtonState mouseButtons[MOUSE_BUTTON_COUNT];
+        ButtonState keys[KEY_COUNT];
+    };
+
+    struct VertexV3V2
+    {
+        vec3 pos;
+        vec2 uv;
+    };
+
+#pragma endregion
+
+#pragma region Globals
+    const VertexV3V2 vertices[] =
+    {
+        { vec3(-0.5, -0.5, 0.0), vec2(0.0,0.0)},
+        { vec3( 0.5, -0.5, 0.0), vec2(1.0,0.0)},
+        { vec3( 0.5,  0.5, 0.0), vec2(1.0,1.0)},
+        { vec3(-0.5,  0.5, 0.0), vec2(0.0,1.0)}
+    };
+
+    const u16 indices[] =
+    {
+        0, 1, 2,
+        0, 2, 3
+    };
+#pragma endregion

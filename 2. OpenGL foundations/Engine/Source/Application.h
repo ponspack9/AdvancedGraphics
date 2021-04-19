@@ -1,7 +1,5 @@
 #pragma once
 
-#include "platform.h"
-#include "engine.h"
 #include "Module.h"
 
 class Application
