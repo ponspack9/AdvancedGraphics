@@ -32,38 +32,68 @@ bool ModuleResources::Init()
     // - programs (and retrieve uniform indices)
     // - textures
 
-    // VBO
-    glGenBuffers(1, &App->embeddedVertices);
-    glBindBuffer(GL_ARRAY_BUFFER, App->embeddedVertices);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    // EBO
-    glGenBuffers(1, &App->embeddedElements);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, App->embeddedElements);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    // VAO
-    // Element 0, has 3 components, that are floats, no need to normalize, 
-    glGenVertexArrays(1, &App->vao);
-    glBindVertexArray(App->vao);
-    glBindBuffer(GL_ARRAY_BUFFER, App->embeddedVertices);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)12);
-    glEnableVertexAttribArray(1);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, App->embeddedElements);
-    glBindVertexArray(0);
-
-
     // Programs
     App->texturedGeometryProgramIdx = M_Resources->LoadProgram("shaders.glsl", "TEXTURED_GEOMETRY");
 
-    Program& texturedGeometryProgram = App->programs[App->texturedGeometryProgramIdx];
+    Submesh quadSubmesh;
+    quadSubmesh.vertices = {
+         -0.5, -0.5, 0.0,   0.0,0.0,
+          0.5, -0.5, 0.0,   1.0,0.0,
+          0.5,  0.5, 0.0,   1.0,1.0,
+         -0.5,  0.5, 0.0,   0.0,1.0 };
+    quadSubmesh.indices = {
+        0, 1, 2,
+        0, 2, 3
+    };
+    quadSubmesh.vertexOffset = 0;
+    quadSubmesh.indexOffset = 0;
+    quadSubmesh.vertexBufferLayout.attributes = { { 0,3,0 },{ 1,2,12 } };
+    quadSubmesh.vertexBufferLayout.stride = 20;
+
+    Mesh quadMesh;
+    quadMesh.submeshes.push_back(quadSubmesh);
+    
+
+    // VBO
+    glGenBuffers(1, &quadMesh.vertexBufferHandle);
+    glBindBuffer(GL_ARRAY_BUFFER, quadMesh.vertexBufferHandle);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadMesh.submeshes[0].vertices), (void*)&quadMesh.submeshes[0].vertices[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // EBO
+    glGenBuffers(1, &quadMesh.indexBufferHandle);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadMesh.indexBufferHandle);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quadMesh.submeshes[0].indices), (void*)&quadMesh.submeshes[0].indices[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
+
+    // VAO
+    // Element 0, has 3 components, that are floats, no need to normalize, 
+    GLuint vao = 0;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, quadMesh.vertexBufferHandle);
+
+    for (u32 i = 0; i < quadMesh.submeshes.size(); ++i)
+    {
+        Submesh* submesh = &quadMesh.submeshes[i];
+        u8 stride = submesh->vertexBufferLayout.stride;
+
+        submesh->vaos.push_back({ vao,App->texturedGeometryProgramIdx });
+        for (VertexBufferAttribute attribute : submesh->vertexBufferLayout.attributes)
+        {
+            glVertexAttribPointer(attribute.location, attribute.componentCount, GL_FLOAT, GL_FALSE, stride, (void*)attribute.offset);
+            glEnableVertexAttribArray(attribute.location);
+
+        }
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadMesh.indexBufferHandle);
+        glBindVertexArray(0);
+    }
+
+    meshes.push_back(quadMesh);
+    
+    Program& texturedGeometryProgram = M_Resources->programs[App->texturedGeometryProgramIdx];
 
     App->programUniformTexture = glGetUniformLocation(texturedGeometryProgram.handle, "uTexture");
 
@@ -74,7 +104,16 @@ bool ModuleResources::Init()
     App->normalTexIdx = M_Resources->LoadTexture2D("color_normal.png");
     App->magentaTexIdx = M_Resources->LoadTexture2D("color_magenta.png");
 
+    Model quad;
+    quad.meshIdx = 0;
+    quad.materialIdx.push_back(0);
 
+    models.push_back(quad);
+
+    Material material;
+    material.albedoTextureIdx = App->diceTexIdx;
+
+    materials.push_back(material);
     App->mode = Mode::Mode_TexturedQuad;
 
     return true;;
@@ -93,9 +132,9 @@ bool ModuleResources::PreUpdate(float dt)
 bool ModuleResources::Update(float dt)
 {
     // hot reload
-    for (int i = 0; i < App->programs.size(); ++i)
+    for (int i = 0; i < M_Resources->programs.size(); ++i)
     {
-        Program& program = App->programs[i];
+        Program& program = M_Resources->programs[i];
         u64 currentTimeStamp = ModuleResources::GetFileLastWriteTimestamp(program.filepath.c_str());
 
         if (currentTimeStamp > program.lastWriteTimestamp)
@@ -560,16 +599,16 @@ u32 ModuleResources::LoadProgram(const char* filepath, const char* programName)
     program.filepath = filepath;
     program.programName = programName;
     program.lastWriteTimestamp = ModuleResources::GetFileLastWriteTimestamp(filepath);
-    App->programs.push_back(program);
+    M_Resources->programs.push_back(program);
 
-    return App->programs.size() - 1;
+    return M_Resources->programs.size() - 1;
 }
 
 
 u32 ModuleResources::LoadTexture2D(const char* filepath)
 {
-    for (u32 texIdx = 0; texIdx < App->textures.size(); ++texIdx)
-        if (App->textures[texIdx].filepath == filepath)
+    for (u32 texIdx = 0; texIdx < M_Resources->textures.size(); ++texIdx)
+        if (M_Resources->textures[texIdx].filepath == filepath)
             return texIdx;
 
     Image image = ReadImage(filepath);
@@ -580,8 +619,8 @@ u32 ModuleResources::LoadTexture2D(const char* filepath)
         tex.handle = CreateTexture2DFromImage(image);
         tex.filepath = filepath;
 
-        u32 texIdx = App->textures.size();
-        App->textures.push_back(tex);
+        u32 texIdx = M_Resources->textures.size();
+        M_Resources->textures.push_back(tex);
 
         FreeImage(image);
         return texIdx;

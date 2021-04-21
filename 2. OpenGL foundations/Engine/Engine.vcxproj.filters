@@ -152,6 +152,7 @@
     <ClInclude Include="Source\Modules\ModuleRenderer.h">
       <Filter>Engine\Modules</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Primitives.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="WorkingDir\shaders.glsl">

@@ -68,6 +68,7 @@
     <ClInclude Include="Source\Modules\Module.h" />
     <ClInclude Include="Source\Panels\Panel.h" />
     <ClInclude Include="Source\Panels\PanelInfo.h" />
+    <ClInclude Include="Source\Primitives.h" />
     <ClInclude Include="Source\Utils\Log.h" />
     <ClInclude Include="Source\Utils\pch.h" />
     <ClInclude Include="ThirdParty\glad\include\glad\glad.h" />
