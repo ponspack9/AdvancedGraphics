@@ -37,10 +37,10 @@ bool ModuleResources::Init()
 
     Submesh quadSubmesh;
     quadSubmesh.vertices = {
-         -0.5, -0.5, 0.0,   0.0,0.0,
-          0.5, -0.5, 0.0,   1.0,0.0,
-          0.5,  0.5, 0.0,   1.0,1.0,
-         -0.5,  0.5, 0.0,   0.0,1.0 };
+         -0.5f, -0.5f, 0.0f,   0.0f,0.0f,
+          0.5f, -0.5f, 0.0f,   1.0f,0.0f,
+          0.5f,  0.5f, 0.0f,   1.0f,1.0f,
+         -0.5f,  0.5f, 0.0f,   0.0f,1.0f };
     quadSubmesh.indices = {
         0, 1, 2,
         0, 2, 3
@@ -57,22 +57,22 @@ bool ModuleResources::Init()
     // VBO
     glGenBuffers(1, &quadMesh.vertexBufferHandle);
     glBindBuffer(GL_ARRAY_BUFFER, quadMesh.vertexBufferHandle);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadMesh.submeshes[0].vertices), (void*)&quadMesh.submeshes[0].vertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, quadMesh.submeshes[0].vertices.size() * sizeof(float), &quadMesh.submeshes[0].vertices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // EBO
     glGenBuffers(1, &quadMesh.indexBufferHandle);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, quadMesh.indexBufferHandle);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quadMesh.submeshes[0].indices), (void*)&quadMesh.submeshes[0].indices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, quadMesh.submeshes[0].indices.size() * sizeof(u32), &quadMesh.submeshes[0].indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 
 
     // VAO
     // Element 0, has 3 components, that are floats, no need to normalize, 
-    GLuint vao = 0;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    //GLuint vao = 0;
+    glGenVertexArrays(1, &App->vao);
+    glBindVertexArray(App->vao);
     glBindBuffer(GL_ARRAY_BUFFER, quadMesh.vertexBufferHandle);
 
     for (u32 i = 0; i < quadMesh.submeshes.size(); ++i)
@@ -80,7 +80,7 @@ bool ModuleResources::Init()
         Submesh* submesh = &quadMesh.submeshes[i];
         u8 stride = submesh->vertexBufferLayout.stride;
 
-        submesh->vaos.push_back({ vao,App->texturedGeometryProgramIdx });
+        submesh->vaos.push_back({ App->vao,App->texturedGeometryProgramIdx });
         for (VertexBufferAttribute attribute : submesh->vertexBufferLayout.attributes)
         {
             glVertexAttribPointer(attribute.location, attribute.componentCount, GL_FLOAT, GL_FALSE, stride, (void*)attribute.offset);

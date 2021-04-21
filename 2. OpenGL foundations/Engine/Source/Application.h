@@ -35,10 +35,6 @@ public:
 
     ivec2 displaySize; // Maintained by platform
 
-    // Engine stuff
-    std::vector<Texture>  textures;
-    std::vector<Program>  programs;
-
     // program indices
     u32 texturedGeometryProgramIdx;
 
@@ -51,11 +47,6 @@ public:
 
     // Mode
     Mode mode;
-
-    // Embedded geometry (in-editor simple meshes such as
-    // a screen filling quad, a cube, a sphere...)
-    GLuint embeddedVertices;
-    GLuint embeddedElements;
 
     // Location of the texture uniform in the textured quad shader
     GLuint programUniformTexture;

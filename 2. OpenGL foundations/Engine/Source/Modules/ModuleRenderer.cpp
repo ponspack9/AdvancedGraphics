@@ -32,7 +32,7 @@ bool ModuleRenderer::Update(float dt)
 
 		// - set the viewport
 		// - bind the program 
-		Program& programTexturedGeometry = App->programs[App->texturedGeometryProgramIdx];
+		Program& programTexturedGeometry = M_Resources->programs[App->texturedGeometryProgramIdx];
 		glUseProgram(programTexturedGeometry.handle);
 		glBindVertexArray(App->vao);
 
@@ -68,8 +68,9 @@ bool ModuleRenderer::Update(float dt)
 
 			for (u32 i = 0; i < mesh.submeshes.size(); ++i)
 			{
-				GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
-				glBindVertexArray(vao);
+				//GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
+
+				glBindVertexArray(App->vao);
 
 				// - set the blending state
 				glEnable(GL_BLEND);
