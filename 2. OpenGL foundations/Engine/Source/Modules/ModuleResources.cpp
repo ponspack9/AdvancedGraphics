@@ -34,21 +34,21 @@ bool ModuleResources::Init()
 
     // VBO
     glGenBuffers(1, &App->embeddedVertices);
-    glBindBuffer(VBO, App->embeddedVertices);
-    glBufferData(VBO, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glBindBuffer(VBO, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, App->embeddedVertices);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // EBO
     glGenBuffers(1, &App->embeddedElements);
-    glBindBuffer(EBO, App->embeddedElements);
-    glBufferData(EBO, sizeof(indices), indices, GL_STATIC_DRAW);
-    glBindBuffer(EBO, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, App->embeddedElements);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     // VAO
     // Element 0, has 3 components, that are floats, no need to normalize, 
     glGenVertexArrays(1, &App->vao);
     glBindVertexArray(App->vao);
-    glBindBuffer(VBO, App->embeddedVertices);
+    glBindBuffer(GL_ARRAY_BUFFER, App->embeddedVertices);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)0);
     glEnableVertexAttribArray(0);
@@ -56,7 +56,7 @@ bool ModuleResources::Init()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)12);
     glEnableVertexAttribArray(1);
 
-    glBindBuffer(EBO, App->embeddedElements);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, App->embeddedElements);
     glBindVertexArray(0);
 
 

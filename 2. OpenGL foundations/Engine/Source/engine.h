@@ -7,9 +7,6 @@
 
 #pragma region Defines
 
-#define VBO GL_ARRAY_BUFFER 
-#define EBO GL_ELEMENT_ARRAY_BUFFER
-
 #define ARRAY_COUNT(array) (sizeof(array)/sizeof(array[0]))
 
 #define ASSERT(condition, message) assert((condition) && message)
@@ -91,13 +88,7 @@ enum ButtonState {
         std::string filepath;
     };
 
-    struct Program
-    {
-        GLuint             handle;
-        std::string        filepath;
-        std::string        programName;
-        u64                lastWriteTimestamp;
-    };
+    
 
     struct Input {
         glm::vec2   mousePos;
@@ -110,6 +101,86 @@ enum ButtonState {
     {
         vec3 pos;
         vec2 uv;
+    };
+    
+    // VBO
+    struct VertexBufferAttribute
+    {
+        u8 location;
+        u8 componentCount;
+        u8 offset;
+    };
+
+    struct VertexBufferLayout
+    {
+        std::vector<VertexBufferAttribute> attributes;
+        u8 stride;
+    };
+
+    // Shader
+    struct VertexShaderAttribute
+    {
+        u8 location;
+        u8 componentCount;
+    };
+
+    struct VertexShaderLayout
+    {
+        std::vector<VertexShaderAttribute> attributes;
+    };
+
+    struct Program
+    {
+        GLuint             handle;
+        std::string        filepath;
+        std::string        programName;
+        u64                lastWriteTimestamp;
+        VertexBufferLayout vertexInputLayout;
+    };
+
+    // VBO + Shader
+    struct VAO
+    {
+        GLuint handle;
+        GLuint programHandle;
+    };
+
+    // Models
+    struct Submesh
+    {
+        VertexBufferLayout vertexBufferLayout;
+        std::vector<float> vertices;
+        std::vector<u32> indices;
+        u32 vertexOffset;
+        u32 indexOffset;
+
+        std::vector<VAO> vaos; // to use different shaders to each submesh
+    };
+
+    struct Mesh
+    {
+        std::vector<Submesh> submeshes;
+        GLuint vertexBufferHandle;
+        GLuint indexBufferHandle;
+    };
+
+    struct Material
+    {
+        std::string name;
+        vec3 albedo;
+        vec3 emissive;
+        f32 smoothness;
+        u32 albedoTextureIdx;
+        u32 emissiveTextureIdx;
+        u32 specularTextureIdx;
+        u32 normalsTextureIdx;
+        u32 bumpTextureIdx;
+    };
+
+    struct Model
+    {
+        u32 meshIdx;
+        std::vector<u32> materialIdx;
     };
 
 #pragma endregion

@@ -4,6 +4,7 @@
 #include <ModuleImGui.h>
 #include <ModuleWindow.h>
 #include <ModuleResources.h>
+#include <ModuleRenderer.h>
 
 Application* App = nullptr;
 
@@ -13,11 +14,13 @@ Application::Application()
 	M_Window = new ModuleWindow();
 	M_Gui = new ModuleImGui();
 	M_Resources = new ModuleResources();
+	M_Renderer = new ModuleRenderer();
 	// END NEW MODULES
 
 	modules.push_back(M_Window);
 	modules.push_back(M_Gui);
 	modules.push_back(M_Resources);
+	modules.push_back(M_Renderer);
 	// END NEW REFERENCE MODULES
 }
 

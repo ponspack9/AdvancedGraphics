@@ -81,6 +81,9 @@
     <ClCompile Include="Source\Modules\ModuleResources.cpp">
       <Filter>Engine\Modules</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Modules\ModuleRenderer.cpp">
+      <Filter>Engine\Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThirdParty\imgui-docking\imconfig.h">
@@ -144,6 +147,9 @@
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="Source\Modules\ModuleResources.h">
+      <Filter>Engine\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Modules\ModuleRenderer.h">
       <Filter>Engine\Modules</Filter>
     </ClInclude>
   </ItemGroup>

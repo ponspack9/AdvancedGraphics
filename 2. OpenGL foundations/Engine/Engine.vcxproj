@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Modules\ModuleRenderer.cpp" />
     <ClCompile Include="Source\Modules\ModuleResources.cpp" />
     <ClCompile Include="Source\Application.cpp" />
     <ClCompile Include="Source\Main.cpp" />
@@ -58,6 +59,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Modules\ModuleRenderer.h" />
     <ClInclude Include="Source\Modules\ModuleResources.h" />
     <ClInclude Include="Source\Application.h" />
     <ClInclude Include="Source\Modules\ModuleWindow.h" />
