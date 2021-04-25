@@ -16,6 +16,8 @@ public:
 	bool PostUpdate(float dt) override;
 	bool CleanUp() override;
 
+	void DockSpace() const;
+
 	void Draw();
 
 	std::vector<Panel*> panels;

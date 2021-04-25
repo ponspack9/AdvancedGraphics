@@ -18,81 +18,46 @@ bool ModuleRenderer::Update(float dt)
 {
 
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Shaded model");
+
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, App->displaySize.x, App->displaySize.y);
 
-	switch (App->mode)
+	// Draw meshes
+	Program& texturedMeshProgram = M_Resources->programs[App->texturedGeometryProgramIdx];
+	glUseProgram(texturedMeshProgram.handle);
+
+	for (Model& model : M_Resources->models)
 	{
-	case 5:
-	{
-		// TODO: Draw your textured quad here!
-		// - clear the framebuffer
-		
+		Mesh& mesh = M_Resources->meshes[model.meshIdx];
 
-		// - set the viewport
-		// - bind the program 
-		Program& programTexturedGeometry = M_Resources->programs[App->texturedGeometryProgramIdx];
-		glUseProgram(programTexturedGeometry.handle);
-		//glBindVertexArray(App->vao);
-
-		// - set the blending state
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		// - bind the texture into unit 0
-		glUniform1i(App->programUniformTexture, 0);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, M_Resources->textures[App->diceTexIdx].handle);
-
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
-
-		glBindVertexArray(0);
-		glUseProgram(0);
-		//   (...and make its texture sample from unit 0)
-		// - bind the vao
-		// - glDrawElements() !!!
-	}
-	break;
-
-	default:
-
-
-		// Draw meshes
-		Program& texturedMeshProgram = M_Resources->programs[App->texturedGeometryProgramIdx];
-		glUseProgram(texturedMeshProgram.handle);
-
-		for (Model& model : M_Resources->models)
+		for (u32 i = 0; i < mesh.submeshes.size(); ++i)
 		{
-			Mesh& mesh = M_Resources->meshes[model.meshIdx];
+			GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
 
-			for (u32 i = 0; i < mesh.submeshes.size(); ++i)
-			{
-				GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
+			// TODO: VAO
+			glBindVertexArray(vao);
 
-				// TODO: VAO
-				glBindVertexArray(vao);
+			// - set the blending state
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-				// - set the blending state
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			u32 submeshMaterialIdx = model.materialIdx[i];
+			Material& submeshMaterial = M_Resources->materials[submeshMaterialIdx];
 
-				u32 submeshMaterialIdx = model.materialIdx[i];
-				Material& submeshMaterial = M_Resources->materials[submeshMaterialIdx];
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, M_Resources->textures[submeshMaterial.albedoTextureIdx].handle);
+			glUniform1i(App->programUniformTexture, 0); // TODO App->texturedMeshProgram_uTexture
 
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, M_Resources->textures[submeshMaterial.albedoTextureIdx].handle);
-				glUniform1i(App->programUniformTexture, 0); // TODO App->texturedMeshProgram_uTexture
+			Submesh& submesh = mesh.submeshes[i];
+			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
 
-				Submesh& submesh = mesh.submeshes[i];
-				glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
-
-				glBindVertexArray(0);
-			}
+			glBindVertexArray(0);
 		}
-		glUseProgram(0);
-
 	}
+	glUseProgram(0);
+
+	
 
 	glPopDebugGroup();
 

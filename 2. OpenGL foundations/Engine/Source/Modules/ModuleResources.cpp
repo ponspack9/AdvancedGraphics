@@ -28,7 +28,7 @@ bool ModuleResources::Init()
     App->texturedGeometryProgramIdx = M_Resources->LoadProgram("shaders.glsl", "TEXTURED_GEOMETRY");
 
     // Primitives
-    Primitives::Init();
+    //Primitives::Init();
     
     
     App->mode = Mode::Mode_TexturedQuad;

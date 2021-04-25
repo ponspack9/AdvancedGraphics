@@ -84,6 +84,12 @@
     <ClCompile Include="Source\Modules\ModuleRenderer.cpp">
       <Filter>Engine\Modules</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Panels\PanelMainMenu.cpp">
+      <Filter>Engine\Panels</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Panels\PanelScene.cpp">
+      <Filter>Engine\Panels</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThirdParty\imgui-docking\imconfig.h">
@@ -152,7 +158,15 @@
     <ClInclude Include="Source\Modules\ModuleRenderer.h">
       <Filter>Engine\Modules</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Primitives.h" />
+    <ClInclude Include="Source\Panels\PanelMainMenu.h">
+      <Filter>Engine\Panels</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Panels\PanelScene.h">
+      <Filter>Engine\Panels</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Primitives.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="WorkingDir\shaders.glsl">
