@@ -34,7 +34,7 @@ bool ModuleRenderer::Update(float dt)
 		// - bind the program 
 		Program& programTexturedGeometry = M_Resources->programs[App->texturedGeometryProgramIdx];
 		glUseProgram(programTexturedGeometry.handle);
-		glBindVertexArray(App->vao);
+		//glBindVertexArray(App->vao);
 
 		// - set the blending state
 		glEnable(GL_BLEND);

@@ -144,6 +144,11 @@ bool ModuleWindow::Init()
     App->deltaTime = 1.0f / 60.0f;
     App->displaySize = ivec2(WINDOW_WIDTH, WINDOW_HEIGHT);
     App->isRunning = true;
+
+    if (GLVersion.major > 4 || (GLVersion.major == 4 && GLVersion.minor >= 3))
+    {
+        glDebugMessageCallback(Log::OnGlError, App);
+    }
 	return true;
 }
 

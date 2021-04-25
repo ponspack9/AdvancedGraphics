@@ -181,6 +181,7 @@ enum ButtonState {
     {
         u32 meshIdx;
         std::vector<u32> materialIdx;
+        std::string name;
     };
 
 #pragma endregion

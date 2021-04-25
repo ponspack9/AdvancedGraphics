@@ -1,8 +1,10 @@
 #pragma once
 #include "Module.h"
-#include <assimp/cimport.h>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+
+class aiScene;
+class aiNode;
+class aiMesh;
+class aiMaterial;
 
 class ModuleResources : public Module
 {
@@ -12,16 +14,14 @@ public:
 	~ModuleResources();
 
 	bool Init() override;
-	bool Start() override;
-	bool PreUpdate(float dt) override;
 	bool Update(float dt) override;
-	bool PostUpdate(float dt) override;
-	bool CleanUp() override;
 
 
 public:
 	// Static
 	static std::string GetDirectoryPart(std::string path);
+
+	static std::string GetFileNamePart(std::string path);
 
 	/**
 	 * Reads a whole file and returns a string with its contents. The returned string
