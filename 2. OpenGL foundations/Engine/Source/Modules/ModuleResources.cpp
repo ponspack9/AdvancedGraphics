@@ -115,6 +115,9 @@ bool ModuleResources::Init()
     materials.push_back(material);
     App->mode = Mode::Mode_TexturedQuad;
 
+
+    LoadModel("Patrick/Patrick.obj");
+
     return true;;
 }
 
@@ -302,7 +305,7 @@ Image ModuleResources::ReadImage(const char* filename)
     }
     else
     {
-        LOG_ERROR("Could not open file %s", filename);
+        LOG_ERROR("Could not open file {0}", filename);
     }
     return img;
 }
@@ -595,7 +598,28 @@ u32 ModuleResources::LoadProgram(const char* filepath, const char* programName)
     program.lastWriteTimestamp = ModuleResources::GetFileLastWriteTimestamp(filepath);
     M_Resources->programs.push_back(program);
 
+    // getting info from the shader
+    GLint attributeCount = 0;
+    GLsizei attributeNameLength = 0;
+    GLsizei attributeSize = 0;
+    GLenum attributeType = 0;
+    char attributeName[64] = "NONE";
+    u8 stride = 0;
 
+    glGetProgramiv(program.handle, GL_ACTIVE_ATTRIBUTES, &attributeCount);
+
+    for (int i = 0; i < attributeCount; ++i)
+    {
+        glGetActiveAttrib(program.handle, i, ARRAY_COUNT(attributeName), &attributeNameLength, &attributeSize, &attributeType, attributeName);
+        GLuint attributeLocation = glGetAttribLocation(program.handle, attributeName);
+
+        VertexBufferAttribute attribute = { attributeLocation, attributeSize };
+
+        program.vertexInputLayout.attributes.push_back(attribute);
+        stride += attributeSize;
+    }
+
+    program.vertexInputLayout.stride = stride;
     return M_Resources->programs.size() - 1;
 }
 
@@ -625,12 +649,6 @@ u32 ModuleResources::LoadTexture2D(const char* filepath)
         return UINT32_MAX;
     }
 }
-
-//Model* ModuleResources::LoadModel()
-//{
-//
-//}
-
 #pragma endregion
 
 
