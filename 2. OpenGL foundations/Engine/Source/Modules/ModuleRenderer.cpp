@@ -68,10 +68,10 @@ bool ModuleRenderer::Update(float dt)
 
 			for (u32 i = 0; i < mesh.submeshes.size(); ++i)
 			{
-				//GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
+				GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
 
 				// TODO: VAO
-				glBindVertexArray(App->vao);
+				glBindVertexArray(vao);
 
 				// - set the blending state
 				glEnable(GL_BLEND);
