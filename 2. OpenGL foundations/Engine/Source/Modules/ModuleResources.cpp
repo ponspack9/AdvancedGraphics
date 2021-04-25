@@ -612,7 +612,12 @@ u32 ModuleResources::LoadProgram(const char* filepath, const char* programName)
         glGetActiveAttrib(program.handle, i, ARRAY_COUNT(attributeName), &attributeNameLength, &attributeSize, &attributeType, attributeName);
         GLuint attributeLocation = glGetAttribLocation(program.handle, attributeName);
 
-        VertexBufferAttribute attribute = { attributeLocation, attributeSize };
+        if (i == 0)
+            attributeSize = 3;
+        else
+            attributeSize = 2;
+
+        VertexBufferAttribute attribute = { attributeLocation, attributeSize,stride };
 
         program.vertexInputLayout.attributes.push_back(attribute);
         stride += attributeSize;
