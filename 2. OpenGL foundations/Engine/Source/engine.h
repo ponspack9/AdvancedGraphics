@@ -22,22 +22,22 @@
 
 #pragma region Typedef
 
-typedef glm::vec2  vec2;
-typedef glm::vec3  vec3;
-typedef glm::vec4  vec4;
-typedef glm::ivec2 ivec2;
-typedef glm::ivec3 ivec3;
-typedef glm::ivec4 ivec4;
-typedef char                   i8;
-typedef short                  i16;
-typedef int                    i32;
-typedef long long int          i64;
-typedef unsigned char          u8;
-typedef unsigned short         u16;
-typedef unsigned int           u32;
-typedef unsigned long long int u64;
-typedef float                  f32;
-typedef double                 f64;
+typedef glm::vec2               vec2;
+typedef glm::vec3               vec3;
+typedef glm::vec4               vec4;
+typedef glm::ivec2              ivec2;
+typedef glm::ivec3              ivec3;
+typedef glm::ivec4              ivec4;
+typedef char                    i8;
+typedef short                   i16;
+typedef int                     i32;
+typedef long long int           i64;
+typedef unsigned char           u8;
+typedef unsigned short          u16;
+typedef unsigned int            u32;
+typedef unsigned long long int  u64;
+typedef float                   f32;
+typedef double                  f64;
 
 #pragma endregion
 

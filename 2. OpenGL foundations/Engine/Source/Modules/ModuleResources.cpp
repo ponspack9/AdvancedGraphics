@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "ModuleResources.h"
-#include <assimp/cimport.h>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+
 
 
 #pragma region Module overrides
@@ -47,7 +45,7 @@ bool ModuleResources::Init()
     };
     quadSubmesh.vertexOffset = 0;
     quadSubmesh.indexOffset = 0;
-    quadSubmesh.vertexBufferLayout.attributes = { { 0,3,0 },{ 1,2,12 } };
+    quadSubmesh.vertexBufferLayout.attributes = { { 0,3,0 },{ 1,2,3 * sizeof(float) } };
     quadSubmesh.vertexBufferLayout.stride = 20;
 
     Mesh quadMesh;
@@ -71,6 +69,7 @@ bool ModuleResources::Init()
     // VAO
     // Element 0, has 3 components, that are floats, no need to normalize, 
     //GLuint vao = 0;
+    // TODO: VAO
     glGenVertexArrays(1, &App->vao);
     glBindVertexArray(App->vao);
     glBindBuffer(GL_ARRAY_BUFFER, quadMesh.vertexBufferHandle);
@@ -341,7 +340,6 @@ GLuint ModuleResources::CreateTexture2DFromImage(Image image)
     return texHandle;
 }
 
-/*
 
 void ModuleResources::ProcessAssimpMesh(const aiScene* scene, aiMesh* mesh, Mesh* myMesh, u32 baseMeshMaterialIndex, std::vector<u32>& submeshMaterialIndices)
 {
@@ -429,7 +427,7 @@ void ModuleResources::ProcessAssimpMesh(const aiScene* scene, aiMesh* mesh, Mesh
     myMesh->submeshes.push_back(submesh);
 }
 
-void ModuleResources::ProcessAssimpMaterial(App* app, aiMaterial* material, Material& myMaterial, String directory)
+void ModuleResources::ProcessAssimpMaterial(aiMaterial* material, Material& myMaterial, std::string directory)
 {
     aiString name;
     aiColor3D diffuseColor;
@@ -451,37 +449,33 @@ void ModuleResources::ProcessAssimpMaterial(App* app, aiMaterial* material, Mate
     if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
     {
         material->GetTexture(aiTextureType_DIFFUSE, 0, &aiFilename);
-        String filename = MakeString(aiFilename.C_Str());
-        String filepath = MakePath(directory, filename);
-        myMaterial.albedoTextureIdx = LoadTexture2D(app, filepath.str);
+        //std::string filename = MakeString(aiFilename.C_Str());
+        std::string filepath = directory + "/" + aiFilename.C_Str();
+        myMaterial.albedoTextureIdx = LoadTexture2D(filepath.c_str());
     }
     if (material->GetTextureCount(aiTextureType_EMISSIVE) > 0)
     {
         material->GetTexture(aiTextureType_EMISSIVE, 0, &aiFilename);
-        String filename = MakeString(aiFilename.C_Str());
-        String filepath = MakePath(directory, filename);
-        myMaterial.emissiveTextureIdx = LoadTexture2D(app, filepath.str);
+        std::string filepath = directory + "/" + aiFilename.C_Str();
+        myMaterial.emissiveTextureIdx = LoadTexture2D(filepath.c_str());
     }
     if (material->GetTextureCount(aiTextureType_SPECULAR) > 0)
     {
         material->GetTexture(aiTextureType_SPECULAR, 0, &aiFilename);
-        String filename = MakeString(aiFilename.C_Str());
-        String filepath = MakePath(directory, filename);
-        myMaterial.specularTextureIdx = LoadTexture2D(app, filepath.str);
+        std::string filepath = directory + "/" + aiFilename.C_Str();
+        myMaterial.specularTextureIdx = LoadTexture2D(filepath.c_str());
     }
     if (material->GetTextureCount(aiTextureType_NORMALS) > 0)
     {
         material->GetTexture(aiTextureType_NORMALS, 0, &aiFilename);
-        String filename = MakeString(aiFilename.C_Str());
-        String filepath = MakePath(directory, filename);
-        myMaterial.normalsTextureIdx = LoadTexture2D(app, filepath.str);
+        std::string filepath = directory + "/" + aiFilename.C_Str();
+        myMaterial.normalsTextureIdx = LoadTexture2D(filepath.c_str());
     }
     if (material->GetTextureCount(aiTextureType_HEIGHT) > 0)
     {
         material->GetTexture(aiTextureType_HEIGHT, 0, &aiFilename);
-        String filename = MakeString(aiFilename.C_Str());
-        String filepath = MakePath(directory, filename);
-        myMaterial.bumpTextureIdx = LoadTexture2D(app, filepath.str);
+        std::string filepath = directory + "/" + aiFilename.C_Str();
+        myMaterial.bumpTextureIdx = LoadTexture2D(filepath.c_str());
     }
 
     //myMaterial.createNormalFromBump();
@@ -505,7 +499,7 @@ void ModuleResources::ProcessAssimpNode(const aiScene* scene, aiNode* node, Mesh
 
 u32 ModuleResources::LoadModel(const char* filename)
 {
-    /*const aiScene* scene = aiImportFile(filename,
+    const aiScene* scene = aiImportFile(filename,
         aiProcess_Triangulate |
         aiProcess_GenSmoothNormals |
         aiProcess_CalcTangentSpace |
@@ -517,28 +511,28 @@ u32 ModuleResources::LoadModel(const char* filename)
 
     if (!scene)
     {
-        ELOG("Error loading mesh %s: %s", filename, aiGetErrorString());
+        LOG_ERROR("Error loading mesh {0}: {1}", filename, aiGetErrorString());
         return UINT32_MAX;
     }
 
-    App->meshes.push_back(Mesh{});
-    Mesh& mesh = App->meshes.back();
-    u32 meshIdx = (u32)App->meshes.size() - 1u;
+    M_Resources->meshes.push_back(Mesh{});
+    Mesh& mesh = M_Resources->meshes.back();
+    u32 meshIdx = (u32)M_Resources->meshes.size() - 1u;
 
-    App->models.push_back(Model{});
-    Model& model = App->models.back();
+    M_Resources->models.push_back(Model{});
+    Model& model = M_Resources->models.back();
     model.meshIdx = meshIdx;
-    u32 modelIdx = (u32)App->models.size() - 1u;
+    u32 modelIdx = (u32)M_Resources->models.size() - 1u;
 
-    String directory = GetDirectoryPart(MakeString(filename));
+    std::string directory = GetDirectoryPart(filename);
 
     // Create a list of materials
-    u32 baseMeshMaterialIndex = (u32)App->materials.size();
+    u32 baseMeshMaterialIndex = (u32)M_Resources->materials.size();
     for (unsigned int i = 0; i < scene->mNumMaterials; ++i)
     {
-        App->materials.push_back(Material{});
-        Material& material = App->materials.back();
-        ProcessAssimpMaterial(app, scene->mMaterials[i], material, directory);
+        M_Resources->materials.push_back(Material{});
+        Material& material = M_Resources->materials.back();
+        ProcessAssimpMaterial(scene->mMaterials[i], material, directory);
     }
 
     ProcessAssimpNode(scene, scene->mRootNode, &mesh, baseMeshMaterialIndex, model.materialIdx);
@@ -586,7 +580,7 @@ u32 ModuleResources::LoadModel(const char* filename)
     return modelIdx;
     return 0;
 }
-*/
+
 #pragma endregion
 
 #pragma region Public 
@@ -600,6 +594,7 @@ u32 ModuleResources::LoadProgram(const char* filepath, const char* programName)
     program.programName = programName;
     program.lastWriteTimestamp = ModuleResources::GetFileLastWriteTimestamp(filepath);
     M_Resources->programs.push_back(program);
+
 
     return M_Resources->programs.size() - 1;
 }
@@ -630,6 +625,11 @@ u32 ModuleResources::LoadTexture2D(const char* filepath)
         return UINT32_MAX;
     }
 }
+
+//Model* ModuleResources::LoadModel()
+//{
+//
+//}
 
 #pragma endregion
 

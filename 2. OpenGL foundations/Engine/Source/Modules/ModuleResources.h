@@ -1,5 +1,8 @@
 #pragma once
 #include "Module.h"
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 class ModuleResources : public Module
 {
@@ -39,6 +42,14 @@ public:
 	static Image ReadImage(const char* filename);
 
 	static GLuint CreateTexture2DFromImage(Image image);
+
+	void ProcessAssimpMesh(const aiScene* scene, aiMesh* mesh, Mesh* myMesh, u32 baseMeshMaterialIndex, std::vector<u32>& submeshMaterialIndices);
+
+	void ProcessAssimpMaterial(aiMaterial* material, Material& myMaterial, std::string directory);
+
+	void ProcessAssimpNode(const aiScene* scene, aiNode* node, Mesh* myMesh, u32 baseMeshMaterialIndex, std::vector<u32>& submeshMaterialIndices);
+
+	u32 LoadModel(const char* filename);
 
 public:
 	

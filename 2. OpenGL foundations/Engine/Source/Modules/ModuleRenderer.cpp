@@ -70,6 +70,7 @@ bool ModuleRenderer::Update(float dt)
 			{
 				//GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
 
+				// TODO: VAO
 				glBindVertexArray(App->vao);
 
 				// - set the blending state
