@@ -5,6 +5,7 @@
 #include <ModuleWindow.h>
 #include <ModuleResources.h>
 #include <ModuleRenderer.h>
+#include <ModuleScene.h>
 
 Application* App = nullptr;
 
@@ -15,12 +16,14 @@ Application::Application()
 	M_Gui = new ModuleImGui();
 	M_Resources = new ModuleResources();
 	M_Renderer = new ModuleRenderer();
+	M_Scene = new ModuleScene();
 	// END NEW MODULES
 
 	modules.push_back(M_Window);
 	modules.push_back(M_Gui);
 	modules.push_back(M_Resources);
 	modules.push_back(M_Renderer);
+	modules.push_back(M_Scene);
 	// END NEW REFERENCE MODULES
 }
 

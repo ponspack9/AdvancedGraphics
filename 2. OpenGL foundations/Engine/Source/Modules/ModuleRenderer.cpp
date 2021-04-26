@@ -8,10 +8,13 @@ ModuleRenderer* M_Renderer = nullptr;
 
 ModuleRenderer::ModuleRenderer()
 {
+	this->name = "ModuleRenderer";
+	LOG_DEBUG("Created module [{0}]", name);
 }
 
 ModuleRenderer::~ModuleRenderer()
 {
+	LOG_DEBUG("Deleted module [{0}]", name);
 }
 
 bool ModuleRenderer::Update(float dt)
