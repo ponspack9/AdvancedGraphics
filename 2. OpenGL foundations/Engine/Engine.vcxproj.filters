@@ -90,6 +90,9 @@
     <ClCompile Include="Source\Panels\PanelScene.cpp">
       <Filter>Engine\Panels</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Modules\ModuleScene.cpp">
+      <Filter>Engine\Modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThirdParty\imgui-docking\imconfig.h">
@@ -166,6 +169,9 @@
     </ClInclude>
     <ClInclude Include="Source\Primitives.h">
       <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Modules\ModuleScene.h">
+      <Filter>Engine\Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

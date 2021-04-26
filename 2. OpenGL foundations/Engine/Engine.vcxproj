@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Modules\ModuleScene.cpp" />
     <ClCompile Include="Source\Panels\PanelScene.cpp" />
     <ClCompile Include="Source\Panels\PanelMainMenu.cpp" />
     <ClCompile Include="Source\Modules\ModuleRenderer.cpp" />
@@ -61,6 +62,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Modules\ModuleScene.h" />
     <ClInclude Include="Source\Panels\PanelScene.h" />
     <ClInclude Include="Source\Panels\PanelMainMenu.h" />
     <ClInclude Include="Source\Modules\ModuleRenderer.h" />
