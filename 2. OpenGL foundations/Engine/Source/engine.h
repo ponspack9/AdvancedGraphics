@@ -88,19 +88,11 @@ enum ButtonState {
         std::string filepath;
     };
 
-    
-
     struct Input {
         glm::vec2   mousePos;
         glm::vec2   mouseDelta;
         ButtonState mouseButtons[MOUSE_BUTTON_COUNT];
         ButtonState keys[KEY_COUNT];
-    };
-
-    struct VertexV3V2
-    {
-        vec3 pos;
-        vec2 uv;
     };
     
     // VBO
@@ -187,17 +179,5 @@ enum ButtonState {
 #pragma endregion
 
 #pragma region Globals
-    const VertexV3V2 vertices[] =
-    {
-        { vec3(-0.5, -0.5, 0.0), vec2(0.0,0.0)},
-        { vec3( 0.5, -0.5, 0.0), vec2(1.0,0.0)},
-        { vec3( 0.5,  0.5, 0.0), vec2(1.0,1.0)},
-        { vec3(-0.5,  0.5, 0.0), vec2(0.0,1.0)}
-    };
 
-    const u16 indices[] =
-    {
-        0, 1, 2,
-        0, 2, 3
-    };
 #pragma endregion

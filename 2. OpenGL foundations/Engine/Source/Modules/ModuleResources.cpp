@@ -46,21 +46,56 @@ bool ModuleResources::Update(float dt)
     // hot reload
     for (int i = 0; i < M_Resources->programs.size(); ++i)
     {
-        Program& program = M_Resources->programs[i];
-        u64 currentTimeStamp = ModuleResources::GetFileLastWriteTimestamp(program.filepath.c_str());
+        Program* program = M_Resources->programs[i];
+        u64 currentTimeStamp = ModuleResources::GetFileLastWriteTimestamp(program->filepath.c_str());
 
-        if (currentTimeStamp > program.lastWriteTimestamp)
+        if (currentTimeStamp > program->lastWriteTimestamp)
         {
-            glDeleteProgram(program.handle);
-            std::string programSource = ModuleResources::ReadTextFile(program.filepath.c_str());
+            glDeleteProgram(program->handle);
+            std::string programSource = ModuleResources::ReadTextFile(program->filepath.c_str());
 
-            program.handle = ModuleResources::CreateProgramFromSource(programSource, program.programName.c_str());
-            program.lastWriteTimestamp = currentTimeStamp;
+            program->handle = ModuleResources::CreateProgramFromSource(programSource, program->programName.c_str());
+            program->lastWriteTimestamp = currentTimeStamp;
 
-            LOG_DEBUG("Successfully reloaded shader '{0}'", program.programName);
+            LOG_DEBUG("Successfully reloaded shader '{0}'", program->programName);
         }
     }
     return true;;
+}
+
+bool ModuleResources::CleanUp()
+{
+    for (int i = 0; i < textures.size(); ++i)
+    {
+        delete(textures[i]);
+    }
+    textures.clear();
+
+    for (int i = 0; i < materials.size(); ++i)
+    {
+        delete(materials[i]);
+    }
+    materials.clear();
+
+    for (int i = 0; i < meshes.size(); ++i)
+    {
+        delete(meshes[i]);
+    }
+    meshes.clear();
+
+    for (int i = 0; i < models.size(); ++i)
+    {
+        delete(models[i]);
+    }
+    models.clear();
+
+    for (int i = 0; i < programs.size(); ++i)
+    {
+        delete(programs[i]);
+    }
+    programs.clear();
+
+    return true;
 }
 
 
@@ -158,7 +193,7 @@ void ModuleResources::ProcessAssimpMesh(const aiScene* scene, aiMesh* mesh, Mesh
     myMesh->submeshes.push_back(submesh);
 }
 
-void ModuleResources::ProcessAssimpMaterial(aiMaterial* material, Material& myMaterial, std::string directory)
+void ModuleResources::ProcessAssimpMaterial(aiMaterial* material, Material* myMaterial, std::string directory)
 {
     aiString name;
     aiColor3D diffuseColor;
@@ -171,10 +206,10 @@ void ModuleResources::ProcessAssimpMaterial(aiMaterial* material, Material& myMa
     material->Get(AI_MATKEY_COLOR_SPECULAR, specularColor);
     material->Get(AI_MATKEY_SHININESS, shininess);
 
-    myMaterial.name = name.C_Str();
-    myMaterial.albedo = vec3(diffuseColor.r, diffuseColor.g, diffuseColor.b);
-    myMaterial.emissive = vec3(emissiveColor.r, emissiveColor.g, emissiveColor.b);
-    myMaterial.smoothness = shininess / 256.0f;
+    myMaterial->name = name.C_Str();
+    myMaterial->albedo = vec3(diffuseColor.r, diffuseColor.g, diffuseColor.b);
+    myMaterial->emissive = vec3(emissiveColor.r, emissiveColor.g, emissiveColor.b);
+    myMaterial->smoothness = shininess / 256.0f;
 
     aiString aiFilename;
     if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
@@ -182,31 +217,31 @@ void ModuleResources::ProcessAssimpMaterial(aiMaterial* material, Material& myMa
         material->GetTexture(aiTextureType_DIFFUSE, 0, &aiFilename);
         //std::string filename = MakeString(aiFilename.C_Str());
         std::string filepath = directory + "/" + aiFilename.C_Str();
-        myMaterial.albedoTextureIdx = LoadTexture2D(filepath.c_str());
+        myMaterial->albedoTextureIdx = LoadTexture2D(filepath.c_str());
     }
     if (material->GetTextureCount(aiTextureType_EMISSIVE) > 0)
     {
         material->GetTexture(aiTextureType_EMISSIVE, 0, &aiFilename);
         std::string filepath = directory + "/" + aiFilename.C_Str();
-        myMaterial.emissiveTextureIdx = LoadTexture2D(filepath.c_str());
+        myMaterial->emissiveTextureIdx = LoadTexture2D(filepath.c_str());
     }
     if (material->GetTextureCount(aiTextureType_SPECULAR) > 0)
     {
         material->GetTexture(aiTextureType_SPECULAR, 0, &aiFilename);
         std::string filepath = directory + "/" + aiFilename.C_Str();
-        myMaterial.specularTextureIdx = LoadTexture2D(filepath.c_str());
+        myMaterial->specularTextureIdx = LoadTexture2D(filepath.c_str());
     }
     if (material->GetTextureCount(aiTextureType_NORMALS) > 0)
     {
         material->GetTexture(aiTextureType_NORMALS, 0, &aiFilename);
         std::string filepath = directory + "/" + aiFilename.C_Str();
-        myMaterial.normalsTextureIdx = LoadTexture2D(filepath.c_str());
+        myMaterial->normalsTextureIdx = LoadTexture2D(filepath.c_str());
     }
     if (material->GetTextureCount(aiTextureType_HEIGHT) > 0)
     {
         material->GetTexture(aiTextureType_HEIGHT, 0, &aiFilename);
         std::string filepath = directory + "/" + aiFilename.C_Str();
-        myMaterial.bumpTextureIdx = LoadTexture2D(filepath.c_str());
+        myMaterial->bumpTextureIdx = LoadTexture2D(filepath.c_str());
     }
 
     //myMaterial.createNormalFromBump();
@@ -431,11 +466,11 @@ u32 ModuleResources::LoadProgram(const char* filepath, const char* programName)
 {
     std::string programSource = ModuleResources::ReadTextFile(filepath);
 
-    Program program = {};
-    program.handle = CreateProgramFromSource(programSource, programName);
-    program.filepath = filepath;
-    program.programName = programName;
-    program.lastWriteTimestamp = ModuleResources::GetFileLastWriteTimestamp(filepath);
+    Program* program = new Program();
+    program->handle = CreateProgramFromSource(programSource, programName);
+    program->filepath = filepath;
+    program->programName = programName;
+    program->lastWriteTimestamp = ModuleResources::GetFileLastWriteTimestamp(filepath);
 
     // getting info from the shader
     GLint attributeCount = 0;
@@ -445,20 +480,20 @@ u32 ModuleResources::LoadProgram(const char* filepath, const char* programName)
     char attributeName[64] = "NONE";
     u8 stride = 0;
 
-    glGetProgramiv(program.handle, GL_ACTIVE_ATTRIBUTES, &attributeCount);
+    glGetProgramiv(program->handle, GL_ACTIVE_ATTRIBUTES, &attributeCount);
 
     for (int i = 0; i < attributeCount; ++i)
     {
-        glGetActiveAttrib(program.handle, i, ARRAY_COUNT(attributeName), &attributeNameLength, &attributeSize, &attributeType, attributeName);
-        GLuint attributeLocation = glGetAttribLocation(program.handle, attributeName);
+        glGetActiveAttrib(program->handle, i, ARRAY_COUNT(attributeName), &attributeNameLength, &attributeSize, &attributeType, attributeName);
+        GLuint attributeLocation = glGetAttribLocation(program->handle, attributeName);
         // ASK: We do really need anything else than the location?
         VertexBufferAttribute attribute = { attributeLocation, attributeSize,stride };
 
-        program.vertexInputLayout.attributes.push_back(attribute);
+        program->vertexInputLayout.attributes.push_back(attribute);
         stride += attributeSize;
     }
 
-    program.vertexInputLayout.stride = stride;
+    program->vertexInputLayout.stride = stride;
     M_Resources->programs.push_back(program);
     return M_Resources->programs.size() - 1;
 }
@@ -507,15 +542,15 @@ u32 ModuleResources::LoadModel(const char* filename)
         return UINT32_MAX;
     }
 
-    M_Resources->meshes.push_back(Mesh{});
-    Mesh& mesh = M_Resources->meshes.back();
+    Mesh* mesh = new Mesh();
+    M_Resources->meshes.push_back(mesh);
     u32 meshIdx = (u32)M_Resources->meshes.size() - 1u;
 
-    M_Resources->models.push_back(Model{});
-    Model& model = M_Resources->models.back();
-    model.meshIdx = meshIdx;
+    Model* model = new Model();
+    M_Resources->models.push_back(model);
+    model->meshIdx = meshIdx;
     u32 modelIdx = (u32)M_Resources->models.size() - 1u;
-    model.name = GetFileNamePart(filename);
+    model->name = GetFileNamePart(filename);
 
     std::string directory = GetDirectoryPart(filename);
 
@@ -523,47 +558,47 @@ u32 ModuleResources::LoadModel(const char* filename)
     u32 baseMeshMaterialIndex = (u32)M_Resources->materials.size();
     for (unsigned int i = 0; i < scene->mNumMaterials; ++i)
     {
-        M_Resources->materials.push_back(Material{});
-        Material& material = M_Resources->materials.back();
+        Material* material = new Material();
+        M_Resources->materials.push_back(material);
         ProcessAssimpMaterial(scene->mMaterials[i], material, directory);
     }
 
-    ProcessAssimpNode(scene, scene->mRootNode, &mesh, baseMeshMaterialIndex, model.materialIdx);
+    ProcessAssimpNode(scene, scene->mRootNode, mesh, baseMeshMaterialIndex, model->materialIdx);
 
     aiReleaseImport(scene);
 
     u32 vertexBufferSize = 0;
     u32 indexBufferSize = 0;
 
-    for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+    for (u32 i = 0; i < mesh->submeshes.size(); ++i)
     {
-        vertexBufferSize += mesh.submeshes[i].vertices.size() * sizeof(float);
-        indexBufferSize += mesh.submeshes[i].indices.size() * sizeof(u32);
+        vertexBufferSize += mesh->submeshes[i].vertices.size() * sizeof(float);
+        indexBufferSize += mesh->submeshes[i].indices.size() * sizeof(u32);
     }
 
-    glGenBuffers(1, &mesh.vertexBufferHandle);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh.vertexBufferHandle);
+    glGenBuffers(1, &mesh->vertexBufferHandle);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->vertexBufferHandle);
     glBufferData(GL_ARRAY_BUFFER, vertexBufferSize, NULL, GL_STATIC_DRAW);
 
-    glGenBuffers(1, &mesh.indexBufferHandle);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.indexBufferHandle);
+    glGenBuffers(1, &mesh->indexBufferHandle);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->indexBufferHandle);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, NULL, GL_STATIC_DRAW);
 
     u32 indicesOffset = 0;
     u32 verticesOffset = 0;
 
-    for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+    for (u32 i = 0; i < mesh->submeshes.size(); ++i)
     {
-        const void* verticesData = mesh.submeshes[i].vertices.data();
-        const u32   verticesSize = mesh.submeshes[i].vertices.size() * sizeof(float);
+        const void* verticesData = mesh->submeshes[i].vertices.data();
+        const u32   verticesSize = mesh->submeshes[i].vertices.size() * sizeof(float);
         glBufferSubData(GL_ARRAY_BUFFER, verticesOffset, verticesSize, verticesData);
-        mesh.submeshes[i].vertexOffset = verticesOffset;
+        mesh->submeshes[i].vertexOffset = verticesOffset;
         verticesOffset += verticesSize;
 
-        const void* indicesData = mesh.submeshes[i].indices.data();
-        const u32   indicesSize = mesh.submeshes[i].indices.size() * sizeof(u32);
+        const void* indicesData = mesh->submeshes[i].indices.data();
+        const u32   indicesSize = mesh->submeshes[i].indices.size() * sizeof(u32);
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, indicesOffset, indicesSize, indicesData);
-        mesh.submeshes[i].indexOffset = indicesOffset;
+        mesh->submeshes[i].indexOffset = indicesOffset;
         indicesOffset += indicesSize;
     }
 

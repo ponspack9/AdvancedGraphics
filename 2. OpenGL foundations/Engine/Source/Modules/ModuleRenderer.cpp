@@ -24,14 +24,14 @@ bool ModuleRenderer::Update(float dt)
 	glViewport(0, 0, App->displaySize.x, App->displaySize.y);
 
 	// Draw meshes
-	Program& texturedMeshProgram = M_Resources->programs[App->texturedGeometryProgramIdx];
-	glUseProgram(texturedMeshProgram.handle);
+	Program* texturedMeshProgram = M_Resources->programs[App->texturedGeometryProgramIdx];
+	glUseProgram(texturedMeshProgram->handle);
 
-	for (Model& model : M_Resources->models)
+	for (Model* model : M_Resources->models)
 	{
-		Mesh& mesh = M_Resources->meshes[model.meshIdx];
+		Mesh* mesh = M_Resources->meshes[model->meshIdx];
 
-		for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+		for (u32 i = 0; i < mesh->submeshes.size(); ++i)
 		{
 			GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
 
@@ -42,14 +42,14 @@ bool ModuleRenderer::Update(float dt)
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			u32 submeshMaterialIdx = model.materialIdx[i];
-			Material& submeshMaterial = M_Resources->materials[submeshMaterialIdx];
+			u32 submeshMaterialIdx = model->materialIdx[i];
+			Material* submeshMaterial = M_Resources->materials[submeshMaterialIdx];
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, M_Resources->textures[submeshMaterial.albedoTextureIdx]->handle);
+			glBindTexture(GL_TEXTURE_2D, M_Resources->textures[submeshMaterial->albedoTextureIdx]->handle);
 			glUniform1i(App->programUniformTexture, 0); // TODO App->texturedMeshProgram_uTexture
 
-			Submesh& submesh = mesh.submeshes[i];
+			Submesh& submesh = mesh->submeshes[i];
 			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
 
 			glBindVertexArray(0);
@@ -66,14 +66,14 @@ bool ModuleRenderer::Update(float dt)
 
 #pragma endregion
 
-GLuint ModuleRenderer::FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program)
+GLuint ModuleRenderer::FindVAO(Mesh* mesh, u32 submeshIndex, const Program* program)
 {
-	Submesh& submesh = mesh.submeshes[submeshIndex];
+	Submesh& submesh = mesh->submeshes[submeshIndex];
 
 	// Try finding a vao for this submesh/program
 	for (u32 i = 0; i < (u32)submesh.vaos.size(); ++i)
 	{
-		if (submesh.vaos[i].programHandle == program.handle)
+		if (submesh.vaos[i].programHandle == program->handle)
 			return submesh.vaos[i].handle;
 	}
 
@@ -81,28 +81,28 @@ GLuint ModuleRenderer::FindVAO(Mesh& mesh, u32 submeshIndex, const Program& prog
 	//Create a new vao for this submesh/program
 	GLuint vaoHandle = CreateNewVao(mesh, submesh, program);
 	//Store it in the list of vaos for this submesh
-	VAO vao = { vaoHandle, program.handle };
+	VAO vao = { vaoHandle, program->handle };
 	submesh.vaos.push_back(vao);
 
 	return vaoHandle;
 }
 
-GLuint ModuleRenderer::CreateNewVao(Mesh& mesh, Submesh& submesh, const Program& program)
+GLuint ModuleRenderer::CreateNewVao(Mesh* mesh, Submesh& submesh, const Program* program)
 {
 	GLuint vaoHandle = 0;
 	glGenVertexArrays(1, &vaoHandle);
 	glBindVertexArray(vaoHandle);
 
-	glBindBuffer(GL_ARRAY_BUFFER, mesh.vertexBufferHandle);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.indexBufferHandle);
+	glBindBuffer(GL_ARRAY_BUFFER, mesh->vertexBufferHandle);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->indexBufferHandle);
 
 	// We have to link all vertex inputs attributes to attributes in the vertex buffer
-	for (u32 i = 0; i < program.vertexInputLayout.attributes.size(); ++i)
+	for (u32 i = 0; i < program->vertexInputLayout.attributes.size(); ++i)
 	{
 		bool attributeWasLinked = false;
 		for (u32 j = 0; j < submesh.vertexBufferLayout.attributes.size(); ++j)
 		{
-			if (program.vertexInputLayout.attributes[i].location == submesh.vertexBufferLayout.attributes[j].location)
+			if (program->vertexInputLayout.attributes[i].location == submesh.vertexBufferLayout.attributes[j].location)
 			{
 				const u32 index = submesh.vertexBufferLayout.attributes[j].location;
 				const u32 nComp = submesh.vertexBufferLayout.attributes[j].componentCount;

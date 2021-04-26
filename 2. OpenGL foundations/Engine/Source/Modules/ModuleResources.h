@@ -15,7 +15,7 @@ public:
 
 	bool Init() override;
 	bool Update(float dt) override;
-
+	bool CleanUp() override;
 
 public:
 	// Static
@@ -45,7 +45,7 @@ public:
 
 	void ProcessAssimpMesh(const aiScene* scene, aiMesh* mesh, Mesh* myMesh, u32 baseMeshMaterialIndex, std::vector<u32>& submeshMaterialIndices);
 
-	void ProcessAssimpMaterial(aiMaterial* material, Material& myMaterial, std::string directory);
+	void ProcessAssimpMaterial(aiMaterial* material, Material* myMaterial, std::string directory);
 
 	void ProcessAssimpNode(const aiScene* scene, aiNode* node, Mesh* myMesh, u32 baseMeshMaterialIndex, std::vector<u32>& submeshMaterialIndices);
 
@@ -57,10 +57,10 @@ public:
 	u32 LoadTexture2D(const char* filepath);
 
 	std::vector<Texture*>	textures;
-	std::vector<Material>	materials;
-	std::vector<Mesh>		meshes;
-	std::vector<Model>		models;
-	std::vector<Program>	programs;
+	std::vector<Material*>	materials;
+	std::vector<Mesh*>		meshes;
+	std::vector<Model*>		models;
+	std::vector<Program*>	programs;
 
 };
 

@@ -10,8 +10,8 @@ public:
 	bool Update(float dt) override;
 public:
 
-	GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program);
-	GLuint CreateNewVao(Mesh& mesh, Submesh& submesh, const Program& program);
+	GLuint FindVAO(Mesh* mesh, u32 submeshIndex, const Program* program);
+	GLuint CreateNewVao(Mesh* mesh, Submesh& submesh, const Program* program);
 };
 
 extern ModuleRenderer* M_Renderer;
