@@ -56,6 +56,8 @@ bool ModuleResources::Update(float dt)
 
             program.handle = ModuleResources::CreateProgramFromSource(programSource, program.programName.c_str());
             program.lastWriteTimestamp = currentTimeStamp;
+
+            LOG_DEBUG("Successfully reloaded shader '{0}'", program.programName);
         }
     }
     return true;;

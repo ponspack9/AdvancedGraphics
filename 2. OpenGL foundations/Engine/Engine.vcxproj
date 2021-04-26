@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Source\Modules\ModuleScene.cpp" />
     <ClCompile Include="Source\Panels\PanelScene.cpp" />
     <ClCompile Include="Source\Panels\PanelMainMenu.cpp" />
@@ -62,6 +63,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Source\Components\Component.h" />
     <ClInclude Include="Source\Modules\ModuleScene.h" />
     <ClInclude Include="Source\Panels\PanelScene.h" />
     <ClInclude Include="Source\Panels\PanelMainMenu.h" />
@@ -74,7 +77,7 @@
     <ClInclude Include="Source\Modules\Module.h" />
     <ClInclude Include="Source\Panels\Panel.h" />
     <ClInclude Include="Source\Panels\PanelInfo.h" />
-    <ClInclude Include="Source\Primitives.h" />
+    <ClInclude Include="Source\Utils\Primitives.h" />
     <ClInclude Include="Source\Utils\Log.h" />
     <ClInclude Include="Source\Utils\pch.h" />
     <ClInclude Include="ThirdParty\glad\include\glad\glad.h" />

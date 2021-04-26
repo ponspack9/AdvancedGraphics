@@ -15,8 +15,8 @@ void PanelMainMenu::Draw()
 	ImGui::MenuItem("Help");
 
 
-	char fps[16];
-	sprintf_s(fps, 16, "FPS: %f", 1.0f/App->deltaTime);
+	char fps[64];
+	sprintf_s(fps, 64, "FPS: %f", 1.0f/App->deltaTime);
 	ImGui::MenuItem(fps);
 	ImGui::EndMainMenuBar();
 }
