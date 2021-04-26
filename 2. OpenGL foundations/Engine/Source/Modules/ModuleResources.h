@@ -56,7 +56,7 @@ public:
 	u32 LoadProgram(const char* filepath, const char* programName);
 	u32 LoadTexture2D(const char* filepath);
 
-	std::vector<Texture>	textures;
+	std::vector<Texture*>	textures;
 	std::vector<Material>	materials;
 	std::vector<Mesh>		meshes;
 	std::vector<Model>		models;

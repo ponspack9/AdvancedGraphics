@@ -46,7 +46,7 @@ bool ModuleRenderer::Update(float dt)
 			Material& submeshMaterial = M_Resources->materials[submeshMaterialIdx];
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, M_Resources->textures[submeshMaterial.albedoTextureIdx].handle);
+			glBindTexture(GL_TEXTURE_2D, M_Resources->textures[submeshMaterial.albedoTextureIdx]->handle);
 			glUniform1i(App->programUniformTexture, 0); // TODO App->texturedMeshProgram_uTexture
 
 			Submesh& submesh = mesh.submeshes[i];

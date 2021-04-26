@@ -466,16 +466,16 @@ u32 ModuleResources::LoadProgram(const char* filepath, const char* programName)
 u32 ModuleResources::LoadTexture2D(const char* filepath)
 {
     for (u32 texIdx = 0; texIdx < M_Resources->textures.size(); ++texIdx)
-        if (M_Resources->textures[texIdx].filepath == filepath)
+        if (M_Resources->textures[texIdx]->filepath == filepath)
             return texIdx;
 
     Image image = ReadImage(filepath);
 
     if (image.pixels)
     {
-        Texture tex = {};
-        tex.handle = CreateTexture2DFromImage(image);
-        tex.filepath = filepath;
+        Texture* tex = new Texture();
+        tex->handle = CreateTexture2DFromImage(image);
+        tex->filepath = filepath;
 
         u32 texIdx = M_Resources->textures.size();
         M_Resources->textures.push_back(tex);
