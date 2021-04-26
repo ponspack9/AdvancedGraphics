@@ -162,16 +162,16 @@ enum ButtonState {
         vec3 albedo;
         vec3 emissive;
         f32 smoothness;
-        u32 albedoTextureIdx;
-        u32 emissiveTextureIdx;
-        u32 specularTextureIdx;
-        u32 normalsTextureIdx;
-        u32 bumpTextureIdx;
+        Texture* albedoTexture;
+        Texture* emissiveTexture;
+        Texture* specularTexture;
+        Texture* normalsTexture;
+        Texture* bumpTexture;
     };
 
     struct Model
     {
-        u32 meshIdx;
+        Mesh* mesh;
         std::vector<u32> materialIdx;
         std::string name;
     };

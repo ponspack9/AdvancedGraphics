@@ -217,31 +217,31 @@ void ModuleResources::ProcessAssimpMaterial(aiMaterial* material, Material* myMa
         material->GetTexture(aiTextureType_DIFFUSE, 0, &aiFilename);
         //std::string filename = MakeString(aiFilename.C_Str());
         std::string filepath = directory + "/" + aiFilename.C_Str();
-        myMaterial->albedoTextureIdx = LoadTexture2D(filepath.c_str());
+        myMaterial->albedoTexture = LoadTexture2D(filepath.c_str());
     }
     if (material->GetTextureCount(aiTextureType_EMISSIVE) > 0)
     {
         material->GetTexture(aiTextureType_EMISSIVE, 0, &aiFilename);
         std::string filepath = directory + "/" + aiFilename.C_Str();
-        myMaterial->emissiveTextureIdx = LoadTexture2D(filepath.c_str());
+        myMaterial->emissiveTexture = LoadTexture2D(filepath.c_str());
     }
     if (material->GetTextureCount(aiTextureType_SPECULAR) > 0)
     {
         material->GetTexture(aiTextureType_SPECULAR, 0, &aiFilename);
         std::string filepath = directory + "/" + aiFilename.C_Str();
-        myMaterial->specularTextureIdx = LoadTexture2D(filepath.c_str());
+        myMaterial->specularTexture = LoadTexture2D(filepath.c_str());
     }
     if (material->GetTextureCount(aiTextureType_NORMALS) > 0)
     {
         material->GetTexture(aiTextureType_NORMALS, 0, &aiFilename);
         std::string filepath = directory + "/" + aiFilename.C_Str();
-        myMaterial->normalsTextureIdx = LoadTexture2D(filepath.c_str());
+        myMaterial->normalsTexture = LoadTexture2D(filepath.c_str());
     }
     if (material->GetTextureCount(aiTextureType_HEIGHT) > 0)
     {
         material->GetTexture(aiTextureType_HEIGHT, 0, &aiFilename);
         std::string filepath = directory + "/" + aiFilename.C_Str();
-        myMaterial->bumpTextureIdx = LoadTexture2D(filepath.c_str());
+        myMaterial->bumpTexture = LoadTexture2D(filepath.c_str());
     }
 
     //myMaterial.createNormalFromBump();
@@ -498,11 +498,12 @@ u32 ModuleResources::LoadProgram(const char* filepath, const char* programName)
     return M_Resources->programs.size() - 1;
 }
 
-u32 ModuleResources::LoadTexture2D(const char* filepath)
+Texture* ModuleResources::LoadTexture2D(const char* filepath)
 {
-    for (u32 texIdx = 0; texIdx < M_Resources->textures.size(); ++texIdx)
-        if (M_Resources->textures[texIdx]->filepath == filepath)
-            return texIdx;
+    //for (u32 texIdx = 0; texIdx < M_Resources->textures.size(); ++texIdx)
+    for (Texture* tex : M_Resources->textures)
+        if (tex->filepath == filepath)
+            return tex;
 
     Image image = ReadImage(filepath);
 
@@ -512,19 +513,19 @@ u32 ModuleResources::LoadTexture2D(const char* filepath)
         tex->handle = CreateTexture2DFromImage(image);
         tex->filepath = filepath;
 
-        u32 texIdx = M_Resources->textures.size();
+        //u32 texIdx = M_Resources->textures.size();
         M_Resources->textures.push_back(tex);
 
         FreeImage(image);
-        return texIdx;
+        return tex;
     }
     else
     {
-        return UINT32_MAX;
+        return nullptr;
     }
 }
 
-u32 ModuleResources::LoadModel(const char* filename)
+Model* ModuleResources::LoadModel(const char* filename)
 {
     const aiScene* scene = aiImportFile(filename,
         aiProcess_Triangulate |
@@ -539,18 +540,19 @@ u32 ModuleResources::LoadModel(const char* filename)
     if (!scene)
     {
         LOG_ERROR("Error loading mesh {0}: {1}", filename, aiGetErrorString());
-        return UINT32_MAX;
+        return nullptr;
     }
 
     Mesh* mesh = new Mesh();
     M_Resources->meshes.push_back(mesh);
-    u32 meshIdx = (u32)M_Resources->meshes.size() - 1u;
+    //u32 meshIdx = (u32)M_Resources->meshes.size() - 1u;
 
     Model* model = new Model();
-    M_Resources->models.push_back(model);
-    model->meshIdx = meshIdx;
-    u32 modelIdx = (u32)M_Resources->models.size() - 1u;
+    model->mesh = mesh;
     model->name = GetFileNamePart(filename);
+    M_Resources->models.push_back(model);
+
+    //u32 modelIdx = (u32)M_Resources->models.size() - 1u;
 
     std::string directory = GetDirectoryPart(filename);
 
@@ -605,7 +607,7 @@ u32 ModuleResources::LoadModel(const char* filename)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    return modelIdx;
+    return model;
     return 0;
 }
 

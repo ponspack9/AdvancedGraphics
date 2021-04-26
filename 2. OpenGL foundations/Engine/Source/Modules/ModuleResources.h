@@ -49,12 +49,12 @@ public:
 
 	void ProcessAssimpNode(const aiScene* scene, aiNode* node, Mesh* myMesh, u32 baseMeshMaterialIndex, std::vector<u32>& submeshMaterialIndices);
 
-	u32 LoadModel(const char* filename);
 
 public:
 	
+	Model* LoadModel(const char* filename);
 	u32 LoadProgram(const char* filepath, const char* programName);
-	u32 LoadTexture2D(const char* filepath);
+	Texture* LoadTexture2D(const char* filepath);
 
 	std::vector<Texture*>	textures;
 	std::vector<Material*>	materials;

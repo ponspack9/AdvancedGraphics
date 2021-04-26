@@ -23,16 +23,16 @@ public:
 
 public:
 
-    static u32 plane;
-    static u32 cube;
-    static u32 sphereLow;
-    static u32 sphereHigh;
-    static std::vector<u32> primitives;
+    static Model* plane;
+    static Model* cube;
+    static Model* sphereLow;
+    static Model* sphereHigh;
+    static std::vector<Model*> primitives;
 	
 };
 
-u32 Primitives::plane = 0;
-u32 Primitives::cube = 0;
-u32 Primitives::sphereLow = 0;
-u32 Primitives::sphereHigh = 0;
-std::vector<u32> Primitives::primitives = std::vector<u32>();
+Model* Primitives::plane = 0;
+Model* Primitives::cube = 0;
+Model* Primitives::sphereLow = 0;
+Model* Primitives::sphereHigh = 0;
+std::vector<Model*> Primitives::primitives = std::vector<Model*>();

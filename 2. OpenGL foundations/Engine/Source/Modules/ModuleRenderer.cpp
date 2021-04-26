@@ -29,7 +29,7 @@ bool ModuleRenderer::Update(float dt)
 
 	for (Model* model : M_Resources->models)
 	{
-		Mesh* mesh = M_Resources->meshes[model->meshIdx];
+		Mesh* mesh = model->mesh;
 
 		for (u32 i = 0; i < mesh->submeshes.size(); ++i)
 		{
@@ -46,7 +46,7 @@ bool ModuleRenderer::Update(float dt)
 			Material* submeshMaterial = M_Resources->materials[submeshMaterialIdx];
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, M_Resources->textures[submeshMaterial->albedoTextureIdx]->handle);
+			glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
 			glUniform1i(App->programUniformTexture, 0); // TODO App->texturedMeshProgram_uTexture
 
 			Submesh& submesh = mesh->submeshes[i];
