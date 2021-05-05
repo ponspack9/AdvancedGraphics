@@ -16,4 +16,8 @@ GameObject::~GameObject()
 
 void GameObject::DrawInspector()
 {
+	for (Component* component : components)
+	{
+		component->DrawInspector();
+	}
 }

@@ -19,7 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="Source\Panels\PanelInspector.cpp" />
+    <ClCompile Include="Source\Components\Component.cpp" />
+    <ClCompile Include="Source\Components\Model.cpp" />
+    <ClCompile Include="Source\GameObjects\GameObject.cpp" />
     <ClCompile Include="Source\Modules\ModuleScene.cpp" />
     <ClCompile Include="Source\Panels\PanelScene.cpp" />
     <ClCompile Include="Source\Panels\PanelMainMenu.cpp" />
@@ -63,7 +66,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Source\Panels\PanelInspector.h" />
+    <ClInclude Include="Source\Components\Model.h" />
+    <ClInclude Include="Source\GameObjects\GameObject.h" />
     <ClInclude Include="Source\Components\Component.h" />
     <ClInclude Include="Source\Modules\ModuleScene.h" />
     <ClInclude Include="Source\Panels\PanelScene.h" />

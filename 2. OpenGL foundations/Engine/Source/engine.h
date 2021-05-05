@@ -169,12 +169,7 @@ enum ButtonState {
         Texture* bumpTexture;
     };
 
-    struct Model
-    {
-        Mesh* mesh;
-        std::vector<u32> materialIdx;
-        std::string name;
-    };
+
 
 #pragma endregion
 

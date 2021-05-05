@@ -6,9 +6,7 @@ class Component
 public:
 	enum class Type
 	{
-		Unknown,
-		Mesh,
-		Renderer,
+		Model,
 		Material,
 		Camera,
 		UI_Element

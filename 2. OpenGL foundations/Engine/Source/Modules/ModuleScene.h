@@ -10,8 +10,11 @@ public:
 	ModuleScene();
 	~ModuleScene();
 
+	bool Init() override;
+
 public:
 	std::vector<GameObject*> sceneObjects;
+	GameObject* selected = nullptr;
 };
 
 extern ModuleScene* M_Scene;

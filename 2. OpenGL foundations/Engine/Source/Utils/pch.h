@@ -37,3 +37,5 @@
 #include "Log.h"
 #include <Engine.h>
 #include <Application.h>
+#include <Components/Component.h>
+#include <Components/Model.h>

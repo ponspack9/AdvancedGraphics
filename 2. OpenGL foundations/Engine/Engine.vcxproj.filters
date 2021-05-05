@@ -93,7 +93,10 @@
     <ClCompile Include="Source\Modules\ModuleScene.cpp">
       <Filter>Engine\Modules</Filter>
     </ClCompile>
-    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="Source\GameObjects\GameObject.cpp" />
+    <ClCompile Include="Source\Panels\PanelInspector.cpp" />
+    <ClCompile Include="Source\Components\Model.cpp" />
+    <ClCompile Include="Source\Components\Component.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThirdParty\imgui-docking\imconfig.h">
@@ -175,7 +178,9 @@
       <Filter>Engine\Utils</Filter>
     </ClInclude>
     <ClInclude Include="Source\Components\Component.h" />
-    <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Source\GameObjects\GameObject.h" />
+    <ClInclude Include="Source\Panels\PanelInspector.h" />
+    <ClInclude Include="Source\Components\Model.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="WorkingDir\shaders.glsl">

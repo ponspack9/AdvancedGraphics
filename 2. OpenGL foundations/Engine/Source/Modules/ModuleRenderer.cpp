@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "ModuleRenderer.h"
 #include "ModuleResources.h"
+#include "ModuleScene.h"
+#include <GameObjects/GameObject.h>
 
 #pragma region Module overrides
 
@@ -30,32 +32,38 @@ bool ModuleRenderer::Update(float dt)
 	Program* texturedMeshProgram = M_Resources->programs[App->texturedGeometryProgramIdx];
 	glUseProgram(texturedMeshProgram->handle);
 
-	for (Model* model : M_Resources->models)
+	for (GameObject* gameObject : M_Scene->sceneObjects)
 	{
-		Mesh* mesh = model->mesh;
-
-		for (u32 i = 0; i < mesh->submeshes.size(); ++i)
+		for (Component* component : gameObject->components)
 		{
-			GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
 
-			// TODO: VAO
-			glBindVertexArray(vao);
+			if (component->type != Component::Type::Model)
+				continue;
 
-			// - set the blending state
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			Model* model = (Model*)component;
+			Mesh* mesh = model->mesh;
 
-			u32 submeshMaterialIdx = model->materialIdx[i];
-			Material* submeshMaterial = M_Resources->materials[submeshMaterialIdx];
+			for (u32 i = 0; i < mesh->submeshes.size(); ++i)
+			{
+				GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
-			glUniform1i(App->programUniformTexture, 0); // TODO App->texturedMeshProgram_uTexture
+				glBindVertexArray(vao);
 
-			Submesh& submesh = mesh->submeshes[i];
-			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			glBindVertexArray(0);
+				u32 submeshMaterialIdx = model->materialIdx[i];
+				Material* submeshMaterial = M_Resources->materials[submeshMaterialIdx];
+
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
+				glUniform1i(App->programUniformTexture, 0); // TODO App->texturedMeshProgram_uTexture
+
+				Submesh& submesh = mesh->submeshes[i];
+				glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+
+				glBindVertexArray(0);
+			}
 		}
 	}
 	glUseProgram(0);
