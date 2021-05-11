@@ -3,7 +3,6 @@
 #include "ModuleWindow.h"
 #include <PanelInfo.h>
 #include <PanelMainMenu.h>
-#include <PanelScene.h>
 #include <PanelInspector.h>
 
 ModuleImGui* M_Gui = nullptr;
@@ -60,7 +59,6 @@ bool ModuleImGui::Init()
     // Panels
     panels.push_back(new PanelMainMenu());
     panels.push_back(new PanelInfo());
-    panels.push_back(new PanelScene());
     panels.push_back(new PanelInspector());
 	return true;
 }

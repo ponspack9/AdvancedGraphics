@@ -15,6 +15,7 @@ public:
 public:
 	std::vector<GameObject*> sceneObjects;
 	GameObject* selected = nullptr;
+	GameObject* camera = nullptr;
 };
 
 extern ModuleScene* M_Scene;

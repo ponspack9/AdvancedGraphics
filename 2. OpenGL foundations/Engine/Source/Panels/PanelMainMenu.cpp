@@ -17,6 +17,6 @@ void PanelMainMenu::Draw()
 
 	char fps[64];
 	sprintf_s(fps, 64, "FPS: %f", 1.0f/App->deltaTime);
-	ImGui::MenuItem(fps);
+	ImGui::Text(fps);
 	ImGui::EndMainMenuBar();
 }

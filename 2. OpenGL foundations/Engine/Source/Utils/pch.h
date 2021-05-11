@@ -39,3 +39,5 @@
 #include <Application.h>
 #include <Components/Component.h>
 #include <Components/Model.h>
+#include <Components/Light.h>
+#include <Components/Camera.h>

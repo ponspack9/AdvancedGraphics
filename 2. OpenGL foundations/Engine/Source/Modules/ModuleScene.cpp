@@ -18,11 +18,15 @@ ModuleScene::~ModuleScene()
 
 bool ModuleScene::Init()
 {
+	GameObject* cam = new GameObject();
+	sceneObjects.push_back(cam);
+	Camera* cam_component = new Camera();
+	cam->components.push_back((Component*)cam_component);
+	camera = cam;
+
 	GameObject* gameObject = new GameObject();
 	sceneObjects.push_back(gameObject);
-	
 	gameObject->components.push_back((Component*)M_Resources->models[0]);
-
 	selected = gameObject;
 
 	return true;

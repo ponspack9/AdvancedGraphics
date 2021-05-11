@@ -19,12 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Components\Camera.cpp" />
+    <ClCompile Include="Source\Components\Light.cpp" />
     <ClCompile Include="Source\Panels\PanelInspector.cpp" />
     <ClCompile Include="Source\Components\Component.cpp" />
     <ClCompile Include="Source\Components\Model.cpp" />
     <ClCompile Include="Source\GameObjects\GameObject.cpp" />
     <ClCompile Include="Source\Modules\ModuleScene.cpp" />
-    <ClCompile Include="Source\Panels\PanelScene.cpp" />
     <ClCompile Include="Source\Panels\PanelMainMenu.cpp" />
     <ClCompile Include="Source\Modules\ModuleRenderer.cpp" />
     <ClCompile Include="Source\Modules\ModuleResources.cpp" />
@@ -66,12 +67,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Components\Camera.h" />
+    <ClInclude Include="Source\Components\Light.h" />
     <ClInclude Include="Source\Panels\PanelInspector.h" />
     <ClInclude Include="Source\Components\Model.h" />
     <ClInclude Include="Source\GameObjects\GameObject.h" />
     <ClInclude Include="Source\Components\Component.h" />
     <ClInclude Include="Source\Modules\ModuleScene.h" />
-    <ClInclude Include="Source\Panels\PanelScene.h" />
     <ClInclude Include="Source\Panels\PanelMainMenu.h" />
     <ClInclude Include="Source\Modules\ModuleRenderer.h" />
     <ClInclude Include="Source\Modules\ModuleResources.h" />

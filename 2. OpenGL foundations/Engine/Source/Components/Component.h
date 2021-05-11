@@ -9,6 +9,7 @@ public:
 		Model,
 		Material,
 		Camera,
+		Light,
 		UI_Element
 	};
 
