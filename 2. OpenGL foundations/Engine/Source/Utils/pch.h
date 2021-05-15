@@ -37,7 +37,6 @@
 #include "Log.h"
 #include <Engine.h>
 #include <Application.h>
-#include <Components/Component.h>
-#include <Components/Model.h>
-#include <Components/Light.h>
-#include <Components/Camera.h>
+#include <Objects/Model.h>
+#include <Objects/Light.h>
+#include <Objects/Camera.h>

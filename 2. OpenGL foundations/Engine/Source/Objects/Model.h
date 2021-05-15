@@ -1,7 +1,6 @@
 #pragma once
-#include <Components/Component.h>
 
-class Model : public Component
+class Model
 {
 public:
 
@@ -12,6 +11,5 @@ public:
     Model();
     ~Model();
 
-    void DrawInspector() override;
-
+    void DrawInspector();
 };

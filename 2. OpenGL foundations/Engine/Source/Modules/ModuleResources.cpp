@@ -26,15 +26,13 @@ bool ModuleResources::Init()
 {
     // Programs
     App->texturedGeometryProgramIdx = M_Resources->LoadProgram("shaders.glsl", "TEXTURED_GEOMETRY");
+    App->lightProgramIdx = M_Resources->LoadProgram("light_shader.glsl", "LIGHTING");
 
     // Primitives
     //Primitives::Init();
     
-    
     App->mode = Mode::Mode_TexturedQuad;
 
-
-    LoadModel("Patrick/Patrick.obj");
     //LoadModel("cube.obj");
 
     return true;;
@@ -82,12 +80,6 @@ bool ModuleResources::CleanUp()
         delete(meshes[i]);
     }
     meshes.clear();
-
-    for (int i = 0; i < models.size(); ++i)
-    {
-        delete(models[i]);
-    }
-    models.clear();
 
     for (int i = 0; i < programs.size(); ++i)
     {
@@ -550,7 +542,6 @@ Model* ModuleResources::LoadModel(const char* filename)
     Model* model = new Model();
     model->mesh = mesh;
     model->name = GetFileNamePart(filename);
-    M_Resources->models.push_back(model);
 
     //u32 modelIdx = (u32)M_Resources->models.size() - 1u;
 

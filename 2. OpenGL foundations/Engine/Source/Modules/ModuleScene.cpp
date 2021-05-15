@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "ModuleScene.h"
 #include <ModuleResources.h>
-#include <GameObjects/GameObject.h>
 
 ModuleScene* M_Scene = nullptr;
 
@@ -18,16 +17,15 @@ ModuleScene::~ModuleScene()
 
 bool ModuleScene::Init()
 {
-	GameObject* cam = new GameObject();
-	sceneObjects.push_back(cam);
-	Camera* cam_component = new Camera();
-	cam->components.push_back((Component*)cam_component);
-	camera = cam;
+	// Set Camera
+	camera = new Camera(glm::vec3(2.0f, 5.0f, 0.0f), glm::vec3(0.0f, 3.0f, 0.0f), 2.0f);
 
-	GameObject* gameObject = new GameObject();
-	sceneObjects.push_back(gameObject);
-	gameObject->components.push_back((Component*)M_Resources->models[0]);
-	selected = gameObject;
+	// Set Models
+	Model* gameObject = M_Resources->LoadModel("Patrick/Patrick.obj");
+	models.push_back(gameObject);
+
+	// Set Lights
+	//...
 
 	return true;
 }

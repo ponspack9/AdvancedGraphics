@@ -90,12 +90,10 @@
     <ClCompile Include="Source\Modules\ModuleScene.cpp">
       <Filter>Engine\Modules</Filter>
     </ClCompile>
-    <ClCompile Include="Source\GameObjects\GameObject.cpp" />
     <ClCompile Include="Source\Panels\PanelInspector.cpp" />
-    <ClCompile Include="Source\Components\Model.cpp" />
-    <ClCompile Include="Source\Components\Component.cpp" />
-    <ClCompile Include="Source\Components\Light.cpp" />
-    <ClCompile Include="Source\Components\Camera.cpp" />
+    <ClCompile Include="Source\Objects\Camera.cpp" />
+    <ClCompile Include="Source\Objects\Light.cpp" />
+    <ClCompile Include="Source\Objects\Model.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThirdParty\imgui-docking\imconfig.h">
@@ -173,16 +171,15 @@
     <ClInclude Include="Source\Utils\Primitives.h">
       <Filter>Engine\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Components\Component.h" />
-    <ClInclude Include="Source\GameObjects\GameObject.h" />
     <ClInclude Include="Source\Panels\PanelInspector.h" />
-    <ClInclude Include="Source\Components\Model.h" />
-    <ClInclude Include="Source\Components\Light.h" />
-    <ClInclude Include="Source\Components\Camera.h" />
+    <ClInclude Include="Source\Objects\Camera.h" />
+    <ClInclude Include="Source\Objects\Light.h" />
+    <ClInclude Include="Source\Objects\Model.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="WorkingDir\shaders.glsl">
       <Filter>Engine\Shaders</Filter>
     </None>
+    <None Include="WorkingDir\light_shader.glsl" />
   </ItemGroup>
 </Project>

@@ -59,7 +59,6 @@ public:
 	std::vector<Texture*>	textures;
 	std::vector<Material*>	materials;
 	std::vector<Mesh*>		meshes;
-	std::vector<Model*>		models;
 	std::vector<Program*>	programs;
 
 };

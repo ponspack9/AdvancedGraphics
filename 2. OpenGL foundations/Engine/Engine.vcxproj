@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -19,12 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Components\Camera.cpp" />
-    <ClCompile Include="Source\Components\Light.cpp" />
+    <ClCompile Include="Source\Objects\Camera.cpp" />
+    <ClCompile Include="Source\Objects\Light.cpp" />
     <ClCompile Include="Source\Panels\PanelInspector.cpp" />
-    <ClCompile Include="Source\Components\Component.cpp" />
-    <ClCompile Include="Source\Components\Model.cpp" />
-    <ClCompile Include="Source\GameObjects\GameObject.cpp" />
+    <ClCompile Include="Source\Objects\Model.cpp" />
     <ClCompile Include="Source\Modules\ModuleScene.cpp" />
     <ClCompile Include="Source\Panels\PanelMainMenu.cpp" />
     <ClCompile Include="Source\Modules\ModuleRenderer.cpp" />
@@ -67,12 +65,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Components\Camera.h" />
-    <ClInclude Include="Source\Components\Light.h" />
+    <ClInclude Include="Source\Objects\Camera.h" />
+    <ClInclude Include="Source\Objects\Light.h" />
     <ClInclude Include="Source\Panels\PanelInspector.h" />
-    <ClInclude Include="Source\Components\Model.h" />
-    <ClInclude Include="Source\GameObjects\GameObject.h" />
-    <ClInclude Include="Source\Components\Component.h" />
+    <ClInclude Include="Source\Objects\Model.h" />
     <ClInclude Include="Source\Modules\ModuleScene.h" />
     <ClInclude Include="Source\Panels\PanelMainMenu.h" />
     <ClInclude Include="Source\Modules\ModuleRenderer.h" />
@@ -100,6 +96,7 @@
     <ClInclude Include="ThirdParty\stb\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="WorkingDir\light_shader.glsl" />
     <None Include="WorkingDir\shaders.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

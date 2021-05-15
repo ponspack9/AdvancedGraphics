@@ -3,7 +3,7 @@
 
 #define TEX_SIZE 256
 
-Model::Model() : Component(Component::Type::Model, nullptr)
+Model::Model()
 {
 
 }

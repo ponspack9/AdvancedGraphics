@@ -2,7 +2,6 @@
 #include "ModuleRenderer.h"
 #include "ModuleResources.h"
 #include "ModuleScene.h"
-#include <GameObjects/GameObject.h>
 
 #pragma region Module overrides
 
@@ -21,7 +20,6 @@ ModuleRenderer::~ModuleRenderer()
 
 bool ModuleRenderer::Update(float dt)
 {
-
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Shaded model");
 
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -32,47 +30,60 @@ bool ModuleRenderer::Update(float dt)
 	Program* texturedMeshProgram = M_Resources->programs[App->texturedGeometryProgramIdx];
 	glUseProgram(texturedMeshProgram->handle);
 
-	for (GameObject* gameObject : M_Scene->sceneObjects)
+	for (Model* model : M_Scene->models)
 	{
-		for (Component* component : gameObject->components)
+		Mesh* mesh = model->mesh;
+
+		for (u32 i = 0; i < mesh->submeshes.size(); ++i)
 		{
+			GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
 
-			if (component->type != Component::Type::Model)
-				continue;
+			glBindVertexArray(vao);
 
-			Model* model = (Model*)component;
-			Mesh* mesh = model->mesh;
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			for (u32 i = 0; i < mesh->submeshes.size(); ++i)
-			{
-				GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
+			u32 submeshMaterialIdx = model->materialIdx[i];
+			Material* submeshMaterial = M_Resources->materials[submeshMaterialIdx];
 
-				glBindVertexArray(vao);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
+			glUniform1i(App->programUniformTexture, 0); // TODO App->texturedMeshProgram_uTexture
 
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			Submesh& submesh = mesh->submeshes[i];
+			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
 
-				u32 submeshMaterialIdx = model->materialIdx[i];
-				Material* submeshMaterial = M_Resources->materials[submeshMaterialIdx];
-
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
-				glUniform1i(App->programUniformTexture, 0); // TODO App->texturedMeshProgram_uTexture
-
-				Submesh& submesh = mesh->submeshes[i];
-				glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
-
-				glBindVertexArray(0);
-			}
+			glBindVertexArray(0);
 		}
 	}
 	glUseProgram(0);
 
-	
-
 	glPopDebugGroup();
 
 	return true;
+
+	// Update Camera
+	//M_Scene->camera->Move();
+
+	////Get the viewprojection
+	//camera->aspect = window_width / window_height;
+	//Matrix44 viewprojection = camera->getViewProjectionMatrix();
+
+	////enable the shader
+	//shader->enable();
+	//shader->setMatrix44("model", model_matrix); //upload info to the shader
+	//shader->setMatrix44("viewprojection", viewprojection); //upload info to the shader
+
+	//shader->setTexture("color_texture", texture, 0); //set texture in slot 0
+
+	////render the data
+	//mesh->render(GL_TRIANGLES);
+
+	////disable shader
+	//shader->disable();
+
+	////swap between front buffer and back buffer
+	//SDL_GL_SwapWindow(this->window);
 }
 
 #pragma endregion

@@ -1,6 +1,6 @@
 #include "pch.h"
 
-Light::Light(Light::Type _type, vec3 _color, vec3 _direction, vec3 _position) : Component(Component::Type::Light, nullptr)
+Light::Light(Light::Type _type, vec3 _color, vec3 _direction, vec3 _position)
 {
 	switch (_type)
 	{

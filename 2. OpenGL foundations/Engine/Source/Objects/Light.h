@@ -1,7 +1,6 @@
 #pragma once
-#include <Components/Component.h>
 
-class Light : public Component
+class Light
 {
 public:
 	enum class Type
@@ -20,6 +19,6 @@ public:
     Light(Light::Type type, vec3 color, vec3 direction, vec3 position);
     ~Light();
 
-    void DrawInspector() override;
+    void DrawInspector();
     void Draw();
 };

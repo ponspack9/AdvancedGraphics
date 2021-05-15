@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "PanelInspector.h"
 #include <ModuleScene.h>
-#include <GameObjects/GameObject.h>
 
 void PanelInspector::Draw()
 {
@@ -24,9 +23,8 @@ void PanelInspector::Draw()
 		ImGui::Separator();
 	}
 	
-	for (GameObject* obj : M_Scene->sceneObjects)
+	for (Model* obj : M_Scene->models)
 	{
-		if (obj == M_Scene->camera) continue;
 		obj->DrawInspector();
 	}
 

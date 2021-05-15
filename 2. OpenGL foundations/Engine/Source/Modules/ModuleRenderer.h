@@ -9,6 +9,7 @@ public:
 
 	bool Update(float dt) override;
 public:
+	void DrawMesh(Program* program, Model* model, glm::mat4 viewProjection);
 
 	GLuint FindVAO(Mesh* mesh, u32 submeshIndex, const Program* program);
 	GLuint CreateNewVao(Mesh* mesh, Submesh& submesh, const Program* program);

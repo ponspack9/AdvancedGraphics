@@ -1,21 +1,21 @@
 #pragma once
 #include "Module.h"
 
-class GameObject;
+//class Camera;
+//class Light;
 
 class ModuleScene : public Module
 {
 public:
-
 	ModuleScene();
 	~ModuleScene();
 
 	bool Init() override;
 
 public:
-	std::vector<GameObject*> sceneObjects;
-	GameObject* selected = nullptr;
-	GameObject* camera = nullptr;
+	Camera* camera = nullptr;
+	std::vector<Light*> lights;
+	std::vector<Model*> models;
 };
 
 extern ModuleScene* M_Scene;
