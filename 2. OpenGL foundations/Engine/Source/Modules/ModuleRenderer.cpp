@@ -18,6 +18,21 @@ ModuleRenderer::~ModuleRenderer()
 	LOG_DEBUG("Deleted module [{0}]", name);
 }
 
+bool ModuleRenderer::Init()
+{
+	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBufferSize);
+	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniformBlockAlignment);
+
+	glGenBuffers(1, &bufferHandle);
+	glBindBuffer(GL_UNIFORM_BUFFER, bufferHandle);
+	glBufferData(GL_UNIFORM_BUFFER, maxUniformBufferSize, NULL, GL_STREAM_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+
+
+	return true;
+}
+
 bool ModuleRenderer::Update(float dt)
 {
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Shaded model");
@@ -25,6 +40,27 @@ bool ModuleRenderer::Update(float dt)
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, App->displaySize.x, App->displaySize.y);
+
+	// Uniforms
+	glBindBuffer(GL_UNIFORM_BUFFER, bufferHandle);
+	u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+	u32 bufferHead = 0;
+
+	glm::mat4 transform = glm::mat4(1.0f);
+	transform = glm::rotate(transform, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+	//transform = glm::scale(transform, glm::vec3(0.5, 0.5, 0.5));
+
+	memcpy(bufferData + bufferHead, glm::value_ptr(transform), sizeof(glm::mat4));
+	bufferHead += sizeof(glm::mat4);
+
+	memcpy(bufferData + bufferHead, glm::value_ptr(glm::mat4(1.0f)), sizeof(glm::mat4));
+	bufferHead += sizeof(glm::mat4);
+
+	u32 blockSize = sizeof(glm::mat4) * 2;
+	glBindBufferRange(GL_UNIFORM_BUFFER, 1, bufferHandle, 0, blockSize);
+
+	
+
 
 	// Draw meshes
 	Program* texturedMeshProgram = M_Resources->programs[App->texturedGeometryProgramIdx];
@@ -56,6 +92,10 @@ bool ModuleRenderer::Update(float dt)
 			glBindVertexArray(0);
 		}
 	}
+
+	glUnmapBuffer(GL_UNIFORM_BUFFER);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
 	glUseProgram(0);
 
 	glPopDebugGroup();

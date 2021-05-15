@@ -167,6 +167,18 @@ enum ButtonState {
         Texture* specularTexture;
         Texture* normalsTexture;
         Texture* bumpTexture;
+
+        std::vector<Texture*> GetTextures()
+        {
+            std::vector<Texture*> tex;
+            tex.push_back(albedoTexture);
+            tex.push_back(emissiveTexture);
+            tex.push_back(specularTexture);
+            tex.push_back(normalsTexture);
+            tex.push_back(bumpTexture);
+
+            return tex;
+        }
     };
 
 
