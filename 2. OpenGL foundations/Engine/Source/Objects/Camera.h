@@ -1,40 +1,37 @@
 #pragma once
-#define WORLD_UP (vec3)(0.0f, 1.0f, 0.0f)
+#define WORLD_UP glm::vec3(0.0f, 1.0f, 0.0f)
 
 class Camera
 {
 public:
+    // Orientation
     vec3 pos;
     vec3 center;
-    float radius;
+    //vec3 up;
 
-    float speed;
-
-    vec3 up;
-    vec3 forward;
-    vec3 right;
+    // Perspective
+    float fov;			//view angle in degrees (1/zoom)
+    float aspect;		//aspect ratio (width/height)
+    float near_plane;	//near plane
+    float far_plane;	//far plane
 
     glm::mat4 viewMatrix;
     glm::mat4 projMatrix;
+
+    float radius;
+    float speed;
 
     float yaw; //horizontal
     float pitch; //vertical
 
 public:
-    Camera(vec3 pos, vec3 center, float radius);
+    Camera(vec3 pos, vec3 center, float radius, float fov, float aspect, float near_plane, float far_plane);
     ~Camera();
 
     void DrawInspector();
-
-    void Draw();
     void Move();
-    void UpdateVectors();
 
-    glm::mat4 GetViewMatrix() { return glm::lookAt(pos, pos+ forward, up); }
-
-private:
-    void MoveLeft();
-    void MoveRight();
-    void MoveUp();
-    void MoveDown();
+    void UpdateViewMatrix();
+    void UpdateProjMatrix();
+    glm::mat4 GetViewProjectionMatrix();
 };

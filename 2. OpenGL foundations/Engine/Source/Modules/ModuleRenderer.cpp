@@ -73,9 +73,7 @@ bool ModuleRenderer::Update(float dt)
 		bufferHead += sizeof(glm::mat4);
 
 
-		//glm::mat4 viewProjection = M_Scene->camera->GetViewMatrix();
-		//M_Scene->camera->projMatrix* M_Scene->camera->GetViewMatrix()
-		memcpy(bufferData + bufferHead, glm::value_ptr(glm::mat4(1.0f)), sizeof(glm::mat4));
+		memcpy(bufferData + bufferHead, glm::value_ptr(M_Scene->camera->GetViewProjectionMatrix()), sizeof(glm::mat4));
 		bufferHead += sizeof(glm::mat4);
 
 		

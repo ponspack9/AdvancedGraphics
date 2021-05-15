@@ -2,6 +2,10 @@
 #include "ModuleScene.h"
 #include <ModuleResources.h>
 
+#define FOV 60
+#define NEAR_PLANE 0.1
+#define FAR_PLANE 10000
+
 ModuleScene* M_Scene = nullptr;
 
 ModuleScene::ModuleScene()
@@ -18,8 +22,9 @@ ModuleScene::~ModuleScene()
 bool ModuleScene::Init()
 {
 	// Set Camera
-	camera = new Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 5.0f);
-
+	vec3 pos	= glm::vec3(5.0f, 0.0f, 0.0f);
+	vec3 center = glm::vec3(0.0f, 0.0f, 0.0f);
+	camera = new Camera(pos, center, 5.0f, FOV, App->displaySize.x / App->displaySize.y, NEAR_PLANE, FAR_PLANE);
 
 	// Set Models
 	Model* gameObject = M_Resources->LoadModel("Patrick/Patrick.obj");

@@ -1,19 +1,23 @@
 #include "pch.h"
 
-Camera::Camera(vec3 _pos, vec3 _center, float _radius)
+Camera::Camera(vec3 _pos, vec3 _center, float _radius, float _fov, float _aspect, float _near_plane, float _far_plane)
 {
 	pos = _pos;
 	center = _center;
 	radius = _radius;
+	//up = 0;
+
+	fov = _fov;
+	aspect = _aspect;
+	near_plane = _near_plane;
+	far_plane = _far_plane;
 
 	speed = 0.1f;
-	
-	forward = normalize(pos - center);
-	right = normalize(cross(WORLD_UP, forward));
-	up = normalize(cross(forward, right));
-
 	yaw = 0.0f;
 	pitch = 0.0f;
+
+	UpdateViewMatrix();
+	UpdateProjMatrix();
 }
 
 Camera::~Camera()
@@ -61,73 +65,69 @@ void Camera::DrawInspector()
 	}
 }
 
-void Camera::Draw()
-{
-}
-
 void Camera::Move()
 {
-	if (GetKeyState('A') & 0x8000)		MoveLeft();
-	else if (GetKeyState('D') & 0x8000) MoveRight();
+	if (GetKeyState('A') & 0x8000) // Left
+	{
+		yaw -= speed;
+		if (yaw < 0.0f)
+			yaw += 360.0f;
 
-	if (GetKeyState('W') & 0x8000)		MoveUp();
-	else if (GetKeyState('S') & 0x8000) MoveDown();
+		float radians = (yaw * PI) / 180.0f;
+		pos.x = sin(radians) * radius;
+		pos.z = cos(radians) * radius;
+		UpdateViewMatrix();
+	}
+	else if (GetKeyState('D') & 0x8000) // Right
+	{
+		yaw += speed;
+		if (yaw > 360.0f)
+			yaw -= 360.0f;
+
+		float radians = (yaw * PI) / 180.0f;
+		pos.x = sin(radians) * radius;
+		pos.z = cos(radians) * radius;
+		UpdateViewMatrix();
+	}
+
+	if (GetKeyState('W') & 0x8000) // Up
+	{
+		pitch -= speed;
+		if (pitch < 0.0f)
+			pitch = 0.0f;
+
+		float radians = (pitch * PI) / 180.0f;
+		pos.z = sin(radians) * radius;
+		pos.y = cos(radians) * radius;
+		UpdateViewMatrix();
+	}
+	else if (GetKeyState('S') & 0x8000) // Down
+	{
+		pitch += speed;
+		if (pitch > 75.0f)
+			pitch = 75.0f;
+
+		float radians = (pitch * PI) / 180.0f;
+		pos.z = sin(radians) * radius;
+		pos.y = cos(radians) * radius;
+		UpdateViewMatrix();
+	}
 }
 
-void Camera::MoveLeft()
+//-------------------------------------------------------------------
+void Camera::UpdateViewMatrix()
 {
-	yaw -= speed;
-	if (yaw < 0.0f) 
-		yaw += 360.0f;
-
-	float radians = (yaw * PI) / 180.0f;
-	pos.x = sin(radians) * radius;
-	pos.z = cos(radians) * radius;
+	viewMatrix = glm::lookAt(pos, center, WORLD_UP);
 }
 
-void Camera::MoveRight()
+void Camera::UpdateProjMatrix()
 {
-	yaw += speed;
-	if (yaw > 360.0f)
-		yaw -= 360.0f;
-
-	float radians = (yaw * PI) / 180.0f;
-	pos.x = sin(radians) * radius;
-	pos.z = cos(radians) * radius;
+	projMatrix = glm::perspective(glm::radians(fov), aspect, near_plane, far_plane);
 }
 
-void Camera::MoveUp() 
+glm::mat4 Camera::GetViewProjectionMatrix()
 {
-	pitch -= speed;
-	if (pitch < 0.0f)
-		pitch = 0.0f;
-
-	float radians = (pitch * PI) / 180.0f;
-	pos.z = sin(radians) * radius;
-	pos.y = cos(radians) * radius;
-}
-
-void Camera::MoveDown() 
-{
-	pitch += speed;
-	if (pitch > 75.0f)
-		pitch = 75.0f;
-
-	float radians = (pitch * PI) / 180.0f;
-	pos.z = sin(radians) * radius;
-	pos.y = cos(radians) * radius;
-}
-
-void Camera::UpdateVectors()
-{
-	// Calculate the new Front vector
-	glm::vec3 front;
-	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	front.y = sin(glm::radians(pitch));
-	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	forward = glm::normalize(front);
-
-	// Also re-calculate the Right and Up vector
-	right = glm::normalize(glm::cross(forward, WORLD_UP));  // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-	up = glm::normalize(glm::cross(right, forward));
+	UpdateViewMatrix();
+	UpdateProjMatrix();
+	return projMatrix * viewMatrix;
 }
