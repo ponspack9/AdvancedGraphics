@@ -17,7 +17,23 @@ void Model::DrawInspector()
     ImGui::BeginChild(name.c_str());
 
     if (ImGui::CollapsingHeader(name.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth))
-        ImGui::Image((ImTextureID)M_Resources->textures[0]->handle, ImVec2(TEX_SIZE, TEX_SIZE));
-    
+    {
+        for (int i = 0; i < materialIdx.size(); ++i)
+        {
+            int mat = materialIdx[i];
+            ImGui::Text(M_Resources->materials[mat]->name.c_str());
+            std::vector<Texture*> materialTextures = M_Resources->materials[mat]->GetTextures();
+
+            for (Texture* texture : materialTextures)
+            {
+                if (texture != nullptr)
+                {
+                    ImGui::Text(texture->filepath.c_str());
+                    ImGui::Image((ImTextureID)texture->handle, ImVec2(TEX_SIZE, TEX_SIZE));
+                }
+
+            }
+        }
+    }
     ImGui::EndChild();
 }
