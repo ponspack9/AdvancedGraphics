@@ -42,6 +42,7 @@ bool ModuleRenderer::Update(float dt)
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, App->displaySize.x, App->displaySize.y);
+	glEnable(GL_DEPTH_TEST);
 
 
 	// Draw meshes
@@ -64,8 +65,8 @@ bool ModuleRenderer::Update(float dt)
 
 		glm::mat4 transform = glm::mat4(1.0f);
 		transform = glm::translate(transform, model->position);
-		transform = glm::rotate(transform, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-		transform = glm::scale(transform, glm::vec3(0.5, 0.5, 0.5));
+		transform = glm::rotate(transform, glm::radians(00.0f), glm::vec3(0.0, 0.0, 1.0));
+		transform = glm::scale(transform, model->scale);
 
 		
 
@@ -91,7 +92,10 @@ bool ModuleRenderer::Update(float dt)
 			Material* submeshMaterial = M_Resources->materials[submeshMaterialIdx];
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
+			if (submeshMaterial->albedoTexture)
+				glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
+			else
+				glBindTexture(GL_TEXTURE_2D, 0);
 			glUniform1i(App->programUniformTexture, 0); // TODO App->texturedMeshProgram_uTexture
 
 			Submesh& submesh = mesh->submeshes[i];

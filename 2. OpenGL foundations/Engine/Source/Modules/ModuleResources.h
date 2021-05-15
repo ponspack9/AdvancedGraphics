@@ -61,6 +61,11 @@ public:
 	std::vector<Mesh*>		meshes;
 	std::vector<Program*>	programs;
 
+	Model* plane;
+	Model* cube;
+	Model* sphereLow;
+	Model* sphereHigh;
+
 };
 
 extern ModuleResources* M_Resources;

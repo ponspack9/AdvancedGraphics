@@ -25,11 +25,14 @@ ModuleResources::~ModuleResources()
 bool ModuleResources::Init()
 {
     // Programs
-    App->texturedGeometryProgramIdx = M_Resources->LoadProgram("shaders.glsl", "TEXTURED_GEOMETRY");
-    App->lightProgramIdx = M_Resources->LoadProgram("light_shader.glsl", "LIGHTING");
+    App->texturedGeometryProgramIdx = LoadProgram("shaders.glsl", "TEXTURED_GEOMETRY");
+    App->lightProgramIdx = LoadProgram("light_shader.glsl", "LIGHTING");
 
     // Primitives
-    //Primitives::Init();
+    plane = LoadModel("plane.obj");
+    cube = LoadModel("cube.obj");
+    sphereLow = LoadModel("Low_sphere.obj");
+    sphereHigh = LoadModel("High_sphere.obj");
     
     App->mode = Mode::Mode_TexturedQuad;
 
