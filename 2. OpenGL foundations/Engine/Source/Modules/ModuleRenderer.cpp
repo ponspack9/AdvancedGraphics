@@ -35,31 +35,13 @@ bool ModuleRenderer::Init()
 
 bool ModuleRenderer::Update(float dt)
 {
+	M_Scene->camera->Move();
+
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Shaded model");
 
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, App->displaySize.x, App->displaySize.y);
-
-	// Uniforms
-	glBindBuffer(GL_UNIFORM_BUFFER, bufferHandle);
-	u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-	u32 bufferHead = 0;
-
-	glm::mat4 transform = glm::mat4(1.0f);
-	transform = glm::rotate(transform, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
-	//transform = glm::scale(transform, glm::vec3(0.5, 0.5, 0.5));
-
-	memcpy(bufferData + bufferHead, glm::value_ptr(transform), sizeof(glm::mat4));
-	bufferHead += sizeof(glm::mat4);
-
-	memcpy(bufferData + bufferHead, glm::value_ptr(glm::mat4(1.0f)), sizeof(glm::mat4));
-	bufferHead += sizeof(glm::mat4);
-
-	u32 blockSize = sizeof(glm::mat4) * 2;
-	glBindBufferRange(GL_UNIFORM_BUFFER, 1, bufferHandle, 0, blockSize);
-
-	
 
 
 	// Draw meshes
@@ -69,6 +51,34 @@ bool ModuleRenderer::Update(float dt)
 	for (Model* model : M_Scene->models)
 	{
 		Mesh* mesh = model->mesh;
+
+		if (mesh == nullptr) continue;
+
+		// Uniforms
+		glBindBuffer(GL_UNIFORM_BUFFER, bufferHandle);
+		u32 blockSize = sizeof(glm::mat4) * 2;
+		glBindBufferRange(GL_UNIFORM_BUFFER, 1, bufferHandle, 0, blockSize);
+
+		u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+		u32 bufferHead = 0;
+
+		glm::mat4 transform = glm::mat4(1.0f);
+		transform = glm::translate(transform, model->position);
+		transform = glm::rotate(transform, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0));
+		transform = glm::scale(transform, glm::vec3(0.5, 0.5, 0.5));
+
+		
+
+		memcpy(bufferData + bufferHead, glm::value_ptr(transform), sizeof(glm::mat4));
+		bufferHead += sizeof(glm::mat4);
+
+
+		//glm::mat4 viewProjection = M_Scene->camera->GetViewMatrix();
+		//M_Scene->camera->projMatrix* M_Scene->camera->GetViewMatrix()
+		memcpy(bufferData + bufferHead, glm::value_ptr(glm::mat4(1.0f)), sizeof(glm::mat4));
+		bufferHead += sizeof(glm::mat4);
+
+		
 
 		for (u32 i = 0; i < mesh->submeshes.size(); ++i)
 		{
@@ -91,10 +101,12 @@ bool ModuleRenderer::Update(float dt)
 
 			glBindVertexArray(0);
 		}
+
+		glUnmapBuffer(GL_UNIFORM_BUFFER);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	
 
 	glUseProgram(0);
 

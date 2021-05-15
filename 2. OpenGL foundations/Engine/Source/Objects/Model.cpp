@@ -16,6 +16,17 @@ void Model::DrawInspector()
 {
     ImGui::BeginChild(name.c_str());
 
+    ImGui::Text("Position");
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(60.0f);
+    ImGui::DragFloat("x##model_pos", &position.x);
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(60.0f);
+    ImGui::DragFloat("y##model_pos", &position.y);
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(60.0f);
+    ImGui::DragFloat("z##model_pos", &position.z);
+
     if (ImGui::CollapsingHeader(name.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth))
     {
         for (int i = 0; i < materialIdx.size(); ++i)
