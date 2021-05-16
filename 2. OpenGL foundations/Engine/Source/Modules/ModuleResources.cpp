@@ -3,7 +3,6 @@
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include <Primitives.h>
 
 
 #pragma region Module overrides

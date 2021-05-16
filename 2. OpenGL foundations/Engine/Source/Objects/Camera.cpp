@@ -4,15 +4,15 @@ Camera::Camera(vec3 _pos, vec3 _center, float _radius, float _fov, float _aspect
 {
 	pos = _pos;
 	center = _center;
-	radius = _radius;
-	//up = 0;
+	up = WORLD_UP;
 
 	fov = _fov;
 	aspect = _aspect;
 	near_plane = _near_plane;
 	far_plane = _far_plane;
 
-	speed = 0.1f;
+	radius = _radius;
+	speed = 0.01f;
 	yaw = 0.0f;
 	pitch = 0.0f;
 
@@ -60,64 +60,83 @@ void Camera::DrawInspector()
 		ImGui::SetNextItemWidth(60.0f);
 		ImGui::DragFloat("##speed", &speed);
 
-		//ImGui::Text("Horizontal: %f", yaw);
-		//ImGui::Text("Vertical: %f", pitch);
+		ImGui::Text("Angle X: %f", yaw);
+		ImGui::Text("Angle Y: %f", pitch);
 	}
 }
 
 void Camera::Move()
 {
+	float prev_yaw = yaw;
+	float prev_pitch = pitch;
+
 	if (GetKeyState('A') & 0x8000) // Left
 	{
 		yaw -= speed;
 		if (yaw < 0.0f)
-			yaw += 360.0f;
-
-		float radians = (yaw * PI) / 180.0f;
-		pos.x = sin(radians) * radius;
-		pos.z = cos(radians) * radius;
-		UpdateViewMatrix();
+			yaw += TAU;
 	}
 	else if (GetKeyState('D') & 0x8000) // Right
 	{
 		yaw += speed;
-		if (yaw > 360.0f)
-			yaw -= 360.0f;
-
-		float radians = (yaw * PI) / 180.0f;
-		pos.x = sin(radians) * radius;
-		pos.z = cos(radians) * radius;
-		UpdateViewMatrix();
+		if (yaw > TAU)
+			yaw -= TAU;
 	}
 
 	if (GetKeyState('W') & 0x8000) // Up
 	{
-		pitch -= speed;
-		if (pitch < 0.0f)
-			pitch = 0.0f;
-
-		float radians = (pitch * PI) / 180.0f;
-		pos.z = sin(radians) * radius;
-		pos.y = cos(radians) * radius;
-		UpdateViewMatrix();
+		pitch += speed;
+		if (pitch > 75.0f * PI / 180)
+			pitch = 75.0f * PI / 180;
 	}
 	else if (GetKeyState('S') & 0x8000) // Down
 	{
-		pitch += speed;
-		if (pitch > 75.0f)
-			pitch = 75.0f;
-
-		float radians = (pitch * PI) / 180.0f;
-		pos.z = sin(radians) * radius;
-		pos.y = cos(radians) * radius;
-		UpdateViewMatrix();
+		pitch -= speed;
+		if (pitch < 0.0f)
+			pitch = 0.0f;
 	}
+
+	if (GetKeyState('Q') & 0x8000) // Zoom In
+	{
+		fov -= 0.1f;
+		if (fov < 1.0f)
+			fov = 1.0f;
+		UpdateProjMatrix();
+	}
+	else if (GetKeyState('E') & 0x8000) // Zoom Out
+	{
+		fov += 0.1f;
+		if (fov > FOV)
+			fov = FOV;
+		UpdateProjMatrix();
+	}
+
+	float angleX = yaw - prev_yaw;
+	float angleY = prev_pitch - pitch;
+
+	// Get the homogenous position of the camera and pivot point
+	glm::vec4 position(pos.x, pos.y, pos.z, 1);
+	glm::vec4 pivot(center.x, center.y, center.z, 1);
+
+	// step 2: Rotate the camera around the pivot point on the first axis.
+	glm::mat4x4 rotationMatrixX(1.0f);
+	rotationMatrixX = glm::rotate(rotationMatrixX, angleX, up);
+	position = (rotationMatrixX * (position - pivot)) + pivot;
+
+	// step 3: Rotate the camera around the pivot point on the second axis.
+	glm::mat4x4 rotationMatrixY(1.0f);
+	rotationMatrixY = glm::rotate(rotationMatrixY, angleY, GetRightVector());
+	glm::vec3 final_pos = (rotationMatrixY * (position - pivot)) + pivot;
+
+	// Update the camera view (we keep the same lookat and the same up vector)
+	pos = final_pos;
+	UpdateViewMatrix();
 }
 
 //-------------------------------------------------------------------
 void Camera::UpdateViewMatrix()
 {
-	viewMatrix = glm::lookAt(pos, center, WORLD_UP);
+	viewMatrix = glm::lookAt(pos, center, up);
 }
 
 void Camera::UpdateProjMatrix()
