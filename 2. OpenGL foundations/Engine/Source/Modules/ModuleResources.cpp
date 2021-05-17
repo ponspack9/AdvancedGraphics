@@ -271,7 +271,7 @@ std::string ModuleResources::GetDirectoryPart(std::string path)
     if (pos != std::string::npos)
         return path.substr(0, path.length() - pos);
 
-    LOG_ERROR("Could not get directory part from {0}", path);
+    LOG_WARN("Could not get directory part from {0}", path);
     return path; // not found
 }
 std::string ModuleResources::GetFileNamePart(std::string path)

@@ -39,12 +39,21 @@ in vec3 vNormal;
 in vec3 vViewDir;
 
 uniform sampler2D uTexture;
+uniform sampler2D uTexture2;
+uniform sampler2D uTexture3;
+uniform sampler2D uDepth;
 
 layout(location = 0) out vec4 oColor;
+layout(location = 1) out vec4 oColor2;
+layout(location = 2) out vec4 oColor3;
+layout(location = 3) out vec4 oDepth;
 
 void main()
 {
 	oColor = texture(uTexture, vTexCoord);
+	oColor2 = texture(uTexture2, vTexCoord) * 0.75;
+	oColor3 = texture(uDepth, vTexCoord);
+	oDepth = texture(uDepth, vTexCoord);
 	//oColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
 

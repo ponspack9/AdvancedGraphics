@@ -43,17 +43,74 @@ bool ModuleRenderer::Update(float dt)
 
 	// Geometry Pass
 	Program* geometry_shader = M_Resources->programs[App->texturedGeometryProgramIdx];
-	GeometryPass(M_Resources->programs[App->texturedGeometryProgramIdx]);
+	GeometryPass(geometry_shader);
 
 	// Light Pass
 	Program* light_shader = M_Resources->programs[App->lightProgramIdx];
 	LightPass(light_shader);
+
+	ScenePass(geometry_shader);
 
 	glPopDebugGroup();
 	return true;
 }
 
 #pragma endregion
+
+// Render to screen
+void ModuleRenderer::ScenePass(Program* program)
+{
+	// Render on GBuffer's FBO
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDrawBuffer(GL_BACK);
+
+	// Clear Color and Depth
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Viewport
+	glViewport(0, 0, App->displaySize.x, App->displaySize.y);
+
+	// Set Default Flags
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
+	// Enable Shader
+	glUseProgram(program->handle);
+
+	// Render
+	for (Model* model : M_Scene->models)
+	{
+		// Shader Uniforms
+		glBindBuffer(GL_UNIFORM_BUFFER, bufferHandle);
+		u32 blockSize = sizeof(glm::mat4) * 2;
+		glBindBufferRange(GL_UNIFORM_BUFFER, 1, bufferHandle, 0, blockSize);
+
+		u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+		u32 bufferHead = 0;
+
+		glm::mat4 transform = glm::mat4(1.0f);
+		transform = glm::translate(transform, model->position);
+		transform = glm::rotate(transform, glm::radians(00.0f), glm::vec3(0.0, 0.0, 1.0));
+		transform = glm::scale(transform, model->scale);
+
+		memcpy(bufferData + bufferHead, glm::value_ptr(transform), sizeof(glm::mat4));
+		bufferHead += sizeof(glm::mat4);
+
+		memcpy(bufferData + bufferHead, glm::value_ptr(M_Scene->camera->GetViewProjectionMatrix()), sizeof(glm::mat4));
+		bufferHead += sizeof(glm::mat4);
+
+		// Draw Mesh
+		DrawMesh(model, program);
+	}
+
+	// Disable Shader
+	glUseProgram(0);
+
+	// Render on screen again
+	//glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.FBO);
+}
 
 void ModuleRenderer::GeometryPass(Program* program)
 {
@@ -158,7 +215,7 @@ void ModuleRenderer::DrawMesh(Model* model, Program* program)
 			glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
 		else
 			glBindTexture(GL_TEXTURE_2D, 0);
-		glUniform1i(App->programUniformTexture, 0); // TODO App->texturedMeshProgram_uTexture
+		//glUniform1i(App->programUniformTexture, 0); // TODO App->texturedMeshProgram_uTexture
 
 		Submesh& submesh = mesh->submeshes[i];
 		glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);

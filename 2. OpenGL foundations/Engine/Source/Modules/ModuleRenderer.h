@@ -11,6 +11,8 @@ public:
 	bool Init() override;
 	bool Update(float dt) override;
 
+	void ScenePass(Program* program);
+
 	void GeometryPass(Program* program);
 	void LightPass(Program* program);
 
