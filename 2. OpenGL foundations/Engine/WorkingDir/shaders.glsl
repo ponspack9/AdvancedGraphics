@@ -6,6 +6,7 @@
 #if defined(VERTEX) ///////////////////////////////////////////////////
 
 layout(location = 0) in vec3 aPosition;
+layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 aTexCoord;
 layout(binding = 1, std140) uniform LocalParams
 {
@@ -21,10 +22,9 @@ out vec3 vViewDir;
 void main()
 {
 	vTexCoord = aTexCoord;
-	float clippingScale = 5.0;
 
 	vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
-	//vNormal		= vec3(uWorldMatrix * vec4(aNormal, 0.0));
+	vNormal		= vec3(uWorldMatrix * vec4(aNormal, 0.0));
 
 	gl_Position = uWorldViewProjectionMatrix * vec4(vPosition, 1.0);
 	//gl_Position = vec4(aPosition, clippingScale);
@@ -39,21 +39,29 @@ in vec3 vNormal;
 in vec3 vViewDir;
 
 uniform sampler2D uTexture;
-uniform sampler2D uTexture2;
-uniform sampler2D uTexture3;
-uniform sampler2D uDepth;
 
-layout(location = 0) out vec4 oColor;
-layout(location = 1) out vec4 oColor2;
-layout(location = 2) out vec4 oColor3;
+layout(location = 0) out vec4 oAlbedo;
+layout(location = 1) out vec4 oNormal;
+layout(location = 2) out vec4 oPosition;
 layout(location = 3) out vec4 oDepth;
+
+
+float near = 0.1;
+float far = 100.0;
+
+float LinearizeDepth(float depth)
+{
+	float z = depth * 2.0 - 1.0; // back to NDC 
+	return (2.0 * near * far) / (far + near - z * (far - near));
+}
+
 
 void main()
 {
-	oColor = texture(uTexture, vTexCoord);
-	oColor2 = texture(uTexture2, vTexCoord) * 0.75;
-	oColor3 = texture(uDepth, vTexCoord);
-	oDepth = texture(uDepth, vTexCoord);
+	oAlbedo = texture(uTexture, vTexCoord);
+	oNormal = vec4(normalize(vNormal), 1.0);
+	oPosition = vec4(vPosition, 1.0);
+	oDepth = vec4(vec3(LinearizeDepth(gl_FragCoord.z) / far), 1.0);
 	//oColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
 
