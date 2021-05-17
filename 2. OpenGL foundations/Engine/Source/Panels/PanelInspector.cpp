@@ -11,25 +11,21 @@ void PanelInspector::Draw()
 	sprintf_s(fps, 64, "FPS: %f", 1.0f / App->deltaTime);
 	ImGui::Text(fps);
 
+	const char* items[] = { "Final Scene", "Albedo", "Normals", "Position", "Depth" };
+	static int item_current = 0;
+	static int size = ImGui::GetContentRegionAvailWidth();
+
+	ImGui::Combo("Textures", &item_current, items, IM_ARRAYSIZE(items));
+	M_Renderer->type = item_current;
+	ImGui::Separator();
+
 	if (M_Scene->camera != nullptr)
 	{
 		M_Scene->camera->DrawInspector();
+		ImGui::Separator();
 	}
 	
 	ImGui::BeginTabBar("TabBar", ImGuiTabBarFlags_NoTooltip | ImGuiTabBarFlags_NoCloseWithMiddleMouseButton);
-	if (ImGui::BeginTabItem("G Buffer"))
-	{
-		const char* items[] = { "Albedo", "Normals", "Position", "Depth" };
-		static int item_current = 0;
-		static int size = ImGui::GetContentRegionAvailWidth();
-
-		ImGui::Combo("Textures", &item_current, items, IM_ARRAYSIZE(items));
-		if (item_current == 0)		ImGui::Image((ImTextureID)M_Renderer->gbuffer.textures[0], ImVec2(size, size), ImVec2(0, 1), ImVec2(1, 0));
-		else if (item_current == 1) ImGui::Image((ImTextureID)M_Renderer->gbuffer.textures[1], ImVec2(size, size), ImVec2(0, 1), ImVec2(1, 0));
-		else if (item_current == 2) ImGui::Image((ImTextureID)M_Renderer->gbuffer.textures[2], ImVec2(size, size), ImVec2(0, 1), ImVec2(1, 0));
-		else if (item_current == 3) ImGui::Image((ImTextureID)M_Renderer->gbuffer.textures[3], ImVec2(size, size), ImVec2(0, 1), ImVec2(1, 0));
-		ImGui::EndTabItem();
-	}
 	if (ImGui::BeginTabItem("Models"))
 	{
 		for (Model* obj : M_Scene->models)

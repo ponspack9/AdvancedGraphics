@@ -46,12 +46,17 @@ bool ModuleRenderer::Update(float dt)
 	GeometryPass(geometry_shader);
 
 	// Light Pass
-	Program* light_shader = M_Resources->programs[App->lightProgramIdx];
-	LightPass(light_shader);
-
-	ScenePass(geometry_shader);
+	if (type == FINAL_SCENE)
+	{
+		ScenePass(geometry_shader);
+		//Program* light_shader = M_Resources->programs[App->lightProgramIdx];
+		//LightPass(light_shader);
+	}
+	else
+		RenderType();
 
 	glPopDebugGroup();
+
 	return true;
 }
 
@@ -173,25 +178,25 @@ void ModuleRenderer::GeometryPass(Program* program)
 
 void ModuleRenderer::LightPass(Program* program)
 {
-	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//gbuffer.BindForReading();
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.FBO);
 
-	//GLint HalfWidth = (GLint)(App->displaySize.x / 2.0f);
-	//GLint HalfHeight = (GLint)(App->displaySize.y / 2.0f);
+	GLint HalfWidth = (GLint)(App->displaySize.x / 2.0f);
+	GLint HalfHeight = (GLint)(App->displaySize.y / 2.0f);
 
-	//gbuffer.SetReadBuffer(0);
-	//glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, 0, 0, HalfWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	glReadBuffer(GL_COLOR_ATTACHMENT0);
+	glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, 0, 0, HalfWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-	//gbuffer.SetReadBuffer(1);
-	//glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, 0, HalfHeight, HalfWidth, App->displaySize.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	glReadBuffer(GL_COLOR_ATTACHMENT1);
+	glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, 0, HalfHeight, HalfWidth, App->displaySize.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-	//gbuffer.SetReadBuffer(2);
-	//glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, HalfWidth, HalfHeight, App->displaySize.x, App->displaySize.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	glReadBuffer(GL_COLOR_ATTACHMENT2);
+	glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, HalfWidth, HalfHeight, App->displaySize.x, App->displaySize.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-	//gbuffer.SetReadBuffer(3);
-	//glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, HalfWidth, 0, App->displaySize.x, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	glReadBuffer(GL_COLOR_ATTACHMENT3);
+	glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, HalfWidth, 0, App->displaySize.x, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 }
 
 void ModuleRenderer::DrawMesh(Model* model, Program* program)
@@ -280,4 +285,15 @@ GLuint ModuleRenderer::CreateNewVao(Mesh* mesh, Submesh& submesh, const Program*
 	glBindVertexArray(0);
 
 	return vaoHandle;
+}
+
+void ModuleRenderer::RenderType()
+{
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.FBO);
+
+	glReadBuffer(GL_COLOR_ATTACHMENT0 + type - 1);
+	glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, 0, 0, App->displaySize.x, App->displaySize.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 }

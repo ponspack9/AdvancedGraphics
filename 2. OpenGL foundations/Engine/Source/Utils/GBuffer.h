@@ -16,10 +16,6 @@ public:
 
     bool Init();
 
-    void BindForWriting();
-    void BindForReading();
-    void SetReadBuffer(Textures TextureType);
-
 public:
     GLuint FBO;
     GLuint textures[NUM_TEXTURES];

@@ -70,18 +70,3 @@ bool GBuffer::Init()
 
     return true;
 }
-
-void GBuffer::BindForWriting()
-{
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, FBO);
-}
-
-void GBuffer::BindForReading()
-{
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO);
-}
-
-void GBuffer::SetReadBuffer(Textures TextureType)
-{
-    glReadBuffer(GL_COLOR_ATTACHMENT0 + TextureType);
-}
