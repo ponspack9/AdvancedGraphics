@@ -2,6 +2,7 @@
 #include "ModuleRenderer.h"
 #include "ModuleResources.h"
 #include "ModuleScene.h"
+#include <Utils/GBuffer.h>
 
 #pragma region Module overrides
 
@@ -27,31 +28,61 @@ bool ModuleRenderer::Init()
 	glBindBuffer(GL_UNIFORM_BUFFER, bufferHandle);
 	glBufferData(GL_UNIFORM_BUFFER, maxUniformBufferSize, NULL, GL_STREAM_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	gbuffer.Init(); // Init GBuffer
+
 	return true;
 }
 
 bool ModuleRenderer::Update(float dt)
 {
-	M_Scene->camera->Move();
-
 	glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Shaded model");
 
+	// Update Camera
+	M_Scene->camera->Move();
+
+	// Geometry Pass
+	Program* geometry_shader = M_Resources->programs[App->texturedGeometryProgramIdx];
+	GeometryPass(M_Resources->programs[App->texturedGeometryProgramIdx]);
+
+	// Light Pass
+	Program* light_shader = M_Resources->programs[App->lightProgramIdx];
+	LightPass(light_shader);
+
+	glPopDebugGroup();
+	return true;
+}
+
+#pragma endregion
+
+void ModuleRenderer::GeometryPass(Program* program)
+{
+	// Render on GBuffer's FBO
+	glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.FBO);
+	
+	// Select Render Targets to Draw
+	GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
+
+	// Clear Color and Depth
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Viewport
 	glViewport(0, 0, App->displaySize.x, App->displaySize.y);
+
+	// Set Default Flags
+	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 
-	// Draw meshes
-	Program* texturedMeshProgram = M_Resources->programs[App->texturedGeometryProgramIdx];
-	glUseProgram(texturedMeshProgram->handle);
+	// Enable Shader
+	glUseProgram(program->handle);
 
+	// Render
 	for (Model* model : M_Scene->models)
 	{
-		Mesh* mesh = model->mesh;
-
-		if (mesh == nullptr) continue;
-
-		// Uniforms
+		// Shader Uniforms
 		glBindBuffer(GL_UNIFORM_BUFFER, bufferHandle);
 		u32 blockSize = sizeof(glm::mat4) * 2;
 		glBindBufferRange(GL_UNIFORM_BUFFER, 1, bufferHandle, 0, blockSize);
@@ -70,41 +101,75 @@ bool ModuleRenderer::Update(float dt)
 		memcpy(bufferData + bufferHead, glm::value_ptr(M_Scene->camera->GetViewProjectionMatrix()), sizeof(glm::mat4));
 		bufferHead += sizeof(glm::mat4);
 
-		for (u32 i = 0; i < mesh->submeshes.size(); ++i)
-		{
-			GLuint vao = FindVAO(mesh, i, texturedMeshProgram);
-
-			glBindVertexArray(vao);
-
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-			u32 submeshMaterialIdx = model->materialIdx[i];
-			Material* submeshMaterial = M_Resources->materials[submeshMaterialIdx];
-
-			glActiveTexture(GL_TEXTURE0);
-			if (submeshMaterial->albedoTexture)
-				glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
-			else
-				glBindTexture(GL_TEXTURE_2D, 0);
-			glUniform1i(App->programUniformTexture, 0); // TODO App->texturedMeshProgram_uTexture
-
-			Submesh& submesh = mesh->submeshes[i];
-			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
-
-			glBindVertexArray(0);
-		}
-		glUnmapBuffer(GL_UNIFORM_BUFFER);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		// Draw Mesh
+		DrawMesh(model, program);
 	}
-	glUseProgram(0);
-	glPopDebugGroup();
 
-	return true;
+	// Disable Shader
+	glUseProgram(0);
+
+	// Render on screen again
+	glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.FBO);
 }
 
-#pragma endregion
+void ModuleRenderer::LightPass(Program* program)
+{
+	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	//gbuffer.BindForReading();
+
+	//GLint HalfWidth = (GLint)(App->displaySize.x / 2.0f);
+	//GLint HalfHeight = (GLint)(App->displaySize.y / 2.0f);
+
+	//gbuffer.SetReadBuffer(0);
+	//glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, 0, 0, HalfWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+	//gbuffer.SetReadBuffer(1);
+	//glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, 0, HalfHeight, HalfWidth, App->displaySize.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+	//gbuffer.SetReadBuffer(2);
+	//glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, HalfWidth, HalfHeight, App->displaySize.x, App->displaySize.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+	//gbuffer.SetReadBuffer(3);
+	//glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, HalfWidth, 0, App->displaySize.x, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+}
+
+void ModuleRenderer::DrawMesh(Model* model, Program* program)
+{
+	if (model->mesh == nullptr) 
+		return;
+
+	Mesh* mesh = model->mesh;
+	for (u32 i = 0; i < mesh->submeshes.size(); ++i)
+	{
+		GLuint vao = FindVAO(mesh, i, program);
+
+		glBindVertexArray(vao);
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		u32 submeshMaterialIdx = model->materialIdx[i];
+		Material* submeshMaterial = M_Resources->materials[submeshMaterialIdx];
+
+		glActiveTexture(GL_TEXTURE0);
+		if (submeshMaterial->albedoTexture)
+			glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
+		else
+			glBindTexture(GL_TEXTURE_2D, 0);
+		glUniform1i(App->programUniformTexture, 0); // TODO App->texturedMeshProgram_uTexture
+
+		Submesh& submesh = mesh->submeshes[i];
+		glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+
+		glBindVertexArray(0);
+	}
+	glUnmapBuffer(GL_UNIFORM_BUFFER);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+//--------------------------------------------------------------------
 GLuint ModuleRenderer::FindVAO(Mesh* mesh, u32 submeshIndex, const Program* program)
 {
 	Submesh& submesh = mesh->submeshes[submeshIndex];

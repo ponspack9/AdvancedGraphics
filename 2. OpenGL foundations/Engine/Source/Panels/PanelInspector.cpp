@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "PanelInspector.h"
 #include <ModuleScene.h>
+#include <ModuleRenderer.h>
 
 void PanelInspector::Draw()
 {
@@ -17,6 +18,10 @@ void PanelInspector::Draw()
 	else if (item_current == 4) {} //DrawDepth()
 	ImGui::Separator();
 
+	for (GLuint tex : M_Renderer->gbuffer.textures)
+		ImGui::Image((ImTextureID)tex, ImVec2(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth()), ImVec2(0,1), ImVec2(1,0));
+	ImGui::Image((ImTextureID)M_Renderer->gbuffer.depth_texture, ImVec2(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth()), ImVec2(0, 1), ImVec2(1, 0));
+	
 	if (M_Scene->camera != nullptr)
 	{
 		M_Scene->camera->DrawInspector();

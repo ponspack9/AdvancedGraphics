@@ -1,7 +1,7 @@
 #pragma once
 #include "Module.h"
 
-#define WINDOW_TITLE  "Oscar Pons Gallart - AGP"
+#define WINDOW_TITLE  "Oscar Pons & David Tello - AGP"
 #define WINDOW_WIDTH  800
 #define WINDOW_HEIGHT 600
 

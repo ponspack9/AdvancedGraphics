@@ -3,20 +3,24 @@
 class GBuffer
 {
 public:
+    enum Textures {
+        ALBEDO,
+        NORMALS,
+        POSITION,
+        NUM_TEXTURES
+    };
+
     GBuffer();
     ~GBuffer();
 
-    bool Init(unsigned int WindowWidth, unsigned int WindowHeight);
+    bool Init();
 
     void BindForWriting();
     void BindForReading();
+    void SetReadBuffer(Textures TextureType);
 
-private:
-
+public:
     GLuint FBO;
-
-    GLuint albedo;
-    GLuint normals;
-    GLuint position;
-    GLuint depth;
+    GLuint textures[NUM_TEXTURES];
+    GLuint depth_texture;
 };
