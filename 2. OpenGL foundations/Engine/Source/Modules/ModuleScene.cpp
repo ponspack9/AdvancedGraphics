@@ -24,23 +24,25 @@ bool ModuleScene::Init()
 
 	// Set Models
 	Model* gameObject = M_Resources->LoadModel("Patrick/Patrick.obj");
-	gameObject->position = { 0,0,0 };
+	gameObject->position = { -5,0,-1 };
 	models.push_back(gameObject);
 	gameObject->index = "0";
 
 	Model* patricio2 = new Model(*gameObject);
-	patricio2->position = { 3,0,-3 };
+	patricio2->position = { 5,0,-1 };
 	patricio2->index = "1";
 	models.push_back(patricio2);
-	//models.push_back(gameObject);
-	
-	
-	//Model* plane = new Model(*M_Resources->plane);
-	//plane->position = { 0,-4,0 };
-	//plane->scale = {10,10,10};
-	//plane->index = "3";
-	//models.push_back(plane);
 
+	patricio2 = new Model(*gameObject);
+	patricio2->position = { 0,0,5 };
+	patricio2->index = "2";
+	models.push_back(patricio2);
+
+	Model* plane = new Model(*M_Resources->plane);
+	plane->position = { 0,-4,0 };
+	plane->scale = { 10,10,10 };
+	plane->index = "55";
+	models.push_back(plane);
 
 	// Directional Lights
 	DirectionalLight* light = new DirectionalLight();

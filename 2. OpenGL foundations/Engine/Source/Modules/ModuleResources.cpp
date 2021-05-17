@@ -213,6 +213,10 @@ void ModuleResources::ProcessAssimpMaterial(aiMaterial* material, Material* myMa
         std::string filepath = directory + "/" + aiFilename.C_Str();
         myMaterial->albedoTexture = LoadTexture2D(filepath.c_str());
     }
+    else
+    {
+        myMaterial->albedoTexture = LoadTexture2D("color_white.png");
+    }
     if (material->GetTextureCount(aiTextureType_EMISSIVE) > 0)
     {
         material->GetTexture(aiTextureType_EMISSIVE, 0, &aiFilename);
