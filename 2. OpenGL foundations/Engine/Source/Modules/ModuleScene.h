@@ -1,9 +1,6 @@
 #pragma once
 #include "Module.h"
 
-//class Camera;
-//class Light;
-
 class ModuleScene : public Module
 {
 public:

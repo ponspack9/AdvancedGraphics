@@ -27,17 +27,6 @@ void Camera::DrawInspector()
 {
 	if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		//ImGui::Text("Position");
-		//ImGui::SameLine();
-		//ImGui::SetNextItemWidth(60.0f);
-		//ImGui::DragFloat("x##camera_pos", &pos.x);
-		//ImGui::SameLine();
-		//ImGui::SetNextItemWidth(60.0f);
-		//ImGui::DragFloat("y##camera_pos", &pos.y);
-		//ImGui::SameLine();
-		//ImGui::SetNextItemWidth(60.0f);
-		//ImGui::DragFloat("z##camera_pos", &pos.z);
-
 		ImGui::Text("Center");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(60.0f);
@@ -53,6 +42,8 @@ void Camera::DrawInspector()
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(60.0f);
 		ImGui::DragFloat("##speed", &speed);
+
+		ImGui::Separator();
 	}
 }
 

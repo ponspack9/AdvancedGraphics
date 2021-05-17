@@ -2,7 +2,6 @@
 #include "ModuleRenderer.h"
 #include "ModuleResources.h"
 #include "ModuleScene.h"
-#include <Utils/GBuffer.h>
 
 #pragma region Module overrides
 
@@ -21,15 +20,16 @@ ModuleRenderer::~ModuleRenderer()
 
 bool ModuleRenderer::Init()
 {
-	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBufferSize);
-	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniformBlockAlignment);
+	u32 geometry_size = sizeof(glm::mat4) * 2;
+	u32 lights_size = sizeof(glm::vec3) + sizeof(u32) + sizeof(DirectionalLight) * M_Scene->dirLights.size() + 
+										  sizeof(u32) + sizeof(PointLight) * M_Scene->pointLights.size();
 
-	glGenBuffers(1, &bufferHandle);
-	glBindBuffer(GL_UNIFORM_BUFFER, bufferHandle);
-	glBufferData(GL_UNIFORM_BUFFER, maxUniformBufferSize, NULL, GL_STREAM_DRAW);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	// Create Uniforms Buffer
+	geometry_uniform = CreateConstantBuffer(geometry_size);
+	light_uniform = CreateConstantBuffer(lights_size);
 
-	gbuffer.Init(); // Init GBuffer
+	// Init GBuffer
+	gbuffer.Init();
 
 	return true;
 }
@@ -42,16 +42,11 @@ bool ModuleRenderer::Update(float dt)
 	M_Scene->camera->Move();
 
 	// Geometry Pass
-	Program* geometry_shader = M_Resources->programs[App->texturedGeometryProgramIdx];
-	GeometryPass(geometry_shader);
+	GeometryPass(M_Resources->programs[App->texturedGeometryProgramIdx]);
 
 	// Light Pass
-	if (type == FINAL_SCENE)
-	{
-		ScenePass(geometry_shader);
-		//Program* light_shader = M_Resources->programs[App->lightProgramIdx];
-		//LightPass(light_shader);
-	}
+	if (renderType == FINAL_SCENE)
+		LightPass(M_Resources->programs[App->lightProgramIdx]);
 	else
 		RenderType();
 
@@ -87,31 +82,23 @@ void ModuleRenderer::ScenePass(Program* program)
 	// Render
 	for (Model* model : M_Scene->models)
 	{
-		// Shader Uniforms
-		glBindBuffer(GL_UNIFORM_BUFFER, bufferHandle);
-		u32 blockSize = sizeof(glm::mat4) * 2;
-		glBindBufferRange(GL_UNIFORM_BUFFER, 1, bufferHandle, 0, blockSize);
-
-		u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-		u32 bufferHead = 0;
-
 		glm::mat4 transform = glm::mat4(1.0f);
 		transform = glm::translate(transform, model->position);
 		transform = glm::rotate(transform, glm::radians(00.0f), glm::vec3(0.0, 0.0, 1.0));
 		transform = glm::scale(transform, model->scale);
 
-		memcpy(bufferData + bufferHead, glm::value_ptr(transform), sizeof(glm::mat4));
-		bufferHead += sizeof(glm::mat4);
-
-		memcpy(bufferData + bufferHead, glm::value_ptr(M_Scene->camera->GetViewProjectionMatrix()), sizeof(glm::mat4));
-		bufferHead += sizeof(glm::mat4);
+		// Shader Uniforms
+		BindBuffer(geometry_uniform);
+		glBindBufferRange(GL_UNIFORM_BUFFER, 0, geometry_uniform.handle, 0, geometry_uniform.size);
+		MapBuffer(geometry_uniform, GL_READ_ONLY);
+		PushMat4(geometry_uniform, transform);
+		PushMat4(geometry_uniform, M_Scene->camera->GetViewProjectionMatrix());
 
 		// Draw Mesh
 		DrawMesh(model, program);
 
 		// Unbind Shader Uniforms
-		glUnmapBuffer(GL_UNIFORM_BUFFER);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		UnmapBuffer(geometry_uniform);
 	}
 
 	// Disable Shader
@@ -145,31 +132,23 @@ void ModuleRenderer::GeometryPass(Program* program)
 	// Render
 	for (Model* model : M_Scene->models)
 	{
-		// Bind Shader Uniforms
-		glBindBuffer(GL_UNIFORM_BUFFER, bufferHandle);
-		u32 blockSize = sizeof(glm::mat4) * 2;
-		glBindBufferRange(GL_UNIFORM_BUFFER, 1, bufferHandle, 0, blockSize);
-
-		u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-		u32 bufferHead = 0;
-
 		glm::mat4 transform = glm::mat4(1.0f);
 		transform = glm::translate(transform, model->position);
 		transform = glm::rotate(transform, glm::radians(00.0f), glm::vec3(0.0, 0.0, 1.0));
 		transform = glm::scale(transform, model->scale);
 
-		memcpy(bufferData + bufferHead, glm::value_ptr(transform), sizeof(glm::mat4));
-		bufferHead += sizeof(glm::mat4);
-
-		memcpy(bufferData + bufferHead, glm::value_ptr(M_Scene->camera->GetViewProjectionMatrix()), sizeof(glm::mat4));
-		bufferHead += sizeof(glm::mat4);
+		// Shader Uniforms
+		BindBuffer(geometry_uniform);
+		glBindBufferRange(GL_UNIFORM_BUFFER, 0, geometry_uniform.handle, 0, geometry_uniform.size);
+		MapBuffer(geometry_uniform, GL_WRITE_ONLY);
+		PushMat4(geometry_uniform, transform);
+		PushMat4(geometry_uniform, M_Scene->camera->GetViewProjectionMatrix());
 
 		// Draw Mesh
 		DrawMesh(model, program);
 
 		// Unbind Shader Uniforms
-		glUnmapBuffer(GL_UNIFORM_BUFFER);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		UnmapBuffer(geometry_uniform);
 	}
 
 	// Disable Shader
@@ -178,25 +157,54 @@ void ModuleRenderer::GeometryPass(Program* program)
 
 void ModuleRenderer::LightPass(Program* program)
 {
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	// Render on Default Framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDrawBuffer(GL_BACK);
+
+	// Clear Color and Depth
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.FBO);
+	// Viewport
+	glViewport(0, 0, App->displaySize.x, App->displaySize.y);
 
-	GLint HalfWidth = (GLint)(App->displaySize.x / 2.0f);
-	GLint HalfHeight = (GLint)(App->displaySize.y / 2.0f);
+	// Set Default Flags
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 
-	glReadBuffer(GL_COLOR_ATTACHMENT0);
-	glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, 0, 0, HalfWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
 
-	glReadBuffer(GL_COLOR_ATTACHMENT1);
-	glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, 0, HalfHeight, HalfWidth, App->displaySize.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	// Enable Shader
+	glUseProgram(program->handle);
 
-	glReadBuffer(GL_COLOR_ATTACHMENT2);
-	glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, HalfWidth, HalfHeight, App->displaySize.x, App->displaySize.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	// Render
+	for (Model* model : M_Scene->models)
+	{
+		u32 numDirLights = M_Scene->dirLights.size();
+		u32 numPointLights = M_Scene->pointLights.size();
 
-	glReadBuffer(GL_COLOR_ATTACHMENT3);
-	glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, HalfWidth, 0, App->displaySize.x, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		// Shader Uniforms
+		BindBuffer(light_uniform);
+		glBindBufferRange(GL_UNIFORM_BUFFER, 0, light_uniform.handle, 0, light_uniform.size);
+		MapBuffer(light_uniform, GL_WRITE_ONLY);
+		PushVec3(light_uniform, M_Scene->camera->pos);
+		PushUInt(light_uniform, numDirLights);
+		for (int i = 0; i < numDirLights; ++i)
+			PushData(light_uniform, M_Scene->dirLights[i], sizeof(DirectionalLight));
+		PushUInt(light_uniform, numPointLights);
+		for (int i = 0; i < numPointLights; ++i)
+			PushData(light_uniform, M_Scene->pointLights[i], sizeof(PointLight));
+
+		// Draw Mesh
+		DrawMesh(model, program);
+
+		// Unbind Shader Uniforms
+		UnmapBuffer(light_uniform);
+	}
+
+	// Disable Shader
+	glUseProgram(0);
 }
 
 void ModuleRenderer::DrawMesh(Model* model, Program* program)
@@ -294,6 +302,6 @@ void ModuleRenderer::RenderType()
 
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.FBO);
 
-	glReadBuffer(GL_COLOR_ATTACHMENT0 + type - 1);
+	glReadBuffer(GL_COLOR_ATTACHMENT0 + renderType - 1);
 	glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, 0, 0, App->displaySize.x, App->displaySize.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 }

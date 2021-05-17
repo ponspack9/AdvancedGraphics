@@ -18,11 +18,15 @@ class PointLight
 {
 public:
     vec3 color;
-    vec3 direction;
     vec3 position;
+    float intensity;
+
+    float att_const;
+    float att_linear;
+    float att_quad;
 
 public:
-    PointLight(vec3 color, vec3 direction, vec3 position);
+    PointLight(vec3 color, vec3 position, float intensity = 1.0f, float att_const = 1.0f, float att_linear = 0.09f, float att_quad = 0.03f);
     ~PointLight();
 
     void DrawInspector(int i);

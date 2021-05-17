@@ -5,7 +5,7 @@
 
 void PanelInspector::Draw()
 {
-	ImGui::Begin("Inspector");
+	ImGui::Begin("Inspector", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 
 	char fps[64];
 	sprintf_s(fps, 64, "FPS: %f", 1.0f / App->deltaTime);
@@ -16,13 +16,12 @@ void PanelInspector::Draw()
 	static int size = ImGui::GetContentRegionAvailWidth();
 
 	ImGui::Combo("Textures", &item_current, items, IM_ARRAYSIZE(items));
-	M_Renderer->type = item_current;
+	M_Renderer->renderType = item_current;
 	ImGui::Separator();
 
 	if (M_Scene->camera != nullptr)
 	{
 		M_Scene->camera->DrawInspector();
-		ImGui::Separator();
 	}
 	
 	ImGui::BeginTabBar("TabBar", ImGuiTabBarFlags_NoTooltip | ImGuiTabBarFlags_NoCloseWithMiddleMouseButton);
