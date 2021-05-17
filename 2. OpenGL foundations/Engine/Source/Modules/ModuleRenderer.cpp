@@ -46,7 +46,8 @@ bool ModuleRenderer::Update(float dt)
 
 	// Light Pass
 	if (renderType == FINAL_SCENE)
-		LightPass(M_Resources->programs[App->lightProgramIdx]);
+		//LightPass(M_Resources->programs[App->lightProgramIdx]);
+		ScenePass(M_Resources->programs[App->texturedGeometryProgramIdx]);
 	else
 		RenderType();
 
@@ -90,7 +91,7 @@ void ModuleRenderer::ScenePass(Program* program)
 		// Shader Uniforms
 		BindBuffer(geometry_uniform);
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, geometry_uniform.handle, 0, geometry_uniform.size);
-		MapBuffer(geometry_uniform, GL_READ_ONLY);
+		MapBuffer(geometry_uniform, GL_WRITE_ONLY);
 		PushMat4(geometry_uniform, transform);
 		PushMat4(geometry_uniform, M_Scene->camera->GetViewProjectionMatrix());
 
