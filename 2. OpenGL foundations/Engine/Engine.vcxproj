@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Utils\GBuffer.cpp" />
     <ClCompile Include="Source\Objects\Camera.cpp" />
     <ClCompile Include="Source\Objects\Light.cpp" />
     <ClCompile Include="Source\Panels\PanelInspector.cpp" />
@@ -65,6 +66,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Utils\GBuffer.h" />
     <ClInclude Include="Source\Objects\Camera.h" />
     <ClInclude Include="Source\Objects\Light.h" />
     <ClInclude Include="Source\Panels\PanelInspector.h" />

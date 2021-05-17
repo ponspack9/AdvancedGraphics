@@ -1,23 +1,32 @@
 #include "pch.h"
 
-Light::Light(Light::Type _type, vec3 _color, vec3 _direction, vec3 _position)
+DirectionalLight::DirectionalLight(vec3 _color, vec3 _direction, float _intensity)
 {
-	type = (u32)_type;
-	//switch (_type)
-	//{
-	//case Light::Type::Directional:	type = 0;
-	//case Light::Type::Point:		type = 1;
-	//}
+	color = _color;
+	direction = _direction;
+	intensity = _intensity;
+}
 
+DirectionalLight::~DirectionalLight()
+{
+}
+
+void DirectionalLight::DrawInspector(int i)
+{
+}
+
+//----------------------------------------------------
+PointLight::PointLight(vec3 _color, vec3 _direction, vec3 _position)
+{
 	color = _color;
 	direction = _direction;
 	position = _position;
 }
 
-Light::~Light()
+PointLight::~PointLight()
 {
 }
 
-void Light::DrawInspector()
+void PointLight::DrawInspector(int i)
 {
 }

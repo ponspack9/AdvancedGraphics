@@ -1,6 +1,6 @@
 #include "pch.h"
 
-Camera::Camera(vec3 _pos, vec3 _center, float _radius, float _fov, float _aspect, float _near_plane, float _far_plane)
+Camera::Camera(vec3 _pos, vec3 _center, float _fov, float _aspect, float _near_plane, float _far_plane)
 {
 	pos = _pos;
 	center = _center;
@@ -11,7 +11,6 @@ Camera::Camera(vec3 _pos, vec3 _center, float _radius, float _fov, float _aspect
 	near_plane = _near_plane;
 	far_plane = _far_plane;
 
-	radius = _radius;
 	speed = 0.01f;
 	yaw = 0.0f;
 	pitch = 0.0f;
@@ -28,16 +27,16 @@ void Camera::DrawInspector()
 {
 	if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::Text("Position");
-		ImGui::SameLine();
-		ImGui::SetNextItemWidth(60.0f);
-		ImGui::DragFloat("x##camera_pos", &pos.x);
-		ImGui::SameLine();
-		ImGui::SetNextItemWidth(60.0f);
-		ImGui::DragFloat("y##camera_pos", &pos.y);
-		ImGui::SameLine();
-		ImGui::SetNextItemWidth(60.0f);
-		ImGui::DragFloat("z##camera_pos", &pos.z);
+		//ImGui::Text("Position");
+		//ImGui::SameLine();
+		//ImGui::SetNextItemWidth(60.0f);
+		//ImGui::DragFloat("x##camera_pos", &pos.x);
+		//ImGui::SameLine();
+		//ImGui::SetNextItemWidth(60.0f);
+		//ImGui::DragFloat("y##camera_pos", &pos.y);
+		//ImGui::SameLine();
+		//ImGui::SetNextItemWidth(60.0f);
+		//ImGui::DragFloat("z##camera_pos", &pos.z);
 
 		ImGui::Text("Center");
 		ImGui::SameLine();
@@ -50,18 +49,10 @@ void Camera::DrawInspector()
 		ImGui::SetNextItemWidth(60.0f);
 		ImGui::DragFloat("z##camera_center", &center.z);
 
-		ImGui::Text("Radius");
-		ImGui::SameLine();
-		ImGui::SetNextItemWidth(60.0f);
-		ImGui::DragFloat("##radius", &radius);
-
 		ImGui::Text("Speed");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(60.0f);
 		ImGui::DragFloat("##speed", &speed);
-
-		ImGui::Text("Angle X: %f", yaw);
-		ImGui::Text("Angle Y: %f", pitch);
 	}
 }
 
@@ -128,7 +119,7 @@ void Camera::Move()
 	rotationMatrixY = glm::rotate(rotationMatrixY, angleY, GetRightVector());
 	glm::vec3 final_pos = (rotationMatrixY * (position - pivot)) + pivot;
 
-	// Update the camera view (we keep the same lookat and the same up vector)
+	// Update the camera view (we keep the same center and the same up vector)
 	pos = final_pos;
 	UpdateViewMatrix();
 }

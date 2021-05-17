@@ -20,13 +20,12 @@ public:
     glm::mat4x4 viewMatrix;
     glm::mat4 projMatrix;
 
-    float radius;
     float speed;
     float yaw; //horizontal
     float pitch; //vertical
 
 public:
-    Camera(vec3 _pos, vec3 _center, float _radius, float _fov, float _aspect, float _near_plane, float _far_plane);
+    Camera(vec3 _pos, vec3 _center, float _fov, float _aspect, float _near_plane, float _far_plane);
     ~Camera();
 
     void DrawInspector();

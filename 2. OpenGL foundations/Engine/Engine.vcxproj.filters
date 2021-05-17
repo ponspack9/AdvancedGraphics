@@ -94,6 +94,7 @@
     <ClCompile Include="Source\Objects\Camera.cpp" />
     <ClCompile Include="Source\Objects\Light.cpp" />
     <ClCompile Include="Source\Objects\Model.cpp" />
+    <ClCompile Include="Source\Utils\GBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThirdParty\imgui-docking\imconfig.h">
@@ -175,6 +176,7 @@
     <ClInclude Include="Source\Objects\Camera.h" />
     <ClInclude Include="Source\Objects\Light.h" />
     <ClInclude Include="Source\Objects\Model.h" />
+    <ClInclude Include="Source\Utils\GBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="WorkingDir\shaders.glsl">

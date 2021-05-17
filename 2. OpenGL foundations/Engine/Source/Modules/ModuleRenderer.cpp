@@ -27,9 +27,6 @@ bool ModuleRenderer::Init()
 	glBindBuffer(GL_UNIFORM_BUFFER, bufferHandle);
 	glBufferData(GL_UNIFORM_BUFFER, maxUniformBufferSize, NULL, GL_STREAM_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-
-
 	return true;
 }
 
@@ -43,7 +40,6 @@ bool ModuleRenderer::Update(float dt)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, App->displaySize.x, App->displaySize.y);
 	glEnable(GL_DEPTH_TEST);
-
 
 	// Draw meshes
 	Program* texturedMeshProgram = M_Resources->programs[App->texturedGeometryProgramIdx];
@@ -68,16 +64,11 @@ bool ModuleRenderer::Update(float dt)
 		transform = glm::rotate(transform, glm::radians(00.0f), glm::vec3(0.0, 0.0, 1.0));
 		transform = glm::scale(transform, model->scale);
 
-		
-
 		memcpy(bufferData + bufferHead, glm::value_ptr(transform), sizeof(glm::mat4));
 		bufferHead += sizeof(glm::mat4);
 
-
 		memcpy(bufferData + bufferHead, glm::value_ptr(M_Scene->camera->GetViewProjectionMatrix()), sizeof(glm::mat4));
 		bufferHead += sizeof(glm::mat4);
-
-		
 
 		for (u32 i = 0; i < mesh->submeshes.size(); ++i)
 		{
@@ -103,41 +94,13 @@ bool ModuleRenderer::Update(float dt)
 
 			glBindVertexArray(0);
 		}
-
 		glUnmapBuffer(GL_UNIFORM_BUFFER);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
-
-	
-
 	glUseProgram(0);
-
 	glPopDebugGroup();
 
 	return true;
-
-	// Update Camera
-	//M_Scene->camera->Move();
-
-	////Get the viewprojection
-	//camera->aspect = window_width / window_height;
-	//Matrix44 viewprojection = camera->getViewProjectionMatrix();
-
-	////enable the shader
-	//shader->enable();
-	//shader->setMatrix44("model", model_matrix); //upload info to the shader
-	//shader->setMatrix44("viewprojection", viewprojection); //upload info to the shader
-
-	//shader->setTexture("color_texture", texture, 0); //set texture in slot 0
-
-	////render the data
-	//mesh->render(GL_TRIANGLES);
-
-	////disable shader
-	//shader->disable();
-
-	////swap between front buffer and back buffer
-	//SDL_GL_SwapWindow(this->window);
 }
 
 #pragma endregion
@@ -152,7 +115,6 @@ GLuint ModuleRenderer::FindVAO(Mesh* mesh, u32 submeshIndex, const Program* prog
 		if (submesh.vaos[i].programHandle == program->handle)
 			return submesh.vaos[i].handle;
 	}
-
 
 	//Create a new vao for this submesh/program
 	GLuint vaoHandle = CreateNewVao(mesh, submesh, program);
@@ -192,10 +154,8 @@ GLuint ModuleRenderer::CreateNewVao(Mesh* mesh, Submesh& submesh, const Program*
 				break;
 			}
 		}
-
 		assert(attributeWasLinked); // The submesh should provide an attribute for each vertex input
 	}
-
 	glBindVertexArray(0);
 
 	return vaoHandle;

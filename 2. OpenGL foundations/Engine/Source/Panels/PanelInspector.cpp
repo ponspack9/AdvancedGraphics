@@ -20,13 +20,32 @@ void PanelInspector::Draw()
 	if (M_Scene->camera != nullptr)
 	{
 		M_Scene->camera->DrawInspector();
-		ImGui::Separator();
 	}
 	
-	for (Model* obj : M_Scene->models)
+	ImGui::BeginTabBar("TabBar", ImGuiTabBarFlags_NoTooltip | ImGuiTabBarFlags_NoCloseWithMiddleMouseButton);
+	if (ImGui::BeginTabItem("Models"))
 	{
-		obj->DrawInspector();
+		for (Model* obj : M_Scene->models)
+		{
+			obj->DrawInspector();
+		}
+		ImGui::EndTabItem();
 	}
+	if (ImGui::BeginTabItem("Lights"))
+	{
+		if (ImGui::CollapsingHeader("Directional", ImGuiTreeNodeFlags_SpanAvailWidth))
+		{
+			for (int i = 0; i < M_Scene->dirLights.size(); ++i)
+				M_Scene->dirLights[i]->DrawInspector(i);
+		}
+		if (ImGui::CollapsingHeader("Point", ImGuiTreeNodeFlags_SpanAvailWidth))
+		{
+			for (int i = 0; i < M_Scene->pointLights.size(); ++i)
+				M_Scene->pointLights[i]->DrawInspector(i);
+		}
+		ImGui::EndTabItem();
+	}
+	ImGui::EndTabBar();
 
 	ImGui::End();
 }
