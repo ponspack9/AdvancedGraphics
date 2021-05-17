@@ -11,27 +11,25 @@ void PanelInspector::Draw()
 	sprintf_s(fps, 64, "FPS: %f", 1.0f / App->deltaTime);
 	ImGui::Text(fps);
 
-	const char* items[] = { "Final Scene", "Albedo", "Normals", "Position", "Depth" };
-	static int item_current = 0;
-	ImGui::Combo("G Buffer", &item_current, items, IM_ARRAYSIZE(items));
-
-	if (item_current == 0) {} //DrawFinalScene()
-	else if (item_current == 1) {} //DrawAlbedo()
-	else if (item_current == 2) {} //DrawNormals()
-	else if (item_current == 3) {} //DrawPosition()
-	else if (item_current == 4) {} //DrawDepth()
-	ImGui::Separator();
-
-	for (GLuint tex : M_Renderer->gbuffer.textures)
-		ImGui::Image((ImTextureID)tex, ImVec2(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth()), ImVec2(0,1), ImVec2(1,0));
-	//ImGui::Image((ImTextureID)M_Renderer->gbuffer.depth_texture, ImVec2(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth()), ImVec2(0, 1), ImVec2(1, 0));
-	
 	if (M_Scene->camera != nullptr)
 	{
 		M_Scene->camera->DrawInspector();
 	}
 	
 	ImGui::BeginTabBar("TabBar", ImGuiTabBarFlags_NoTooltip | ImGuiTabBarFlags_NoCloseWithMiddleMouseButton);
+	if (ImGui::BeginTabItem("G Buffer"))
+	{
+		const char* items[] = { "Albedo", "Normals", "Position", "Depth" };
+		static int item_current = 0;
+		static int size = ImGui::GetContentRegionAvailWidth();
+
+		ImGui::Combo("Textures", &item_current, items, IM_ARRAYSIZE(items));
+		if (item_current == 0)		ImGui::Image((ImTextureID)M_Renderer->gbuffer.textures[0], ImVec2(size, size), ImVec2(0, 1), ImVec2(1, 0));
+		else if (item_current == 1) ImGui::Image((ImTextureID)M_Renderer->gbuffer.textures[1], ImVec2(size, size), ImVec2(0, 1), ImVec2(1, 0));
+		else if (item_current == 2) ImGui::Image((ImTextureID)M_Renderer->gbuffer.textures[2], ImVec2(size, size), ImVec2(0, 1), ImVec2(1, 0));
+		else if (item_current == 3) ImGui::Image((ImTextureID)M_Renderer->gbuffer.textures[3], ImVec2(size, size), ImVec2(0, 1), ImVec2(1, 0));
+		ImGui::EndTabItem();
+	}
 	if (ImGui::BeginTabItem("Models"))
 	{
 		for (Model* obj : M_Scene->models)

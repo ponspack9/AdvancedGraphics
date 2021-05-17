@@ -103,20 +103,21 @@ void ModuleRenderer::ScenePass(Program* program)
 
 		// Draw Mesh
 		DrawMesh(model, program);
+
+		// Unbind Shader Uniforms
+		glUnmapBuffer(GL_UNIFORM_BUFFER);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
 	// Disable Shader
 	glUseProgram(0);
-
-	// Render on screen again
-	//glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.FBO);
 }
 
 void ModuleRenderer::GeometryPass(Program* program)
 {
 	// Render on GBuffer's FBO
 	glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.FBO);
-	
+
 	// Select Render Targets to Draw
 	GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,GL_COLOR_ATTACHMENT3 };
 	glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
@@ -139,7 +140,7 @@ void ModuleRenderer::GeometryPass(Program* program)
 	// Render
 	for (Model* model : M_Scene->models)
 	{
-		// Shader Uniforms
+		// Bind Shader Uniforms
 		glBindBuffer(GL_UNIFORM_BUFFER, bufferHandle);
 		u32 blockSize = sizeof(glm::mat4) * 2;
 		glBindBufferRange(GL_UNIFORM_BUFFER, 1, bufferHandle, 0, blockSize);
@@ -160,13 +161,14 @@ void ModuleRenderer::GeometryPass(Program* program)
 
 		// Draw Mesh
 		DrawMesh(model, program);
+
+		// Unbind Shader Uniforms
+		glUnmapBuffer(GL_UNIFORM_BUFFER);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
 	// Disable Shader
 	glUseProgram(0);
-
-	// Render on screen again
-	//glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.FBO);
 }
 
 void ModuleRenderer::LightPass(Program* program)
@@ -215,15 +217,12 @@ void ModuleRenderer::DrawMesh(Model* model, Program* program)
 			glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
 		else
 			glBindTexture(GL_TEXTURE_2D, 0);
-		//glUniform1i(App->programUniformTexture, 0); // TODO App->texturedMeshProgram_uTexture
 
 		Submesh& submesh = mesh->submeshes[i];
 		glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
 
 		glBindVertexArray(0);
 	}
-	glUnmapBuffer(GL_UNIFORM_BUFFER);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 //--------------------------------------------------------------------
