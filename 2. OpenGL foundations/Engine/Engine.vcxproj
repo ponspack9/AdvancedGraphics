@@ -25,7 +25,6 @@
     <ClCompile Include="Source\Panels\PanelInspector.cpp" />
     <ClCompile Include="Source\Objects\Model.cpp" />
     <ClCompile Include="Source\Modules\ModuleScene.cpp" />
-    <ClCompile Include="Source\Panels\PanelMainMenu.cpp" />
     <ClCompile Include="Source\Modules\ModuleRenderer.cpp" />
     <ClCompile Include="Source\Modules\ModuleResources.cpp" />
     <ClCompile Include="Source\Application.cpp" />
@@ -72,7 +71,6 @@
     <ClInclude Include="Source\Panels\PanelInspector.h" />
     <ClInclude Include="Source\Objects\Model.h" />
     <ClInclude Include="Source\Modules\ModuleScene.h" />
-    <ClInclude Include="Source\Panels\PanelMainMenu.h" />
     <ClInclude Include="Source\Modules\ModuleRenderer.h" />
     <ClInclude Include="Source\Modules\ModuleResources.h" />
     <ClInclude Include="Source\Application.h" />

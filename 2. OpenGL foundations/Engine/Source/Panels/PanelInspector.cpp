@@ -7,6 +7,10 @@ void PanelInspector::Draw()
 {
 	ImGui::Begin("Inspector");
 
+	char fps[64];
+	sprintf_s(fps, 64, "FPS: %f", 1.0f / App->deltaTime);
+	ImGui::Text(fps);
+
 	const char* items[] = { "Final Scene", "Albedo", "Normals", "Position", "Depth" };
 	static int item_current = 0;
 	ImGui::Combo("G Buffer", &item_current, items, IM_ARRAYSIZE(items));

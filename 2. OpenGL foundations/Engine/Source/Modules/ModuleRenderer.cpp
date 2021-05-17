@@ -109,7 +109,7 @@ void ModuleRenderer::GeometryPass(Program* program)
 	glUseProgram(0);
 
 	// Render on screen again
-	glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.FBO);
+	//glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.FBO);
 }
 
 void ModuleRenderer::LightPass(Program* program)

@@ -84,9 +84,6 @@
     <ClCompile Include="Source\Modules\ModuleRenderer.cpp">
       <Filter>Engine\Modules</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Panels\PanelMainMenu.cpp">
-      <Filter>Engine\Panels</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Modules\ModuleScene.cpp">
       <Filter>Engine\Modules</Filter>
     </ClCompile>
@@ -162,9 +159,6 @@
     </ClInclude>
     <ClInclude Include="Source\Modules\ModuleRenderer.h">
       <Filter>Engine\Modules</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Panels\PanelMainMenu.h">
-      <Filter>Engine\Panels</Filter>
     </ClInclude>
     <ClInclude Include="Source\Modules\ModuleScene.h">
       <Filter>Engine\Modules</Filter>
