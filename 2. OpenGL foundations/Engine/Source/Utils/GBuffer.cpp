@@ -62,7 +62,7 @@ bool GBuffer::Init()
     }
 
     // Draw Buffers
-    GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
     glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
 
     // Restore default FBO

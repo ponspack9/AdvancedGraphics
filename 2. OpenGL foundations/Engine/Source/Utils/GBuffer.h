@@ -7,6 +7,7 @@ public:
         ALBEDO,
         NORMALS,
         POSITION,
+        DEPTH,
         NUM_TEXTURES
     };
 

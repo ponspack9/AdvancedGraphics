@@ -118,7 +118,7 @@ void ModuleRenderer::GeometryPass(Program* program)
 	glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.FBO);
 	
 	// Select Render Targets to Draw
-	GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,GL_COLOR_ATTACHMENT3 };
 	glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
 
 	// Clear Color and Depth

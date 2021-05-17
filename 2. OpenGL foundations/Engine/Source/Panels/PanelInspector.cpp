@@ -24,7 +24,7 @@ void PanelInspector::Draw()
 
 	for (GLuint tex : M_Renderer->gbuffer.textures)
 		ImGui::Image((ImTextureID)tex, ImVec2(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth()), ImVec2(0,1), ImVec2(1,0));
-	ImGui::Image((ImTextureID)M_Renderer->gbuffer.depth_texture, ImVec2(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth()), ImVec2(0, 1), ImVec2(1, 0));
+	//ImGui::Image((ImTextureID)M_Renderer->gbuffer.depth_texture, ImVec2(ImGui::GetContentRegionAvailWidth(), ImGui::GetContentRegionAvailWidth()), ImVec2(0, 1), ImVec2(1, 0));
 	
 	if (M_Scene->camera != nullptr)
 	{

@@ -27,8 +27,6 @@ void main()
 	vNormal		= vec3(uWorldMatrix * vec4(aNormal, 0.0));
 
 	gl_Position = uWorldViewProjectionMatrix * vec4(vPosition, 1.0);
-	//gl_Position = vec4(aPosition, clippingScale);
-	//gl_Position.z = -gl_Position.z;
 }
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
