@@ -19,25 +19,26 @@ public:
 	bool Init() override;
 	bool Update(float dt) override;
 
-	void ScenePass(Program* program);
-
 	void GeometryPass(Program* program);
 	void LightPass(Program* program);
-
-	void DrawMesh(Model* mesh, Program* program);
 
 private:
 	GLuint FindVAO(Mesh* mesh, u32 submeshIndex, const Program* program);
 	GLuint CreateNewVao(Mesh* mesh, Submesh& submesh, const Program* program);
 
 	void RenderType();
+    void LoadUniforms();
 
 public:
-	Buffer geometry_uniform;
-    Buffer light_uniform;
-
     u32 renderType;
+	Buffer uniforms;
 	GBuffer gbuffer;
+
+private:
+    GLint maxUniformBufferSize;
+    GLint uniformBlockAlignment;
+    u32 globalParams_offset;
+    u32 globalParams_size;
 
 	// ------------------------- BUFFERS --------------------------------
     bool IsPowerOf2(u32 value)

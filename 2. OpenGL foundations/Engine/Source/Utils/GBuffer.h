@@ -4,6 +4,7 @@ class GBuffer
 {
 public:
     enum Textures {
+        LIGHT,
         ALBEDO,
         NORMALS,
         POSITION,

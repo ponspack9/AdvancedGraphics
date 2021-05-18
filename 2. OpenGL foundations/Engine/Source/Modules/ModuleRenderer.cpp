@@ -20,13 +20,10 @@ ModuleRenderer::~ModuleRenderer()
 
 bool ModuleRenderer::Init()
 {
-	u32 geometry_size = sizeof(glm::mat4) * 2;
-	u32 lights_size = sizeof(glm::vec3) + sizeof(u32) + sizeof(DirectionalLight) * M_Scene->dirLights.size() + 
-										  sizeof(u32) + sizeof(PointLight) * M_Scene->pointLights.size();
-
 	// Create Uniforms Buffer
-	geometry_uniform = CreateConstantBuffer(geometry_size);
-	light_uniform = CreateConstantBuffer(lights_size);
+	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBufferSize);
+	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniformBlockAlignment);
+	uniforms = CreateConstantBuffer(maxUniformBufferSize);
 
 	// Init GBuffer
 	gbuffer.Init();
@@ -41,202 +38,115 @@ bool ModuleRenderer::Update(float dt)
 	// Update Camera
 	M_Scene->camera->Move();
 
-	// Geometry Pass
+	// Load Uniforms Buffer
+	LoadUniforms();
+
+	// --- Render
+	glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.FBO); // Render on GBuffer's FBO
+	GLenum drawBuffers[] = {
+		GL_COLOR_ATTACHMENT0, // Light
+		GL_COLOR_ATTACHMENT1, // Albedo
+		GL_COLOR_ATTACHMENT2, // Normals
+		GL_COLOR_ATTACHMENT3, // Position
+		GL_COLOR_ATTACHMENT4, // Depth
+	};
+	glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
+
+	// Clear Screen & Set Viewport
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, App->displaySize.x, App->displaySize.y);
+
+	// Set Default Flags
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
+	// --- Geometry Pass
 	GeometryPass(M_Resources->programs[App->texturedGeometryProgramIdx]);
 
-	// Light Pass
-	if (renderType == FINAL_SCENE)
+	// --- Light Pass
+	if (renderType == FINAL_SCENE) {}
 		//LightPass(M_Resources->programs[App->lightProgramIdx]);
-		ScenePass(M_Resources->programs[App->texturedGeometryProgramIdx]);
 	else
 		RenderType();
 
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glPopDebugGroup();
-
 	return true;
 }
 
 #pragma endregion
 
-// Render to screen
-void ModuleRenderer::ScenePass(Program* program)
-{
-	// Render on GBuffer's FBO
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glDrawBuffer(GL_BACK);
-
-	// Clear Color and Depth
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// Viewport
-	glViewport(0, 0, App->displaySize.x, App->displaySize.y);
-
-	// Set Default Flags
-	glDisable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-
-	// Enable Shader
-	glUseProgram(program->handle);
-
-	// Render
-	for (Model* model : M_Scene->models)
-	{
-		glm::mat4 transform = glm::mat4(1.0f);
-		transform = glm::translate(transform, model->position);
-		transform = glm::rotate(transform, glm::radians(00.0f), glm::vec3(0.0, 0.0, 1.0));
-		transform = glm::scale(transform, model->scale);
-
-		// Shader Uniforms
-		BindBuffer(geometry_uniform);
-		glBindBufferRange(GL_UNIFORM_BUFFER, 0, geometry_uniform.handle, 0, geometry_uniform.size);
-		MapBuffer(geometry_uniform, GL_WRITE_ONLY);
-		PushMat4(geometry_uniform, transform);
-		PushMat4(geometry_uniform, M_Scene->camera->GetViewProjectionMatrix());
-
-		// Draw Mesh
-		DrawMesh(model, program);
-
-		// Unbind Shader Uniforms
-		UnmapBuffer(geometry_uniform);
-	}
-
-	// Disable Shader
-	glUseProgram(0);
-}
-
 void ModuleRenderer::GeometryPass(Program* program)
 {
-	// Render on GBuffer's FBO
-	glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.FBO);
-
-	// Select Render Targets to Draw
-	GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,GL_COLOR_ATTACHMENT3 };
-	glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
-
-	// Clear Color and Depth
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// Viewport
-	glViewport(0, 0, App->displaySize.x, App->displaySize.y);
-
-	// Set Default Flags
-	glDisable(GL_BLEND);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-
 	// Enable Shader
 	glUseProgram(program->handle);
-
+	
 	// Render
 	for (Model* model : M_Scene->models)
 	{
-		glm::mat4 transform = glm::mat4(1.0f);
-		transform = glm::translate(transform, model->position);
-		transform = glm::rotate(transform, glm::radians(00.0f), glm::vec3(0.0, 0.0, 1.0));
-		transform = glm::scale(transform, model->scale);
-
-		// Shader Uniforms
-		BindBuffer(geometry_uniform);
-		glBindBufferRange(GL_UNIFORM_BUFFER, 0, geometry_uniform.handle, 0, geometry_uniform.size);
-		MapBuffer(geometry_uniform, GL_WRITE_ONLY);
-		PushMat4(geometry_uniform, transform);
-		PushMat4(geometry_uniform, M_Scene->camera->GetViewProjectionMatrix());
+		//Bind Local Params
+		glBindBufferRange(GL_UNIFORM_BUFFER, 0, uniforms.handle, model->localParams_offset, sizeof(glm::mat4) * 2);
 
 		// Draw Mesh
-		DrawMesh(model, program);
+		Mesh* mesh = model->mesh;
+		if (mesh == nullptr) continue;
+		for (u32 i = 0; i < mesh->submeshes.size(); ++i)
+		{
+			// VAO
+			GLuint vao = FindVAO(mesh, i, program);
+			glBindVertexArray(vao);
 
-		// Unbind Shader Uniforms
-		UnmapBuffer(geometry_uniform);
+			// Material
+			u32 submeshMaterialIdx = model->materialIdx[i];
+			Material* submeshMaterial = M_Resources->materials[submeshMaterialIdx];
+
+			// Pass Textures to Uniform
+			glActiveTexture(GL_TEXTURE0);
+			if (submeshMaterial->albedoTexture)
+				glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
+			else
+				glBindTexture(GL_TEXTURE_2D, 0);
+			glUniform1i(App->programUniformTexture, 0);
+
+			// Draw
+			Submesh& submesh = mesh->submeshes[i];
+			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+
+			glBindVertexArray(0);
+		}
 	}
-
-	// Disable Shader
-	glUseProgram(0);
+	glUseProgram(0); // Disable Shader
 }
 
 void ModuleRenderer::LightPass(Program* program)
 {
-	// Render on Default Framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glDrawBuffer(GL_BACK);
-
-	// Clear Color and Depth
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// Viewport
-	glViewport(0, 0, App->displaySize.x, App->displaySize.y);
-
-	// Set Default Flags
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);
-
 	// Enable Shader
 	glUseProgram(program->handle);
 
+	// Pass the Textures in Order
+	glUniform1i(glGetUniformLocation(program->handle, "oAlbedo"),	0);
+	glUniform1i(glGetUniformLocation(program->handle, "oNormal"),	1);
+	glUniform1i(glGetUniformLocation(program->handle, "oPosition"), 2);
+	glUniform1i(glGetUniformLocation(program->handle, "oDepth"),	3);
+
+	glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[1]);
+	glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[2]);
+	glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[3]);
+	glActiveTexture(GL_TEXTURE3); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[4]);
+
+	// Draw on Final Color Attachment
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+	glDepthMask(false);
+	glBindBufferRange(GL_UNIFORM_BUFFER, 0, uniforms.handle, globalParams_offset, globalParams_size); // Bind GlobalParams
+
 	// Render
-	for (Model* model : M_Scene->models)
-	{
-		u32 numDirLights = M_Scene->dirLights.size();
-		u32 numPointLights = M_Scene->pointLights.size();
+	RenderType();
 
-		// Shader Uniforms
-		BindBuffer(light_uniform);
-		glBindBufferRange(GL_UNIFORM_BUFFER, 0, light_uniform.handle, 0, light_uniform.size);
-		MapBuffer(light_uniform, GL_WRITE_ONLY);
-		PushVec3(light_uniform, M_Scene->camera->pos);
-		PushUInt(light_uniform, numDirLights);
-		for (int i = 0; i < numDirLights; ++i)
-			PushData(light_uniform, M_Scene->dirLights[i], sizeof(DirectionalLight));
-		PushUInt(light_uniform, numPointLights);
-		for (int i = 0; i < numPointLights; ++i)
-			PushData(light_uniform, M_Scene->pointLights[i], sizeof(PointLight));
-
-		// Draw Mesh
-		DrawMesh(model, program);
-
-		// Unbind Shader Uniforms
-		UnmapBuffer(light_uniform);
-	}
-
-	// Disable Shader
-	glUseProgram(0);
-}
-
-void ModuleRenderer::DrawMesh(Model* model, Program* program)
-{
-	if (model->mesh == nullptr) 
-		return;
-
-	Mesh* mesh = model->mesh;
-	for (u32 i = 0; i < mesh->submeshes.size(); ++i)
-	{
-		GLuint vao = FindVAO(mesh, i, program);
-
-		glBindVertexArray(vao);
-
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		u32 submeshMaterialIdx = model->materialIdx[i];
-		Material* submeshMaterial = M_Resources->materials[submeshMaterialIdx];
-
-		glActiveTexture(GL_TEXTURE0);
-		if (submeshMaterial->albedoTexture)
-			glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
-		else
-			glBindTexture(GL_TEXTURE_2D, 0);
-
-		Submesh& submesh = mesh->submeshes[i];
-		glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
-
-		glBindVertexArray(0);
-	}
+	glDepthMask(true);
+	glUseProgram(0); // Disable Shader
 }
 
 //--------------------------------------------------------------------
@@ -305,4 +215,44 @@ void ModuleRenderer::RenderType()
 
 	glReadBuffer(GL_COLOR_ATTACHMENT0 + renderType - 1);
 	glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, 0, 0, App->displaySize.x, App->displaySize.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+}
+
+void ModuleRenderer::LoadUniforms()
+{
+	MapBuffer(uniforms, GL_WRITE_ONLY);
+
+	//Global params
+	globalParams_offset = uniforms.head;
+	PushVec3(uniforms, M_Scene->camera->pos);
+	PushUInt(uniforms, M_Scene->lights.size());
+
+	for (Light* light : M_Scene->lights)
+	{
+		AlignHead(uniforms, sizeof(vec4));
+
+		PushUInt(uniforms, light->type);
+		PushUInt(uniforms, (u32)light->range);
+		PushVec3(uniforms, light->color);
+		PushVec3(uniforms, light->direction);
+		PushVec3(uniforms, light->position);
+	}
+	globalParams_size = uniforms.head - globalParams_offset;
+
+	//Local params
+	for (Model* model : M_Scene->models)
+	{
+		glm::mat4 transform = glm::mat4(1.0f);
+		transform = glm::translate(transform, model->position);
+		transform = glm::rotate(transform, glm::radians(00.0f), glm::vec3(0.0, 0.0, 1.0));
+		transform = glm::scale(transform, model->scale);
+
+		AlignHead(uniforms, uniformBlockAlignment);
+
+		model->localParams_offset = uniforms.head;
+		PushMat4(uniforms, transform);
+		PushMat4(uniforms, M_Scene->camera->GetViewProjectionMatrix());
+		model->localParams_size = uniforms.head - model->localParams_offset;
+	}
+
+	UnmapBuffer(uniforms);
 }
