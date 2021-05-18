@@ -275,7 +275,7 @@ std::string ModuleResources::GetDirectoryPart(std::string path)
     if (pos != std::string::npos)
         return path.substr(0, path.length() - pos);
 
-    LOG_WARN("Could not get directory part from {0}", path);
+    //LOG_WARN("Could not get directory part from {0}", path);
     return path; // not found
 }
 std::string ModuleResources::GetFileNamePart(std::string path)
@@ -287,7 +287,7 @@ std::string ModuleResources::GetFileNamePart(std::string path)
     if (pos != std::string::npos)
         return path.substr(pos, path.length()-1);
 
-    LOG_ERROR("Could not get directory part from {0}", path);
+    //LOG_ERROR("Could not get directory part from {0}", path);
     return path; // not found
 }
 std::string ModuleResources::ReadTextFile(const char* filepath)
@@ -373,7 +373,7 @@ GLuint ModuleResources::CreateProgramFromSource(std::string programSource, const
     if (!success)
     {
         glGetShaderInfoLog(vshader, infoLogBufferSize, &infoLogSize, infoLogBuffer);
-        LOG_ERROR("glCompileShader() failed with vertex shader %s\nReported message:\n%s\n", shaderName, infoLogBuffer);
+        LOG_ERROR("glCompileShader() failed with vertex shader {0}\nReported message:\n{1}\n", shaderName, infoLogBuffer);
     }
 
     GLuint fshader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -383,7 +383,7 @@ GLuint ModuleResources::CreateProgramFromSource(std::string programSource, const
     if (!success)
     {
         glGetShaderInfoLog(fshader, infoLogBufferSize, &infoLogSize, infoLogBuffer);
-        LOG_ERROR("glCompileShader() failed with fragment shader %s\nReported message:\n%s\n", shaderName, infoLogBuffer);
+        LOG_ERROR("glCompileShader() failed with fragment shader {0}\nReported message:\n{1}\n", shaderName, infoLogBuffer);
     }
 
     GLuint programHandle = glCreateProgram();
@@ -394,7 +394,7 @@ GLuint ModuleResources::CreateProgramFromSource(std::string programSource, const
     if (!success)
     {
         glGetProgramInfoLog(programHandle, infoLogBufferSize, &infoLogSize, infoLogBuffer);
-        LOG_ERROR("glLinkProgram() failed with program %s\nReported message:\n%s\n", shaderName, infoLogBuffer);
+        LOG_ERROR("glLinkProgram() failed with program {0}\nReported message:\n{1}\n", shaderName, infoLogBuffer);
     }
 
     glUseProgram(0);
