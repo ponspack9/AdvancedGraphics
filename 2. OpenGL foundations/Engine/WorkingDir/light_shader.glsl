@@ -34,7 +34,7 @@ in vec2 vTexCoord;
 in vec3 vPosition;
 in vec3 vNormal;
 
-layout(binding = 0, std140) uniform GlobalParams
+layout(binding = 1, std140) uniform GlobalParams
 {
 	vec3 uCameraPos;
 
@@ -75,7 +75,7 @@ vec4 CalcDirLight(DirectionalLight light, vec3 pos, vec3 normal)
 	vec3 dir = normalize(light.dir);
 	vec3 halfway_dir = normalize(dir + pos);
 
-	float diffusse = max(dot(normal, dir), 0.0);
+	float diffuse = max(dot(normal, dir), 0.0);
 	float specular = pow(max(dot(normal, halfway_dir), 0.0), 256.0);
 
 	vec3 color = light.color * light.intensity * (diffuse + specular);
@@ -84,7 +84,7 @@ vec4 CalcDirLight(DirectionalLight light, vec3 pos, vec3 normal)
 
 vec4 CalcPointLight(PointLight light, vec3 pos, vec3 normal)
 {
-	vec3 position = light.pos.xyz - v_Position;
+	vec3 position = light.pos.xyz - vPosition;
 	float dist = length(position);
 	vec3 dir = normalize(position);
 	vec3 halfway_dir = normalize(dir + pos);
@@ -93,7 +93,7 @@ vec4 CalcPointLight(PointLight light, vec3 pos, vec3 normal)
 	float specular = pow(max(dot(normal, halfway_dir), 0.0), 256.0);
 
 	float attenuation = 1.0 / (light.att_const + light.att_linear * dist + light.att_quad * dist * dist);
-	vec4 color = light.Color * light.intensity * attenuation * (diffuse + specular);
+	vec4 color = light.color * light.intensity * attenuation * (diffuse + specular);
 	
 	return vec4(color.rgb, 1.0);
 }
@@ -104,20 +104,22 @@ void main()
 {
 	vec4 light_color = 0.0;
 	vec3 albedo = texture(uTexture, vTexCoord).xyz;
-	vec3 pos = texture(vPosition, vTexCoord).xyz;
+	vec3 pos	  = texture(vPosition, vTexCoord).xyz;
 	vec3 normal = texture(vNormal, vTexCoord).xyz;
 	normal = normalize(normal);
-
+	
 	// Calculate Directional Lights
 	for (int i = 0; i < uNumDirectional; ++i)
 		light_color += CalcDirLight(uDirLights[i], pos, normal);
-
+	
 	// Calculate Point Lights
 	for (int j = 0; j < uNumPoint; ++j)
 		light_color += CalcPointLight(uPointLights[j], pos, normal);
-
+	
 	// Get Final Color
     oColor = vec4(albedo, 1.0) + light_color;
+
+	//oColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
 
 #endif
