@@ -38,11 +38,11 @@ bool ModuleScene::Init()
 	patricio2->index = "2";
 	models.push_back(patricio2);
 
-	//Model* plane = new Model(*M_Resources->plane);
-	//plane->position = { 0,-4,0 };
-	//plane->scale = { 10,10,10 };
-	//plane->index = "55";
-	//models.push_back(plane);
+	Model* plane = new Model(*M_Resources->plane);
+	plane->position = { 0,-4,0 };
+	plane->scale = { 10,10,10 };
+	plane->index = "55";
+	models.push_back(plane);
 
 	// Directional Lights
 	Light* dlight1 = new Light(Light::LightType::DIRECTIONAL, glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(2.0f, 5.0f, 3.0f));

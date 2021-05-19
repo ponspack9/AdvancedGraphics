@@ -13,8 +13,6 @@ void PanelInspector::Draw()
 
 	const char* items[] = { "Final Scene", "Albedo", "Normals", "Position", "Depth" };
 	static int item_current = 0;
-	static int size = ImGui::GetContentRegionAvailWidth();
-
 	ImGui::Combo("Textures", &item_current, items, IM_ARRAYSIZE(items));
 	M_Renderer->renderType = item_current;
 	ImGui::Separator();

@@ -66,12 +66,11 @@ bool ModuleRenderer::Update(float dt)
 	GeometryPass(M_Resources->programs[App->texturedGeometryProgramIdx]);
 
 	// --- Light Pass
-	if (renderType == FINAL_SCENE) {}
-		//LightPass(M_Resources->programs[App->lightProgramIdx]);
-	else
-		RenderType();
+	LightPass(M_Resources->programs[App->lightProgramIdx]);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	// --- Render to Screen
+	RenderType();
+
 	glPopDebugGroup();
 	return true;
 }
@@ -82,12 +81,12 @@ void ModuleRenderer::GeometryPass(Program* program)
 {
 	// Enable Shader
 	glUseProgram(program->handle);
-	
+
 	// Render
 	for (Model* model : M_Scene->models)
 	{
 		//Bind Local Params
-		glBindBufferRange(GL_UNIFORM_BUFFER, 0, uniforms.handle, model->localParams_offset, sizeof(glm::mat4) * 2);
+		glBindBufferRange(GL_UNIFORM_BUFFER, 1, uniforms.handle, model->localParams_offset, sizeof(glm::mat4) * 2);
 
 		// Draw Mesh
 		Mesh* mesh = model->mesh;
@@ -104,10 +103,7 @@ void ModuleRenderer::GeometryPass(Program* program)
 
 			// Pass Textures to Uniform
 			glActiveTexture(GL_TEXTURE0);
-			if (submeshMaterial->albedoTexture)
-				glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
-			else
-				glBindTexture(GL_TEXTURE_2D, 0);
+			glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
 			glUniform1i(App->programUniformTexture, 0);
 
 			// Draw
@@ -138,15 +134,12 @@ void ModuleRenderer::LightPass(Program* program)
 
 	// Draw on Final Color Attachment
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
-
 	glDepthMask(false);
-	glBindBufferRange(GL_UNIFORM_BUFFER, 0, uniforms.handle, globalParams_offset, globalParams_size); // Bind GlobalParams
-
-	// Render
-	RenderType();
+	glBindBufferRange(GL_UNIFORM_BUFFER, 0, uniforms.handle, globalParams_offset, globalParams_size);
 
 	glDepthMask(true);
 	glUseProgram(0); // Disable Shader
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 //--------------------------------------------------------------------
@@ -213,7 +206,7 @@ void ModuleRenderer::RenderType()
 
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.FBO);
 
-	glReadBuffer(GL_COLOR_ATTACHMENT0 + renderType - 1);
+	glReadBuffer(GL_COLOR_ATTACHMENT0 + renderType);
 	glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, 0, 0, App->displaySize.x, App->displaySize.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 }
 
@@ -230,7 +223,7 @@ void ModuleRenderer::LoadUniforms()
 	{
 		AlignHead(uniforms, sizeof(vec4));
 
-		PushUInt(uniforms, light->type);
+		PushUInt(uniforms, (u32)light->type);
 		PushUInt(uniforms, (u32)light->range);
 		PushVec3(uniforms, light->color);
 		PushVec3(uniforms, light->direction);
