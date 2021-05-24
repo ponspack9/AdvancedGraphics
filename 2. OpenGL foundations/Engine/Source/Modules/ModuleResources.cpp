@@ -471,27 +471,28 @@ u32 ModuleResources::LoadProgram(const char* filepath, const char* programName)
     program->lastWriteTimestamp = ModuleResources::GetFileLastWriteTimestamp(filepath);
 
     // getting info from the shader
-    GLint attributeCount = 0;
-    GLsizei attributeNameLength = 0;
-    GLsizei attributeSize = 0;
+    GLint attributeSize = 0;
     GLenum attributeType = 0;
-    char attributeName[64] = "NONE";
-    u8 stride = 0;
+    const GLsizei bufferSize = 64;
+    GLchar attributeName[bufferSize];
 
+    GLint attributeCount = 0;
     glGetProgramiv(program->handle, GL_ACTIVE_ATTRIBUTES, &attributeCount);
 
     for (int i = 0; i < attributeCount; ++i)
     {
-        glGetActiveAttrib(program->handle, i, ARRAY_COUNT(attributeName), &attributeNameLength, &attributeSize, &attributeType, attributeName);
-        GLuint attributeLocation = glGetAttribLocation(program->handle, attributeName);
-        // ASK: We do really need anything else than the location?
-        VertexBufferAttribute attribute = { attributeLocation, attributeSize,stride };
+        VertexShaderAttribute attribute = {};
+        GLsizei attributeNameLength = 0;
 
-        program->vertexInputLayout.attributes.push_back(attribute);
-        stride += attributeSize;
+        glGetActiveAttrib(program->handle, (GLuint)i, bufferSize,
+            &attributeNameLength, &attributeSize, &attributeType, attributeName);
+
+        attribute.componentCount = attributeSize;
+        attribute.location = glGetAttribLocation(program->handle, attributeName);
+
+        program->vertexShaderLayout.attributes.push_back(attribute);
     }
 
-    program->vertexInputLayout.stride = stride;
     M_Resources->programs.push_back(program);
     return M_Resources->programs.size() - 1;
 }

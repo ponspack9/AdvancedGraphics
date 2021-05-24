@@ -156,6 +156,7 @@ GLuint ModuleRenderer::FindVAO(Mesh* mesh, u32 submeshIndex, const Program* prog
 
 	//Create a new vao for this submesh/program
 	GLuint vaoHandle = CreateNewVao(mesh, submesh, program);
+
 	//Store it in the list of vaos for this submesh
 	VAO vao = { vaoHandle, program->handle };
 	submesh.vaos.push_back(vao);
@@ -173,12 +174,12 @@ GLuint ModuleRenderer::CreateNewVao(Mesh* mesh, Submesh& submesh, const Program*
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->indexBufferHandle);
 
 	// We have to link all vertex inputs attributes to attributes in the vertex buffer
-	for (u32 i = 0; i < program->vertexInputLayout.attributes.size(); ++i)
+	for (u32 i = 0; i < program->vertexShaderLayout.attributes.size(); ++i)
 	{
 		bool attributeWasLinked = false;
 		for (u32 j = 0; j < submesh.vertexBufferLayout.attributes.size(); ++j)
 		{
-			if (program->vertexInputLayout.attributes[i].location == submesh.vertexBufferLayout.attributes[j].location)
+			if (program->vertexShaderLayout.attributes[i].location == submesh.vertexBufferLayout.attributes[j].location)
 			{
 				const u32 index = submesh.vertexBufferLayout.attributes[j].location;
 				const u32 nComp = submesh.vertexBufferLayout.attributes[j].componentCount;

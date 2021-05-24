@@ -137,7 +137,7 @@ enum ButtonState {
         std::string        filepath;
         std::string        programName;
         u64                lastWriteTimestamp;
-        VertexBufferLayout vertexInputLayout;
+        VertexShaderLayout vertexShaderLayout;
     };
 
     // VBO + Shader
