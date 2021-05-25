@@ -61,38 +61,38 @@ layout(location = 0) out vec4 oColor;
 
 void main()
 {
-    //vec3 iAlbedo   = texture(oAlbedo, vTexCoord).rgb;
-	//vec3 iNormal   = texture(oNormal, vTexCoord).rgb;
-	//vec3 iPosition = texture(oPosition, vTexCoord).rgb;
-    //
-    //vec3 normal = normalize(iNormal);
-    //float ambient = 0.4;
-    //vec3 lightColor = iAlbedo * ambient;
-    //vec3 viewDir = normalize(vViewDir - iPosition);
-    //
-    //for(int i = 0; i < uLightCount; ++i)
-    //{
-    //    // Diffuse
-    //    vec3 lightDir = normalize(uLight[i].position - iPosition);
-    //    vec3 diffuse = max(dot(normal, lightDir), 0.0) * iAlbedo * uLight[i].color;
-    //
-    //    // Specular
-    //    vec3 halfwayDir = normalize(lightDir + viewDir);  
-    //    float spec_factor = pow(max(dot(normal, halfwayDir), 0.0), 60.0);
-    //    vec3 specular = uLight[i].color * spec_factor * vec3(1.0);
-    //
-    //    // Attenuation
-    //    float attenuation = 1.0f;
-    //    float dist = length(uLight[i].position - iPosition);
-    //    attenuation = 1.0 / (1.0 + 0.1 * dist + 0.02 * dist * dist);
-    //    
-    //    lightColor += attenuation * (diffuse + specular);   
-    //}
-    //
-    //// Final Color
-    //oColor = vec4(lightColor, 1.0);
+    vec3 iAlbedo   = texture(oAlbedo, vTexCoord).rgb;
+	vec3 iNormal   = texture(oNormal, vTexCoord).rgb;
+	vec3 iPosition = texture(oPosition, vTexCoord).rgb;
+    
+    vec3 normal = normalize(iNormal);
+    float ambient = 0.4;
+    vec3 lightColor = iAlbedo * ambient;
+    vec3 viewDir = normalize(vViewDir - iPosition);
+    
+    for(int i = 0; i < uLightCount; ++i)
+    {
+        // Diffuse
+        vec3 lightDir = normalize(uLight[i].position - iPosition);
+        vec3 diffuse = max(dot(normal, lightDir), 0.0) * iAlbedo * uLight[i].color;
+    
+        // Specular
+        vec3 halfwayDir = normalize(lightDir + viewDir);  
+        float spec_factor = pow(max(dot(normal, halfwayDir), 0.0), 60.0);
+        vec3 specular = uLight[i].color * spec_factor * vec3(1.0);
+    
+        // Attenuation
+        float attenuation = 1.0f;
+        float dist = length(uLight[i].position - iPosition);
+        attenuation = 1.0 / (1.0 + 0.1 * dist + 0.02 * dist * dist);
+        
+        lightColor += attenuation * (diffuse + specular);   
+    }
+    
+    // Final Color
+    oColor = vec4(lightColor, 1.0);
 
-    oColor = vec4(1.0, 0.0, 0.0, 1.0);
+    //oColor = vec4(1.0, 0.0, 0.0, 1.0);
 }
 
 #endif

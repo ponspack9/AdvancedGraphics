@@ -40,6 +40,9 @@ private:
     u32 globalParams_offset;
     u32 globalParams_size;
 
+    u32 quadVAO = 0;
+    u32 quadVBO = 0;
+
 	// ------------------------- BUFFERS --------------------------------
     bool IsPowerOf2(u32 value)
     {
