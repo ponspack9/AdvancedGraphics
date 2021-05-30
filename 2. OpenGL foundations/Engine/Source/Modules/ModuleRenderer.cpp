@@ -76,11 +76,8 @@ void ModuleRenderer::GeometryPass(Program* program)
 
 	// Set Default Flags
 	glEnable(GL_DEPTH_TEST);
-	glDepthMask(true);
+	glDepthMask(GL_TRUE);
 	glDisable(GL_BLEND);
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_CCW);
 
 	// Enable Shader
 	glUseProgram(program->handle);
@@ -152,7 +149,7 @@ void ModuleRenderer::LightPass(Program* dirLight_program, Program* pointLight_pr
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
-	glFrontFace(GL_CW); // render only the inner faces of the light sphere
+	//glFrontFace(GL_CW); // render only the inner faces of the light sphere
 
 	// Enable Point Light Shader
 	glUseProgram(pointLight_program->handle);
@@ -165,15 +162,23 @@ void ModuleRenderer::LightPass(Program* dirLight_program, Program* pointLight_pr
 	glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[2]);
 	glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[3]);
 
-	//for (PointLight* light : M_Scene->pointLights)
-	//{
-	//	glDrawBuffer(GL_COLOR_ATTACHMENT0);
-	//	glBindBufferRange(GL_UNIFORM_BUFFER, 1, uniforms.handle, light->localParams_offset, light->localParams_size);
+	glUniform3f(glGetUniformLocation(pointLight_program->handle, "uCameraPos"), M_Scene->camera->pos.x, M_Scene->camera->pos.y, M_Scene->camera->pos.z);
+	glUniformMatrix4fv(glGetUniformLocation(pointLight_program->handle, "uViewProjection"), 1, GL_FALSE, (GLfloat*)&M_Scene->camera->GetViewProjectionMatrix());
 
-	//	glBindVertexArray(M_Resources->quadVAO);
-	//	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	//	glBindVertexArray(0);
-	//}
+
+	for (PointLight* light : M_Scene->pointLights)
+	{
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		
+		glUniform1f(glGetUniformLocation(pointLight_program->handle, "uLightRadius"), light->radius);
+		glUniform3f(glGetUniformLocation(pointLight_program->handle, "uLightPosition"), light->position.x, light->position.y, light->position.z);
+		glUniform3f(glGetUniformLocation(pointLight_program->handle, "uLightColor"), light->color.x, light->color.y, light->color.z);
+
+		// draw sphere
+		glBindVertexArray(M_Resources->sphereVAO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, M_Resources->sphereIdxVBO);
+		glDrawElements(GL_TRIANGLES, M_Resources->sphereIdxCount, GL_UNSIGNED_INT, NULL);
+	}
 
 	glUseProgram(0); // Disable Shader
 }

@@ -59,9 +59,11 @@ public:
 	u32 quadVBO = 0;
 
 	// Sphere
-	u32 sphereVAO = 0;
-	u32 sphereVBO = 0;
+	GLuint sphereVAO;
+	GLuint spherePosVBO;
+	GLuint sphereIdxVBO;
 	GLuint sphereIdxCount;
+
 };
 
 extern ModuleResources* M_Resources;
