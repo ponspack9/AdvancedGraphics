@@ -131,9 +131,11 @@ void ModuleRenderer::LightPass(Program* dirLight_program, Program* pointLight_pr
 	glUniform1i(glGetUniformLocation(dirLight_program->handle, "oAlbedo"), 0);
 	glUniform1i(glGetUniformLocation(dirLight_program->handle, "oNormal"), 1);
 	glUniform1i(glGetUniformLocation(dirLight_program->handle, "oPosition"), 2);
+	glUniform1i(glGetUniformLocation(dirLight_program->handle, "oDepth"), 3);
 	glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[1]);
 	glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[2]);
 	glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[3]);
+	glActiveTexture(GL_TEXTURE3); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[4]);
 
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 	glBindBufferRange(GL_UNIFORM_BUFFER, 1, uniforms.handle, M_Scene->dirLight->localParams_offset, M_Scene->dirLight->localParams_size);
