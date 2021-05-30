@@ -32,74 +32,24 @@ in vec2 vTexCoord;
 in vec3 vViewDir;
 in mat4 invertProj;
 
-layout(binding = 1, std140) uniform LightParams
-{
-    vec3 light_color;
-    vec3 light_direction;
-};          
-
 uniform sampler2D oAlbedo;
 uniform sampler2D oNormal;
 uniform sampler2D oPosition;
 uniform sampler2D oDepth;
 
 layout(location = 0) out vec4 oColor;
+layout(binding = 1, std140) uniform LightParams
+{
+    vec3 light_color;
+    vec3 light_direction;
+};          
 
 float rand(vec2 co) {
     return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
-float unpackFloat(vec4 rgbaDepth) {
-    const vec4 bitShift = vec4(1.0 / (256.0 * 256.0 * 256.0), 1.0 / (256.0 * 256.0), 1.0 / 256.0, 1.0);
-    return dot(rgbaDepth, bitShift);
-}
-
-vec3 normal_from_depth(float depth, vec2 texcoords) {
-    const vec2 offset1 = vec2(0.0, 0.001);
-    const vec2 offset2 = vec2(0.001, 0.0);
-
-    float depth1 = texture2D(oDepth, texcoords + offset1).r;
-    float depth2 = texture2D(oDepth, texcoords + offset2).r;
-
-    vec3 p1 = vec3(offset1, depth1 - depth);
-    vec3 p2 = vec3(offset2, depth2 - depth);
-
-    vec3 normal = cross(p1, p2);
-    normal.z = -normal.z;
-    return normalize(normal);
-}
-
 vec3 adjustContrast(vec3 color, float value) {
     return 0.5 + value * (color - 0.5);
-}
-
-mat4 contrastMatrix(float contrast)
-{
-    float t = (1.0 - contrast) / 2.0;
-
-    return mat4(contrast, 0, 0, 0,
-        0, contrast, 0, 0,
-        0, 0, contrast, 0,
-        t, t, t, 1);
-
-}
-
-vec3 adjustExposure(vec3 color, float value) {
-    return (1.0 + value) * color;
-}
-
-vec3 VSPositionFromDepth(vec2 uv)
-{
-    // Get the depth value for this pixel
-    float z = texture2D(oDepth, uv).r;
-    // Get x/w and y/w from the viewport position
-    float x = uv.x * 2.0 - 1.0;
-    float y = (1.0 - uv.y) * 2.0 - 1.0;
-    vec4 vProjectedPos = vec4(x, y, z, 1.0);
-    // Transform by the inverse projection matrix
-    vec4 vPositionVS = invertProj * vProjectedPos;
-    // Divide by w to get the view-space position
-    return vPositionVS.xyz / vPositionVS.w;
 }
 
 
@@ -120,19 +70,7 @@ void main(void) {
     vec3 final_color = diffuse + specular + ambient;
 
     // SSAO
-
-    const float base = 0.2;
     vec2 screen = vec2(800.0, 600.0);
-    const float total_strength = 20.0;
-    const float area = 0.0075;
-    const float radius = 0.005;
-
-    //radius = textureSize(oAlbedo, 0);
-    const float falloff = 0.0001;
-
-    float contrast = total_strength;
-    float depth = adjustContrast(texture2D(oDepth, vTexCoord).xyz, contrast).r;
-    float radius_depth = radius / depth;
 
     const int uSampleKernelSize = 16;
     vec3 sample_sphere[uSampleKernelSize];
@@ -156,23 +94,16 @@ void main(void) {
     vec3 random = normalize(vec3(rand(vTexCoord), rand(vTexCoord + vec2(10.0, 1.0)), rand(vTexCoord) + vec2(10.0, 50.0)));
 
     vec2 ndc = vTexCoord * 2.0 - 1.0;
-    float fov = 45.0;
+    float fov = 60.0;
     float aspect = screen.x / screen.y;
     float thfov = tan(fov / 2.0); // can do this on the CPU
-    vec3 viewray = vec3(
-        ndc.x * thfov * aspect,
-        ndc.y * thfov,
-        1.0
-    );
+    vec3 viewray = vec3(ndc.x * thfov * aspect, ndc.y * thfov, 1.0);
 
 
-    vec2 uNoiseScale = vec2(screen.x / 8.0, screen.y / 8.0);
     vec3 origin = viewray * texture2D(oDepth, vTexCoord).r;
-    //  origin.z *= texture2D(oDepth, vTexCoord).r;
-    //vec3 normal = normal_from_depth(texture2D(oDepth, vTexCoord).r, vTexCoord);
 
     // TODO noiseTexture
-    vec3 noiseVec = texture2D(oNormal, vTexCoord * uNoiseScale).xyz;
+    vec3 noiseVec = texture2D(oNormal, vTexCoord).xyz;
     noiseVec.xy -= 0.5;
     noiseVec.xy /= 0.5;
 
@@ -183,7 +114,7 @@ void main(void) {
     mat3 tbn = mat3(tangent, bitangent, normal);
 
 
-    float uRadius = 3.0;
+    float uRadius = 1.0;
 
     float occlusion = 0.0;
     for (int i = 0; i < uSampleKernelSize; i++)
@@ -204,17 +135,13 @@ void main(void) {
 
         // range check & accumulate:
         float rangeCheck = abs(originDepth - sampleDepth) < uRadius ? 1.0 : 0.0;
-        occlusion += (sampleDepth <= sampleSphere.z ? 1.0 : 0.0);
+        occlusion += (sampleDepth < sampleSphere.z ? 1.0 : 0.0);
     }
 
     float ao = 1.0 - (occlusion / 16.0);
 
     oColor = mix(vec4(final_color, 1.0), vec4(0.0, 0.0, 0.0, 1.0), ao);
-    //oColor = mix(texture2D(oAlbedo, vTexCoord), vec4(0.0, 0.0, 0.0, 1.0), ao);
-    //gl_FragColor.xyz = vec3(ao);
-
-    //gl_FragColor.a = 1.0;
-    // Final Color
+    oColor = mix(vec4(final_color, 1.0), vec4(final_color*0.5, 1.0), ao);
     //oColor = vec4(final_color, 1.0);
 }
 

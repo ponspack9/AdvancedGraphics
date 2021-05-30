@@ -17,6 +17,8 @@ void PanelInspector::Draw()
 	M_Renderer->renderType = item_current;
 	ImGui::Separator();
 
+	ImGui::Checkbox("SSAO", &M_Renderer->applySSAO);
+
 	if (M_Scene->camera != nullptr)
 	{
 		M_Scene->camera->DrawInspector();
