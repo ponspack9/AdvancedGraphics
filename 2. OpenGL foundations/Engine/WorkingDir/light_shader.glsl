@@ -1,32 +1,16 @@
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-#ifdef LIGHTING
-
-struct Light
-{
-    int type;
-    float range;
-    vec3 color;
-    vec3 direction;
-    vec3 position;
-};
+#ifdef DIRECTIONAL_LIGHT
 
 #if defined(VERTEX) ///////////////////////////////////////////////////
 
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec2 aTexCoord;
 
-layout(binding = 0, std140) uniform GlobalParams
-{
-    vec3   uCameraPos;
-    int    uLightCount;
-    Light  uLight[16];
-};
-
 layout(binding = 1, std140) uniform LocalParams
 {
-	mat4 uWorldMatrix;
+	vec3 uCameraPos;
 	mat4 uWorldViewProjectionMatrix;
 };
 
@@ -45,61 +29,106 @@ void main()
 in vec2 vTexCoord;
 in vec3 vViewDir;
 
-layout(binding = 0, std140) uniform GlobalParams
+layout(binding = 1, std140) uniform LightParams
 {
-    vec3   uCameraPos;
-    int    uLightCount;
-    Light  uLight[16];
+    vec3 light_color;
+    vec3 light_direction;
 };          
 
 uniform sampler2D oAlbedo;
 uniform sampler2D oNormal;
 uniform sampler2D oPosition;
-uniform sampler2D oDepth;
 
 layout(location = 0) out vec4 oColor;
 
 void main()
 {
-    vec3 iAlbedo   = texture(oAlbedo, vTexCoord).rgb;
-	vec3 iNormal   = texture(oNormal, vTexCoord).rgb;
-	vec3 iPosition = texture(oPosition, vTexCoord).rgb;
+    vec3 albedo   = texture(oAlbedo, vTexCoord).rgb;
+	vec3 normal   = normalize(texture(oNormal, vTexCoord).rgb);
+	vec3 position = texture(oPosition, vTexCoord).rgb;
     
-    vec3 normal = normalize(iNormal);
-    float ambient = 0.4;
-    vec3 lightColor = iAlbedo * ambient;
-    vec3 viewDir = normalize(vViewDir - iPosition);
+    vec3 lightDir = normalize(light_direction);
+    vec3 viewDir = normalize(vViewDir - position);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
     
-    for(int i = 0; i < uLightCount; ++i)
-    {
-        // Diffuse
-        vec3 lightDir = normalize(uLight[i].position - iPosition);
-        vec3 diffuse = max(dot(normal, lightDir), 0.0) * iAlbedo * uLight[i].color;
+    vec3 ambient = albedo * 0.4;
+    vec3 diffuse = max(0.0, dot(normal, lightDir)) * albedo * light_color;
+    vec3 specular = pow(max(0.0, dot(halfwayDir, normal)), 32.0) * light_color;
     
-        // Specular
-        vec3 halfwayDir = normalize(lightDir + viewDir);  
-        float spec_factor = pow(max(dot(normal, halfwayDir), 0.0), 60.0);
-        vec3 specular = uLight[i].color * spec_factor * vec3(1.0);
-    
-        // Attenuation
-        float attenuation = 1.0f;
-        float dist = length(uLight[i].position - iPosition);
-        attenuation = 1.0 / (1.0 + 0.1 * dist + 0.02 * dist * dist);
-        
-        lightColor += attenuation * (diffuse + specular);   
-    }
-    
-    // Final Color
-    oColor = vec4(lightColor, 1.0);
+    vec3 final_color = diffuse + specular + ambient;
 
-    //oColor = vec4(1.0, 0.0, 0.0, 1.0);
+    // Final Color
+    oColor = vec4(final_color, 1.0);
 }
 
 #endif
 #endif
 
 
-// NOTE: You can write several shaders in the same file if you want as
-// long as you embrace them within an #ifdef block (as you can see above).
-// The third parameter of the LoadProgram function in engine.cpp allows
-// chosing the shader you want to load by name.
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+#ifdef POINT_LIGHT
+
+#if defined(VERTEX) ///////////////////////////////////////////////////
+
+layout(location = 0) in vec3 aPosition;
+layout(location = 1) in vec2 aTexCoord;
+
+out vec2 vTexCoord;
+
+void main()
+{
+	vTexCoord = aTexCoord;
+	gl_Position = vec4(aPosition, 1.0);
+}
+
+#elif defined(FRAGMENT) ///////////////////////////////////////////////
+
+in vec2 vTexCoord;
+
+layout(binding = 1, std140) uniform LightParams
+{
+    vec3 uCameraPos;
+    vec3 light_color;
+    vec3 light_position;
+    float light_radius;
+};          
+
+uniform sampler2D oAlbedo;
+uniform sampler2D oNormal;
+uniform sampler2D oPosition;
+
+layout(location = 0) out vec4 oColor;
+
+void main()
+{
+    //vec3 albedo   = texture(oAlbedo, vTexCoord).rgb;
+	//vec3 normal   = normalize(texture(oNormal, vTexCoord).rgb);
+	//vec3 position = texture(oPosition, vTexCoord).rgb;
+    //
+    //vec3 lightToPos = position - light_position;
+    //float lightDist = length(lightToPos);
+    //vec3 l = -lightToPos / (lightDist);
+    //float ztest = step(0.0, light_radius - lightDist);
+    //
+    //// Attenuation
+    //float d = lightDist / light_radius;
+    //float attenuation = 1.0 - d;
+    //vec3 v = normalize(uCameraPos - position);
+    //vec3 h = normalize(l + v);
+    //
+    //vec3 diffuse = max(0.0, dot(normal, l)) * albedo * light_color;
+    //vec3 specular = pow(max(0.0, dot(h, normal)), 12.0) * light_color;
+    //
+    //vec3 lightColor = diffuse + specular;
+    //lightColor *= ztest * attenuation;
+    //
+    //// Final Color
+    //oColor = vec4(lightColor, 1.0);
+
+    oColor = vec4(1.0, 0.0, 0.0, 1.0);
+}
+
+#endif
+#endif

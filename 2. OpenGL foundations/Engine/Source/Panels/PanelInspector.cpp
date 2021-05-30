@@ -26,29 +26,19 @@ void PanelInspector::Draw()
 	if (ImGui::BeginTabItem("Models"))
 	{
 		for (Model* obj : M_Scene->models)
-		{
 			obj->DrawInspector();
-		}
+
 		ImGui::EndTabItem();
 	}
 	if (ImGui::BeginTabItem("Lights"))
 	{
-		if (ImGui::CollapsingHeader("Directional", ImGuiTreeNodeFlags_SpanAvailWidth))
-		{
-			for (int i = 0; i < M_Scene->lights.size(); ++i)
-			{
-				if (M_Scene->lights[i]->type == Light::LightType::DIRECTIONAL)
-					M_Scene->lights[i]->DrawInspector(Light::LightType::DIRECTIONAL, i);
-			}
-		}
-		if (ImGui::CollapsingHeader("Point", ImGuiTreeNodeFlags_SpanAvailWidth))
-		{
-			for (int i = 0; i < M_Scene->lights.size(); ++i)
-			{
-				if (M_Scene->lights[i]->type == Light::LightType::POINT)
-					M_Scene->lights[i]->DrawInspector(Light::LightType::POINT, i);
-			}
-		}
+		// Directional Light
+		M_Scene->dirLight->DrawInspector();
+
+		// Point Lights
+		for (int i = 0; i < M_Scene->pointLights.size(); ++i)
+			M_Scene->pointLights[i]->DrawInspector(i);
+
 		ImGui::EndTabItem();
 	}
 	ImGui::EndTabBar();

@@ -20,7 +20,7 @@ public:
 	bool Update(float dt) override;
 
 	void GeometryPass(Program* program);
-	void LightPass(Program* program);
+	void LightPass(Program* dirLight_program, Program* pointLight_program);
 
 private:
 	GLuint FindVAO(Mesh* mesh, u32 submeshIndex, const Program* program);
@@ -37,11 +37,8 @@ public:
 private:
     GLint maxUniformBufferSize;
     GLint uniformBlockAlignment;
-    u32 globalParams_offset;
-    u32 globalParams_size;
-
-    u32 quadVAO = 0;
-    u32 quadVBO = 0;
+    u32 pointLights_offset;
+    u32 pointLights_size;
 
 	// ------------------------- BUFFERS --------------------------------
     bool IsPowerOf2(u32 value)

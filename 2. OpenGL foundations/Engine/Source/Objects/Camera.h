@@ -3,6 +3,7 @@
 #define FOV 60
 #define NEAR_PLANE 0.1
 #define FAR_PLANE 10000
+#define ZOOM_SPEED 10.0
 
 class Camera
 {
@@ -29,7 +30,7 @@ public:
     ~Camera();
 
     void DrawInspector();
-    void Move();
+    void Move(float dt);
 
     void UpdateViewMatrix();
     void UpdateProjMatrix();

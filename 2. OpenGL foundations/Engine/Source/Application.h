@@ -37,7 +37,8 @@ public:
 
     // program indices
     u32 texturedGeometryProgramIdx;
-    u32 lightProgramIdx;
+    u32 dirLightProgramIdx;
+    u32 pointLightProgramIdx;
 
     // texture indices
     u32 diceTexIdx;

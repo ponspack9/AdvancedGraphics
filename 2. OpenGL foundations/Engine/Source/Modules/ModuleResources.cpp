@@ -25,9 +25,12 @@ bool ModuleResources::Init()
 {
     // Programs
     App->texturedGeometryProgramIdx = LoadProgram("shaders.glsl", "TEXTURED_GEOMETRY");
-    App->lightProgramIdx = LoadProgram("light_shader.glsl", "LIGHTING");
+    App->dirLightProgramIdx = LoadProgram("light_shader.glsl", "DIRECTIONAL_LIGHT");
+    App->pointLightProgramIdx = LoadProgram("light_shader.glsl", "POINT_LIGHT");
 
     // Primitives
+    CreateQuad();
+    CreateSphere();
     plane = LoadModel("plane.obj");
     cube = LoadModel("cube.obj");
     sphereLow = LoadModel("Low_sphere.obj");
@@ -609,6 +612,75 @@ Model* ModuleResources::LoadModel(const char* filename)
     return 0;
 }
 
+void ModuleResources::CreateQuad()
+{
+    // Create Quad VAO & VBO
+    float quadVertices[] = {
+        // positions        // texture Coords
+        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+         1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+         1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+    };
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+}
+
+void ModuleResources::CreateSphere(int stacks, int slices) 
+{
+    std::vector<float> positions;
+    std::vector<GLuint> indices;
+
+    // loop through stacks.
+    for (int i = 0; i <= stacks; ++i) {
+
+        float V = (float)i / (float)stacks;
+        float phi = V * PI;
+
+        // loop through the slices.
+        for (int j = 0; j <= slices; ++j) {
+
+            float U = (float)j / (float)slices;
+            float theta = U * (PI * 2);
+
+            // use spherical coordinates to calculate the positions.
+            float x = cos(theta) * sin(phi);
+            float y = cos(phi);
+            float z = sin(theta) * sin(phi);
+
+            positions.push_back(x);
+            positions.push_back(y);
+            positions.push_back(z);
+        }
+    }
+
+    // Calc The Index Positions
+    for (int i = 0; i < slices * stacks + slices; ++i) {
+        indices.push_back(GLuint(i));
+        indices.push_back(GLuint(i + slices + 1));
+        indices.push_back(GLuint(i + slices));
+
+        indices.push_back(GLuint(i + slices + 1));
+        indices.push_back(GLuint(i));
+        indices.push_back(GLuint(i + 1));
+    }
+    sphereIdxCount = indices.size();
+
+    glGenVertexArrays(1, &sphereVAO);
+    glGenBuffers(1, &sphereVBO);
+    glBindVertexArray(sphereVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, sphereVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * positions.size(), positions.data(), GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+}
 #pragma endregion
 
 

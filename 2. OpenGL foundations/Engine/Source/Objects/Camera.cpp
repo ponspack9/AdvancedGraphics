@@ -11,7 +11,7 @@ Camera::Camera(vec3 _pos, vec3 _center, float _fov, float _aspect, float _near_p
 	near_plane = _near_plane;
 	far_plane = _far_plane;
 
-	speed = 0.01f;
+	speed = 1.0f;
 	yaw = 0.0f;
 	pitch = 0.0f;
 
@@ -47,47 +47,47 @@ void Camera::DrawInspector()
 	}
 }
 
-void Camera::Move()
+void Camera::Move(float dt)
 {
 	float prev_yaw = yaw;
 	float prev_pitch = pitch;
 
 	if (GetKeyState('A') & 0x8000) // Left
 	{
-		yaw -= speed;
+		yaw -= speed * dt;
 		if (yaw < 0.0f)
 			yaw += TAU;
 	}
 	else if (GetKeyState('D') & 0x8000) // Right
 	{
-		yaw += speed;
+		yaw += speed * dt;
 		if (yaw > TAU)
 			yaw -= TAU;
 	}
 
 	if (GetKeyState('W') & 0x8000) // Up
 	{
-		pitch += speed;
+		pitch += speed * dt;
 		if (pitch > 75.0f * PI / 180)
 			pitch = 75.0f * PI / 180;
 	}
 	else if (GetKeyState('S') & 0x8000) // Down
 	{
-		pitch -= speed;
+		pitch -= speed * dt;
 		if (pitch < 0.0f)
 			pitch = 0.0f;
 	}
 
 	if (GetKeyState('Q') & 0x8000) // Zoom In
 	{
-		fov -= 0.1f;
+		fov -= ZOOM_SPEED * dt;
 		if (fov < 1.0f)
 			fov = 1.0f;
 		UpdateProjMatrix();
 	}
 	else if (GetKeyState('E') & 0x8000) // Zoom Out
 	{
-		fov += 0.1f;
+		fov += ZOOM_SPEED * dt;
 		if (fov > FOV)
 			fov = FOV;
 		UpdateProjMatrix();

@@ -1,23 +1,34 @@
 #pragma once
 
-class Light
+class DirectionalLight
 {
 public:
-    enum LightType
-    {
-        DIRECTIONAL,
-        POINT
-    };
-
-    vec3 position;
-    vec3 direction;
-    LightType type;
     vec3 color;
-    float range;
+    vec3 direction;
+
+    u32 localParams_offset;
+    u32 localParams_size;
 
 public:
-    Light(LightType type, vec3 color, vec3 dir, vec3 pos = glm::vec3(0.0f), float range = 0.0f) : type(type), position(pos), direction(dir), color(color), range(range) {};
-    ~Light() {};
+    DirectionalLight(vec3 color, vec3 dir) : direction(dir), color(color) {};
+    ~DirectionalLight() {};
 
-    void DrawInspector(LightType type, int count);
+    void DrawInspector();
+};
+
+class PointLight
+{
+public:
+    vec3 color;
+    vec3 position;
+    float radius;
+
+    u32 localParams_offset;
+    u32 localParams_size;
+
+public:
+    PointLight(vec3 color, vec3 position, float radius) : position(position), color(color), radius(radius) {};
+    ~PointLight() {};
+
+    void DrawInspector(int count);
 };

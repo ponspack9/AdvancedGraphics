@@ -12,7 +12,8 @@ public:
 public:
 	Camera* camera = nullptr;
 	std::vector<Model*> models;
-	std::vector<Light*> lights;
+	DirectionalLight* dirLight = nullptr;
+	std::vector<PointLight*> pointLights;
 };
 
 extern ModuleScene* M_Scene;
