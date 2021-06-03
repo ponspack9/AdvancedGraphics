@@ -34,6 +34,8 @@ public:
 	Buffer uniforms;
 	GBuffer gbuffer;
 
+    bool applySSAO = true;
+
 private:
     GLint maxUniformBufferSize;
     GLint uniformBlockAlignment;
