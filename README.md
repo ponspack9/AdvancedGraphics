@@ -18,6 +18,7 @@ QE to zoom in/out.
 
 * **Free Moving:**
 WASD to move.
+QE to move up/down.
 Left-Click to rotate.
 
 ## Renders
