@@ -9,8 +9,13 @@ class Camera
 {
 public:
     glm::vec3 pos; // Camera position in 3D
+    glm::vec3 rot; // Camera rotation
     glm::vec3 center; // Point that the camera is looking at
+
+    // Vectors
     glm::vec3 up; // Orientation of the camera
+    glm::vec3 front;
+    glm::vec3 right;
 
     // Perspective
     float fov;			//view angle in degrees (1/zoom)
@@ -18,12 +23,19 @@ public:
     float near_plane;	//near plane
     float far_plane;	//far plane
 
+    // Matrices
     glm::mat4x4 viewMatrix;
     glm::mat4 projMatrix;
 
-    float speed;
+    // Angles
     float yaw; //horizontal
     float pitch; //vertical
+
+    float orbit_speed;
+    float move_speed;
+
+    bool isOrbital;
+    bool isFree;
 
 public:
     Camera(vec3 _pos, vec3 _center, float _fov, float _aspect, float _near_plane, float _far_plane);
@@ -32,6 +44,10 @@ public:
     void DrawInspector();
     void Move(float dt);
 
+    void Orbit(float dt);
+    void WASD_Move(float dt);
+
+    void UpdateVectors(); // Free move camera
     void UpdateViewMatrix();
     void UpdateProjMatrix();
     glm::mat4 GetViewProjectionMatrix();
