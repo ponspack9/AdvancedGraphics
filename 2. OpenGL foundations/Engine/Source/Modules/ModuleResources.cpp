@@ -25,8 +25,9 @@ bool ModuleResources::Init()
 {
     // Programs
     App->texturedGeometryProgramIdx = LoadProgram("shaders.glsl", "TEXTURED_GEOMETRY");
-    App->dirLightProgramIdx = LoadProgram("light_shaderSSAO.glsl", "DIRECTIONAL_LIGHT");
+    App->dirLightProgramIdx = LoadProgram("light_shader.glsl", "DIRECTIONAL_LIGHT");
     App->pointLightProgramIdx = LoadProgram("light_shader.glsl", "POINT_LIGHT");
+    App->SSAOProgramIdx = LoadProgram("light_shaderSSAO.glsl", "DIRECTIONAL_LIGHT");
 
     // Primitives
     CreateQuad();

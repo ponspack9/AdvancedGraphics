@@ -56,7 +56,10 @@ bool ModuleRenderer::Update(float dt)
 	GeometryPass(M_Resources->programs[App->texturedGeometryProgramIdx]);
 	
 	// --- Light Pass
-	LightPass(M_Resources->programs[App->dirLightProgramIdx], M_Resources->programs[App->pointLightProgramIdx]);
+	if (applySSAO)
+		LightPass(M_Resources->programs[App->SSAOProgramIdx], M_Resources->programs[App->SSAOProgramIdx]);
+	else
+		LightPass(M_Resources->programs[App->dirLightProgramIdx], M_Resources->programs[App->pointLightProgramIdx]);
 
 	// --- Render to Screen
 	RenderType();
