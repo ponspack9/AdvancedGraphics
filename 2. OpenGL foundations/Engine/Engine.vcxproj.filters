@@ -177,5 +177,6 @@
       <Filter>Engine\Shaders</Filter>
     </None>
     <None Include="WorkingDir\light_shader.glsl" />
+    <None Include="WorkingDir\relief_mapping.glsl" />
   </ItemGroup>
 </Project>

@@ -40,6 +40,7 @@ public:
     u32 dirLightProgramIdx;
     u32 pointLightProgramIdx;
     u32 SSAOProgramIdx;
+    u32 reliefMappingProgramIdx;
 
     // texture indices
     u32 diceTexIdx;

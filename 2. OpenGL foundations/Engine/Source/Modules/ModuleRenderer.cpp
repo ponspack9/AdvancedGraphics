@@ -72,6 +72,11 @@ bool ModuleRenderer::Update(float dt)
 
 void ModuleRenderer::GeometryPass(Program* program)
 {
+	Program* reliefMap_program = M_Resources->programs[App->reliefMappingProgramIdx];
+	Program* curr_program = program;
+
+	bool reliefMapping_On = false;
+
 	// Clear Screen & Set Viewport
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -82,12 +87,21 @@ void ModuleRenderer::GeometryPass(Program* program)
 	glDepthMask(GL_TRUE);
 	glDisable(GL_BLEND);
 
-	// Enable Shader
-	glUseProgram(program->handle);
-
 	// Render
 	for (Model* model : M_Scene->models)
 	{
+		if (model->useReliefMap)
+		{
+			curr_program = reliefMap_program;
+			glUseProgram(curr_program->handle);
+			glUniform3f(glGetUniformLocation(curr_program->handle, "uCameraPos"), M_Scene->camera->pos.x, M_Scene->camera->pos.y, M_Scene->camera->pos.z);
+		}
+		else
+		{
+			curr_program = program;
+			glUseProgram(curr_program->handle);
+		}
+
 		//Bind Local Params
 		glBindBufferRange(GL_UNIFORM_BUFFER, 1, uniforms.handle, model->localParams_offset, model->localParams_size);
 
@@ -97,7 +111,7 @@ void ModuleRenderer::GeometryPass(Program* program)
 		for (u32 i = 0; i < mesh->submeshes.size(); ++i)
 		{
 			// VAO
-			GLuint vao = FindVAO(mesh, i, program);
+			GLuint vao = FindVAO(mesh, i, curr_program);
 			glBindVertexArray(vao);
 
 			// Material
@@ -107,20 +121,23 @@ void ModuleRenderer::GeometryPass(Program* program)
 			// Pass Textures to Uniform
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
-			glUniform1i(App->programUniformTexture, 0);
+			glUniform1i(glGetUniformLocation(curr_program->handle, "uTexture"), 0);
 
-			if (submeshMaterial->normalsTexture != nullptr)
+			if (model->useReliefMap)
 			{
-				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, submeshMaterial->normalsTexture->handle);
-				glUniform1i(glGetUniformLocation(program->handle, "uNormalMap"), 1);
-			}
+				if (submeshMaterial->normalsTexture != nullptr)
+				{
+					glActiveTexture(GL_TEXTURE1);
+					glBindTexture(GL_TEXTURE_2D, submeshMaterial->normalsTexture->handle);
+					glUniform1i(glGetUniformLocation(curr_program->handle, "uNormalMap"), 1);
+				}
 
-			if (submeshMaterial->bumpTexture != nullptr)
-			{
-				glActiveTexture(GL_TEXTURE2);
-				glBindTexture(GL_TEXTURE_2D, submeshMaterial->bumpTexture->handle);
-				glUniform1i(glGetUniformLocation(program->handle, "uBumpTexture"), 2);
+				if (submeshMaterial->bumpTexture != nullptr)
+				{
+					glActiveTexture(GL_TEXTURE2);
+					glBindTexture(GL_TEXTURE_2D, submeshMaterial->bumpTexture->handle);
+					glUniform1i(glGetUniformLocation(curr_program->handle, "uBumpTexture"), 2);
+				}
 			}
 
 			// Draw
@@ -168,7 +185,7 @@ void ModuleRenderer::LightPass(Program* dirLight_program, Program* pointLight_pr
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_ONE, GL_ONE);
-	//glFrontFace(GL_CW); // render only the inner faces of the light sphere
+	glFrontFace(GL_CW); // render only the inner faces of the light sphere
 
 	// Enable Point Light Shader
 	glUseProgram(pointLight_program->handle);

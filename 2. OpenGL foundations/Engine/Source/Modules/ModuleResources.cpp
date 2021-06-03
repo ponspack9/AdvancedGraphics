@@ -28,6 +28,7 @@ bool ModuleResources::Init()
     App->dirLightProgramIdx = LoadProgram("light_shader.glsl", "DIRECTIONAL_LIGHT");
     App->pointLightProgramIdx = LoadProgram("light_shader.glsl", "POINT_LIGHT");
     App->SSAOProgramIdx = LoadProgram("light_shaderSSAO.glsl", "DIRECTIONAL_LIGHT");
+    App->reliefMappingProgramIdx = LoadProgram("relief_mapping.glsl", "RELIEF_MAPPING");
 
     // Primitives
     CreateQuad();

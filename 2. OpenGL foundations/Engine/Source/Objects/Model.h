@@ -19,6 +19,8 @@ public:
     u32 localParams_offset;
     u32 localParams_size;
 
+    bool useReliefMap = false;
+
     // ImGui things
     std::string index = "0";
 };

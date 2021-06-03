@@ -6,6 +6,7 @@
 
 Model::Model()
 {
+    useReliefMap = false;
 }
 
 Model::~Model()
