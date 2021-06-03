@@ -24,7 +24,7 @@ ModuleResources::~ModuleResources()
 bool ModuleResources::Init()
 {
     // Programs
-    App->texturedGeometryProgramIdx = LoadProgram("shaders.glsl", "TEXTURED_GEOMETRY");
+    App->texturedGeometryProgramIdx = LoadProgram("shaders.glsl", "GEOMETRY_PASS");
     App->dirLightProgramIdx = LoadProgram("light_shader.glsl", "DIRECTIONAL_LIGHT");
     App->pointLightProgramIdx = LoadProgram("light_shader.glsl", "POINT_LIGHT");
     App->SSAOProgramIdx = LoadProgram("light_shaderSSAO.glsl", "DIRECTIONAL_LIGHT");
@@ -33,9 +33,6 @@ bool ModuleResources::Init()
     CreateQuad();
     CreateSphere();
     plane = LoadModel("plane.obj");
-    cube = LoadModel("cube.obj");
-    sphereLow = LoadModel("Low_sphere.obj");
-    sphereHigh = LoadModel("High_sphere.obj");
     
     App->mode = Mode::Mode_TexturedQuad;
 
@@ -275,6 +272,13 @@ std::string ModuleResources::GetDirectoryPart(std::string path)
     size_t pos = path.rfind('/');
     if (pos == std::string::npos)
         pos = path.rfind('\\');
+
+    if (pos != std::string::npos)
+    {
+       std::string tmp_path = path.substr(0, path.length() - pos);
+       if (tmp_path.find(".") != std::string::npos)
+           return tmp_path.substr(0, tmp_path.length() - 1);
+    }
 
     if (pos != std::string::npos)
         return path.substr(0, path.length() - pos);

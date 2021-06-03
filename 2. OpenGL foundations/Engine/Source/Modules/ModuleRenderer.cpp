@@ -109,6 +109,20 @@ void ModuleRenderer::GeometryPass(Program* program)
 			glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
 			glUniform1i(App->programUniformTexture, 0);
 
+			if (submeshMaterial->normalsTexture != nullptr)
+			{
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, submeshMaterial->normalsTexture->handle);
+				glUniform1i(glGetUniformLocation(program->handle, "uNormalMap"), 1);
+			}
+
+			if (submeshMaterial->bumpTexture != nullptr)
+			{
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, submeshMaterial->bumpTexture->handle);
+				glUniform1i(glGetUniformLocation(program->handle, "uBumpTexture"), 2);
+			}
+
 			// Draw
 			Submesh& submesh = mesh->submeshes[i];
 			glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);

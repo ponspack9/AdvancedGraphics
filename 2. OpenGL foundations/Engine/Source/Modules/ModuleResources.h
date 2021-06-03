@@ -50,9 +50,6 @@ public:
 	std::vector<Program*>	programs;
 
 	Model* plane;
-	Model* cube;
-	Model* sphereLow;
-	Model* sphereHigh;
 
 	// Quad
 	u32 quadVAO = 0;

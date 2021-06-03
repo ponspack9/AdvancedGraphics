@@ -38,6 +38,11 @@ bool ModuleScene::Init()
 	patricio2->index = "2";
 	models.push_back(patricio2);
 
+	Model* cube = M_Resources->LoadModel("Box/Cube.fbx");
+	cube->position = { 0,0,0 };
+	cube->index = "3";
+	models.push_back(cube);
+
 	Model* plane = new Model(*M_Resources->plane);
 	plane->position = { 0,-4,0 };
 	plane->scale = { 10,10,10 };
