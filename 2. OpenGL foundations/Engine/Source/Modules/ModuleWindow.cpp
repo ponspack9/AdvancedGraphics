@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ModuleWindow.h"
+#include "ModuleScene.h"
 #include <PanelInfo.h>
 
 
@@ -13,9 +14,12 @@ void OnGlfwError(int errorCode, const char* errorMessage)
 void OnGlfwMouseMoveEvent(GLFWwindow* window, double xpos, double ypos)
 {
     App->input.mouseDelta.x = xpos - App->input.mousePos.x;
-    App->input.mouseDelta.y = ypos - App->input.mousePos.y;
+    App->input.mouseDelta.y = App->input.mousePos.y - ypos;
     App->input.mousePos.x = xpos;
     App->input.mousePos.y = ypos;
+
+    if (M_Window->mouse_click && M_Scene->camera->isFree)
+        M_Scene->camera->MouseMovement(App->input.mouseDelta.x, App->input.mouseDelta.y);
 }
 
 void OnGlfwMouseEvent(GLFWwindow* window, int button, int event, int modifiers)
@@ -23,20 +27,20 @@ void OnGlfwMouseEvent(GLFWwindow* window, int button, int event, int modifiers)
     switch (event) {
     case GLFW_PRESS:
         switch (button) {
-        case GLFW_MOUSE_BUTTON_RIGHT: App->input.mouseButtons[RIGHT] = BUTTON_PRESS; break;
-        case GLFW_MOUSE_BUTTON_LEFT:  App->input.mouseButtons[LEFT] = BUTTON_PRESS; break;
+        case GLFW_MOUSE_BUTTON_RIGHT: App->input.mouseButtons[RIGHT] = BUTTON_PRESS; M_Window->mouse_click = true; break;
+        case GLFW_MOUSE_BUTTON_LEFT:  App->input.mouseButtons[LEFT] = BUTTON_PRESS;  M_Window->mouse_click = true; break;
         } break;
     case GLFW_RELEASE:
         switch (button) {
-        case GLFW_MOUSE_BUTTON_RIGHT: App->input.mouseButtons[RIGHT] = BUTTON_RELEASE; break;
-        case GLFW_MOUSE_BUTTON_LEFT:  App->input.mouseButtons[LEFT] = BUTTON_RELEASE; break;
+        case GLFW_MOUSE_BUTTON_RIGHT: App->input.mouseButtons[RIGHT] = BUTTON_RELEASE; M_Window->mouse_click = false; break;
+        case GLFW_MOUSE_BUTTON_LEFT:  App->input.mouseButtons[LEFT] = BUTTON_RELEASE;  M_Window->mouse_click = false; break;
         } break;
     }
 }
 
 void OnGlfwScrollEvent(GLFWwindow* window, double xoffset, double yoffset)
 {
-    // Nothing do yet... maybe zoom in/out in the future?
+    M_Scene->camera->MouseScroll(yoffset);
 }
 
 void OnGlfwKeyboardEvent(GLFWwindow* window, int key, int scancode, int action, int mods)

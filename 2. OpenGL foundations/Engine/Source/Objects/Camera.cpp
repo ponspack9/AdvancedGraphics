@@ -3,7 +3,6 @@
 Camera::Camera(vec3 _pos, vec3 _center, float _fov, float _aspect, float _near_plane, float _far_plane)
 {
 	pos = _pos;
-	rot = glm::vec3(0.0f);
 	center = _center;
 
 	front = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -14,6 +13,7 @@ Camera::Camera(vec3 _pos, vec3 _center, float _fov, float _aspect, float _near_p
 	near_plane = _near_plane;
 	far_plane = _far_plane;
 
+	sensitivity = 0.1f;
 	orbit_speed = 1.0f;
 	move_speed = 5.0f;
 	yaw = 0.0f;
@@ -69,21 +69,15 @@ void Camera::DrawInspector()
 			ImGui::SetNextItemWidth(60.0f);
 			ImGui::DragFloat("z##camera_pos", &pos.z);
 
-			ImGui::Text("Rotation");
-			ImGui::SameLine();
-			ImGui::SetNextItemWidth(60.0f);
-			ImGui::DragFloat("x##camera_rot", &rot.x);
-			ImGui::SameLine();
-			ImGui::SetNextItemWidth(60.0f);
-			ImGui::DragFloat("y##camera_rot", &rot.y);
-			ImGui::SameLine();
-			ImGui::SetNextItemWidth(60.0f);
-			ImGui::DragFloat("z##camera_rotr", &rot.z);
-
 			ImGui::Text("Speed");
 			ImGui::SameLine();
 			ImGui::SetNextItemWidth(60.0f);
 			ImGui::DragFloat("##move_speed", &move_speed);
+
+			ImGui::Text("Mouse Sensitivity");
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(60.0f);
+			ImGui::DragFloat("##sensitivity", &sensitivity);
 		}
 		ImGui::Separator();
 	}
@@ -126,21 +120,6 @@ void Camera::Orbit(float dt)
 		pitch -= orbit_speed * dt;
 		if (pitch < 0.0f)
 			pitch = 0.0f;
-	}
-
-	if (GetKeyState('Q') & 0x8000) // Zoom In
-	{
-		fov -= ZOOM_SPEED * dt;
-		if (fov < 1.0f)
-			fov = 1.0f;
-		UpdateProjMatrix();
-	}
-	else if (GetKeyState('E') & 0x8000) // Zoom Out
-	{
-		fov += ZOOM_SPEED * dt;
-		if (fov > FOV)
-			fov = FOV;
-		UpdateProjMatrix();
 	}
 
 	float angleX = yaw - prev_yaw;
@@ -186,6 +165,34 @@ void Camera::WASD_Move(float dt)
 	UpdateViewMatrix();
 }
 
+void Camera::MouseMovement(float xoffset, float yoffset)
+{
+	xoffset *= sensitivity;
+	yoffset *= sensitivity;
+
+	yaw += xoffset;
+	pitch += yoffset;
+
+	if (pitch > 89.0f)
+		pitch = 89.0f;
+	if (pitch < -89.0f)
+		pitch = -89.0f;
+
+	UpdateVectors();
+}
+
+void Camera::MouseScroll(float yoffset)
+{
+	fov -= (float)yoffset;
+
+	if (fov < 1.0f)
+		fov = 1.0f;
+	if (fov > FOV)
+		fov = FOV;
+
+	UpdateProjMatrix();
+}
+
 //-------------------------------------------------------------------
 void Camera::UpdateViewMatrix()
 {
@@ -209,12 +216,11 @@ glm::mat4 Camera::GetViewProjectionMatrix()
 
 void Camera::UpdateVectors()
 {
-	glm::vec3 tmp_front;
-	tmp_front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	tmp_front.y = sin(glm::radians(pitch));
-	tmp_front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	front.y = sin(glm::radians(pitch));
+	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
 	front = glm::normalize(front);
-	right = glm::normalize(glm::cross(front, up));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+	right = glm::normalize(glm::cross(front, WORLD_UP));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
 	up = glm::normalize(glm::cross(right, front));
 }

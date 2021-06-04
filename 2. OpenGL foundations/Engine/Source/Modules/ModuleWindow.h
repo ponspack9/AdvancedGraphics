@@ -21,6 +21,7 @@ public:
 	bool CleanUp() override;
 
 	GLFWwindow* window = nullptr;
+	bool mouse_click = false;
 
 private:
 	f64 lastFrameTime = 0;

@@ -3,17 +3,15 @@
 #define FOV 60
 #define NEAR_PLANE 0.1
 #define FAR_PLANE 10000
-#define ZOOM_SPEED 10.0
 
 class Camera
 {
 public:
     glm::vec3 pos; // Camera position in 3D
-    glm::vec3 rot; // Camera rotation
     glm::vec3 center; // Point that the camera is looking at
 
     // Vectors
-    glm::vec3 up; // Orientation of the camera
+    glm::vec3 up;
     glm::vec3 front;
     glm::vec3 right;
 
@@ -33,7 +31,8 @@ public:
 
     float orbit_speed;
     float move_speed;
-
+    float sensitivity;
+    
     bool isOrbital;
     bool isFree;
 
@@ -46,6 +45,9 @@ public:
 
     void Orbit(float dt);
     void WASD_Move(float dt);
+
+    void MouseMovement(float xoffset, float yoffset);
+    void MouseScroll(float yoffset);
 
     void UpdateVectors(); // Free move camera
     void UpdateViewMatrix();
