@@ -27,11 +27,9 @@ private:
 	GLuint CreateNewVao(Mesh* mesh, Submesh& submesh, const Program* program);
 
 	void RenderType();
-    void LoadUniforms();
 
 public:
     u32 renderType;
-	Buffer uniforms;
 	GBuffer gbuffer;
 
     bool applySSAO = true;

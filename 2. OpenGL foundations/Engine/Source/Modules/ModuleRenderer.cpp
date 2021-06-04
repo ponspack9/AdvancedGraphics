@@ -20,11 +20,6 @@ ModuleRenderer::~ModuleRenderer()
 
 bool ModuleRenderer::Init()
 {
-	// Create Uniforms Buffer
-	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBufferSize);
-	glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &uniformBlockAlignment);
-	uniforms = CreateConstantBuffer(maxUniformBufferSize);
-
 	// Init GBuffer
 	gbuffer.Init();
 
@@ -38,9 +33,6 @@ bool ModuleRenderer::Update(float dt)
 	// Update Camera
 	M_Scene->camera->Move(dt);
 
-	// Load Uniforms Buffer
-	LoadUniforms();
-
 	// --- Render
 	glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.FBO); // Render on GBuffer's FBO
 	GLenum drawBuffers[] = {
@@ -53,7 +45,7 @@ bool ModuleRenderer::Update(float dt)
 	glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
 
 	// --- Geometry Pass
-	GeometryPass(M_Resources->programs[App->texturedGeometryProgramIdx]);
+	GeometryPass(M_Resources->programs[App->reliefMappingProgramIdx]);
 	
 	// --- Light Pass
 	if (applySSAO)
@@ -72,11 +64,6 @@ bool ModuleRenderer::Update(float dt)
 
 void ModuleRenderer::GeometryPass(Program* program)
 {
-	Program* reliefMap_program = M_Resources->programs[App->reliefMappingProgramIdx];
-	Program* curr_program = program;
-
-	bool reliefMapping_On = false;
-
 	// Clear Screen & Set Viewport
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -87,23 +74,15 @@ void ModuleRenderer::GeometryPass(Program* program)
 	glDepthMask(GL_TRUE);
 	glDisable(GL_BLEND);
 
+	glUseProgram(program->handle); // Enable Shader
+
 	// Render
 	for (Model* model : M_Scene->models)
 	{
-		if (model->useReliefMap)
-		{
-			curr_program = reliefMap_program;
-			glUseProgram(curr_program->handle);
-			glUniform3f(glGetUniformLocation(curr_program->handle, "uCameraPos"), M_Scene->camera->pos.x, M_Scene->camera->pos.y, M_Scene->camera->pos.z);
-		}
-		else
-		{
-			curr_program = program;
-			glUseProgram(curr_program->handle);
-		}
-
-		//Bind Local Params
-		glBindBufferRange(GL_UNIFORM_BUFFER, 1, uniforms.handle, model->localParams_offset, model->localParams_size);
+		glm::mat4 transform = glm::mat4(1.0f);
+		transform = glm::translate(transform, model->position);
+		transform = glm::rotate(transform, glm::radians(00.0f), glm::vec3(0.0, 0.0, 1.0));
+		transform = glm::scale(transform, model->scale);
 
 		// Draw Mesh
 		Mesh* mesh = model->mesh;
@@ -111,33 +90,39 @@ void ModuleRenderer::GeometryPass(Program* program)
 		for (u32 i = 0; i < mesh->submeshes.size(); ++i)
 		{
 			// VAO
-			GLuint vao = FindVAO(mesh, i, curr_program);
+			GLuint vao = FindVAO(mesh, i, program);
 			glBindVertexArray(vao);
 
 			// Material
 			u32 submeshMaterialIdx = model->materialIdx[i];
 			Material* submeshMaterial = M_Resources->materials[submeshMaterialIdx];
 
-			// Pass Textures to Uniform
+			// Pass Uniforms
+			glUniformMatrix4fv(glGetUniformLocation(program->handle, "uModel"), 1, GL_FALSE, (GLfloat*)&transform);
+			glUniformMatrix4fv(glGetUniformLocation(program->handle, "uViewProjection"), 1, GL_FALSE, (GLfloat*)&M_Scene->camera->GetViewProjectionMatrix());
+			glUniform3f(glGetUniformLocation(program->handle, "uCameraPos"), M_Scene->camera->pos.x, M_Scene->camera->pos.y, M_Scene->camera->pos.z);
+
+			bool hasNormalMap = (submeshMaterial->normalsTexture != nullptr);
+			model->hasBumpTexture = (submeshMaterial->bumpTexture != nullptr);
+			glUniform1f(glGetUniformLocation(program->handle, "bumpiness"), model->bumpiness);
+			glUniform1i(glGetUniformLocation(program->handle, "hasNormalMap"), (int)hasNormalMap);
+			glUniform1i(glGetUniformLocation(program->handle, "hasReliefMap"), (int)model->hasBumpTexture);
+
+			// Pass the Textures in Order
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
-			glUniform1i(glGetUniformLocation(curr_program->handle, "uTexture"), 0);
-
-			if (model->useReliefMap)
+			glUniform1i(glGetUniformLocation(program->handle, "uTexture"), 0);
+			if (hasNormalMap)
 			{
-				if (submeshMaterial->normalsTexture != nullptr)
-				{
-					glActiveTexture(GL_TEXTURE1);
-					glBindTexture(GL_TEXTURE_2D, submeshMaterial->normalsTexture->handle);
-					glUniform1i(glGetUniformLocation(curr_program->handle, "uNormalMap"), 1);
-				}
-
-				if (submeshMaterial->bumpTexture != nullptr)
-				{
-					glActiveTexture(GL_TEXTURE2);
-					glBindTexture(GL_TEXTURE_2D, submeshMaterial->bumpTexture->handle);
-					glUniform1i(glGetUniformLocation(curr_program->handle, "uBumpTexture"), 2);
-				}
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, submeshMaterial->normalsTexture->handle);
+				glUniform1i(glGetUniformLocation(program->handle, "uNormalMap"), 1);
+			}
+			if (model->hasBumpTexture)
+			{
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, submeshMaterial->bumpTexture->handle);
+				glUniform1i(glGetUniformLocation(program->handle, "uBumpTexture"), 2);
 			}
 
 			// Draw
@@ -169,7 +154,11 @@ void ModuleRenderer::LightPass(Program* dirLight_program, Program* pointLight_pr
 	glActiveTexture(GL_TEXTURE3); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[4]);
 
 	glDrawBuffer(GL_COLOR_ATTACHMENT0);
-	glBindBufferRange(GL_UNIFORM_BUFFER, 1, uniforms.handle, M_Scene->dirLight->localParams_offset, M_Scene->dirLight->localParams_size);
+	glUniform3f(glGetUniformLocation(dirLight_program->handle, "uCameraPos"), M_Scene->camera->pos.x, M_Scene->camera->pos.y, M_Scene->camera->pos.z);
+	glUniformMatrix4fv(glGetUniformLocation(dirLight_program->handle, "uViewProjection"), 1, GL_FALSE, (GLfloat*)&M_Scene->camera->GetViewProjectionMatrix());
+
+	glUniform3f(glGetUniformLocation(dirLight_program->handle, "uLightDirection"), M_Scene->dirLight->direction.x, M_Scene->dirLight->direction.y, M_Scene->dirLight->direction.z);
+	glUniform3f(glGetUniformLocation(dirLight_program->handle, "uLightColor"), M_Scene->dirLight->color.x, M_Scene->dirLight->color.y, M_Scene->dirLight->color.z);
 
 	// Draw
 	glBindVertexArray(M_Resources->quadVAO);
@@ -180,43 +169,42 @@ void ModuleRenderer::LightPass(Program* dirLight_program, Program* pointLight_pr
 	glUseProgram(0); // Disable Shader
 
 
-	// --- POINT LIGHTS ---
-	// Set Flags
-	glDisable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);
-	glFrontFace(GL_CW); // render only the inner faces of the light sphere
+	//// --- POINT LIGHTS ---
+	//// Set Flags
+	//glDisable(GL_DEPTH_TEST);
+	//glEnable(GL_BLEND);
+	//glBlendFunc(GL_ONE, GL_ONE);
+	//glFrontFace(GL_CW); // render only the inner faces of the light sphere
 
-	// Enable Point Light Shader
-	glUseProgram(pointLight_program->handle);
+	//// Enable Point Light Shader
+	//glUseProgram(pointLight_program->handle);
 
-	// Pass the Textures in Order
-	glUniform1i(glGetUniformLocation(pointLight_program->handle, "oAlbedo"), 0);
-	glUniform1i(glGetUniformLocation(pointLight_program->handle, "oNormal"), 1);
-	glUniform1i(glGetUniformLocation(pointLight_program->handle, "oPosition"), 2);
-	glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[1]);
-	glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[2]);
-	glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[3]);
+	//// Pass the Textures in Order
+	//glUniform1i(glGetUniformLocation(pointLight_program->handle, "oAlbedo"), 0);
+	//glUniform1i(glGetUniformLocation(pointLight_program->handle, "oNormal"), 1);
+	//glUniform1i(glGetUniformLocation(pointLight_program->handle, "oPosition"), 2);
+	//glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[1]);
+	//glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[2]);
+	//glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[3]);
 
-	glUniform3f(glGetUniformLocation(pointLight_program->handle, "uCameraPos"), M_Scene->camera->pos.x, M_Scene->camera->pos.y, M_Scene->camera->pos.z);
-	glUniformMatrix4fv(glGetUniformLocation(pointLight_program->handle, "uViewProjection"), 1, GL_FALSE, (GLfloat*)&M_Scene->camera->GetViewProjectionMatrix());
+	//glUniform3f(glGetUniformLocation(pointLight_program->handle, "uCameraPos"), M_Scene->camera->pos.x, M_Scene->camera->pos.y, M_Scene->camera->pos.z);
+	//glUniformMatrix4fv(glGetUniformLocation(pointLight_program->handle, "uViewProjection"), 1, GL_FALSE, (GLfloat*)&M_Scene->camera->GetViewProjectionMatrix());
 
+	//for (PointLight* light : M_Scene->pointLights)
+	//{
+	//	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	//	
+	//	glUniform1f(glGetUniformLocation(pointLight_program->handle, "uLightRadius"), light->radius);
+	//	glUniform3f(glGetUniformLocation(pointLight_program->handle, "uLightPosition"), light->position.x, light->position.y, light->position.z);
+	//	glUniform3f(glGetUniformLocation(pointLight_program->handle, "uLightColor"), light->color.x, light->color.y, light->color.z);
 
-	for (PointLight* light : M_Scene->pointLights)
-	{
-		glDrawBuffer(GL_COLOR_ATTACHMENT0);
-		
-		glUniform1f(glGetUniformLocation(pointLight_program->handle, "uLightRadius"), light->radius);
-		glUniform3f(glGetUniformLocation(pointLight_program->handle, "uLightPosition"), light->position.x, light->position.y, light->position.z);
-		glUniform3f(glGetUniformLocation(pointLight_program->handle, "uLightColor"), light->color.x, light->color.y, light->color.z);
+	//	// draw sphere
+	//	glBindVertexArray(M_Resources->sphereVAO);
+	//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, M_Resources->sphereIdxVBO);
+	//	glDrawElements(GL_TRIANGLES, M_Resources->sphereIdxCount, GL_UNSIGNED_INT, NULL);
+	//}
 
-		// draw sphere
-		glBindVertexArray(M_Resources->sphereVAO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, M_Resources->sphereIdxVBO);
-		glDrawElements(GL_TRIANGLES, M_Resources->sphereIdxCount, GL_UNSIGNED_INT, NULL);
-	}
-
-	glUseProgram(0); // Disable Shader
+	//glUseProgram(0); // Disable Shader
 }
 
 //--------------------------------------------------------------------
@@ -286,48 +274,4 @@ void ModuleRenderer::RenderType()
 
 	glReadBuffer(GL_COLOR_ATTACHMENT0 + renderType);
 	glBlitFramebuffer(0, 0, App->displaySize.x, App->displaySize.y, 0, 0, App->displaySize.x, App->displaySize.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-}
-
-void ModuleRenderer::LoadUniforms()
-{
-	MapBuffer(uniforms, GL_WRITE_ONLY);
-
-	//Directional Light Params
-	DirectionalLight* light = M_Scene->dirLight;
-	AlignHead(uniforms, sizeof(vec4));
-	light->localParams_offset = uniforms.head;
-	PushVec3(uniforms, light->color);
-	PushVec3(uniforms, light->direction);
-	light->localParams_size = uniforms.head - light->localParams_offset;
-
-	// Point Light Params
-	for (PointLight* light : M_Scene->pointLights)
-	{
-		AlignHead(uniforms, sizeof(vec4));
-
-		light->localParams_offset = uniforms.head;
-		PushVec3(uniforms, M_Scene->camera->pos);	//*** SHOULD BE GLOBAL PARAMETER (PASSED ONLY ONCE)
-		PushVec3(uniforms, light->color);
-		PushVec3(uniforms, light->position);
-		PushData(uniforms, &light->radius, sizeof(float));
-		light->localParams_size = uniforms.head - light->localParams_offset;
-	}
-
-	// Model Params
-	for (Model* model : M_Scene->models)
-	{
-		glm::mat4 transform = glm::mat4(1.0f);
-		transform = glm::translate(transform, model->position);
-		transform = glm::rotate(transform, glm::radians(00.0f), glm::vec3(0.0, 0.0, 1.0));
-		transform = glm::scale(transform, model->scale);
-
-		AlignHead(uniforms, uniformBlockAlignment);
-
-		model->localParams_offset = uniforms.head;
-		PushMat4(uniforms, transform);
-		PushMat4(uniforms, M_Scene->camera->GetViewProjectionMatrix());
-		model->localParams_size = uniforms.head - model->localParams_offset;
-	}
-
-	UnmapBuffer(uniforms);
 }

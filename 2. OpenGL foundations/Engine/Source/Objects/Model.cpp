@@ -6,7 +6,6 @@
 
 Model::Model()
 {
-    useReliefMap = false;
 }
 
 Model::~Model()
@@ -38,6 +37,14 @@ void Model::DrawInspector()
         ImGui::SameLine();
         ImGui::SetNextItemWidth(60.0f);
         ImGui::DragFloat(std::string("z##scale" + index).c_str(), &scale.z);
+
+        if (hasBumpTexture)
+        {
+            ImGui::Text("Bumpiness");
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(60.0f);
+            ImGui::DragFloat(std::string("##bumpiness" + index).c_str(), &bumpiness);
+        }
 
         for (int i = 0; i < materialIdx.size(); ++i)
         {

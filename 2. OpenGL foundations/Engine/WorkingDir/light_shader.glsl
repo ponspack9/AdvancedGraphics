@@ -8,11 +8,8 @@
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec2 aTexCoord;
 
-layout(binding = 1, std140) uniform LocalParams
-{
-	vec3 uCameraPos;
-	mat4 uWorldViewProjectionMatrix;
-};
+uniform vec3 uCameraPos;
+uniform mat4 uViewProjection;
 
 out vec2 vTexCoord;
 out vec3 vViewDir;
@@ -20,7 +17,7 @@ out vec3 vViewDir;
 void main()
 {
 	vTexCoord = aTexCoord;
-	vViewDir = vec3(uWorldViewProjectionMatrix * vec4(uCameraPos, 1.0));
+	vViewDir = vec3(uViewProjection * vec4(uCameraPos, 1.0));
 	gl_Position = vec4(aPosition, 1.0);
 }
 
@@ -29,11 +26,8 @@ void main()
 in vec2 vTexCoord;
 in vec3 vViewDir;
 
-layout(binding = 1, std140) uniform LightParams
-{
-    vec3 light_color;
-    vec3 light_direction;
-};          
+uniform vec3 uLightColor;
+uniform vec3 uLightDirection;
 
 uniform sampler2D oAlbedo;
 uniform sampler2D oNormal;
@@ -47,13 +41,13 @@ void main()
 	vec3 normal   = normalize(texture(oNormal, vTexCoord).rgb);
 	vec3 position = texture(oPosition, vTexCoord).rgb;
     
-    vec3 lightDir = normalize(light_direction);
+    vec3 lightDir = normalize(uLightDirection);
     vec3 viewDir = normalize(vViewDir - position);
     vec3 halfwayDir = normalize(lightDir + viewDir);
     
     vec3 ambient = albedo * 0.4;
-    vec3 diffuse = max(0.0, dot(normal, lightDir)) * albedo * light_color;
-    vec3 specular = pow(max(0.0, dot(halfwayDir, normal)), 32.0) * light_color;
+    vec3 diffuse = max(0.0, dot(normal, lightDir)) * albedo * uLightColor;
+    vec3 specular = pow(max(0.0, dot(halfwayDir, normal)), 32.0) * uLightColor;
     
     vec3 final_color = diffuse + specular + ambient;
 

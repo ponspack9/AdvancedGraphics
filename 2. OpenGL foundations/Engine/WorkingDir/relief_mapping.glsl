@@ -11,12 +11,8 @@ layout(location = 2) in vec2 aTexCoord;
 layout(location = 3) in vec3 aTangent;
 layout(location = 4) in vec3 aBitangent;
 
-layout(binding = 1, std140) uniform LocalParams
-{
-    mat4 uWorldMatrix;
-    mat4 uWorldViewProjectionMatrix;
-};
-
+uniform mat4 uModel;
+uniform mat4 uViewProjection;
 uniform vec3 uCameraPos;
 
 out vec2 vTexCoord;
@@ -28,16 +24,16 @@ out mat3 vTBN;
 void main()
 {
 	vTexCoord = aTexCoord;
-    vPosition = vec3(uWorldMatrix * vec4(aPosition, 1.0));
-    vNormal = vec3(uWorldMatrix * vec4(aNormal, 0.0));
+    vPosition = vec3(uModel * vec4(aPosition, 1.0));
+    vNormal = vec3(uModel * vec4(aNormal, 0.0));
     vViewDir = normalize(uCameraPos - vPosition);
 
-    vec3 T = normalize(vec3(uWorldMatrix * vec4(aTangent, 0.0)));
-    vec3 N = normalize(vec3(uWorldMatrix * vec4(aNormal, 0.0)));
+    vec3 T = normalize(vec3(uModel * vec4(aTangent, 0.0)));
+    vec3 N = normalize(vec3(uModel * vec4(aNormal, 0.0)));
     vec3 B = cross(N, T);
 
     vTBN = mat3(T,B,N);
-    gl_Position = uWorldViewProjectionMatrix * vec4(aPosition, 1.0);
+    gl_Position = uViewProjection * vec4(vPosition, 1.0);
 }
 
 #elif defined(FRAGMENT)
@@ -47,6 +43,10 @@ in vec3 vPosition;
 in vec3 vNormal; 
 in vec3 vViewDir;
 in mat3 vTBN;
+
+uniform int hasNormalMap;
+uniform int hasBumpTexture;
+uniform float bumpiness;
 
 uniform sampler2D uTexture;
 uniform sampler2D uNormalMap;
@@ -70,7 +70,6 @@ float LinearizeDepth(float depth)
 vec2 reliefMapping(vec2 texCoords, vec3 viewDir)
 {
     int numSteps = 15;
-    float bumpiness = 1.0;
 
     //Compute the view ray in texture space
     vec3 viewRay = transpose(vTBN) * vViewDir;
@@ -159,12 +158,20 @@ vec2 parallaxMapping(vec2 T, vec3 V)
 
 void main()
 {
-    vec2 texCoords = parallaxMapping(vTexCoord, vViewDir);
+    vec2 texCoords = vTexCoord;
+    if (hasBumpTexture == 1)
+    {
+        texCoords = parallaxMapping(vTexCoord, vViewDir);
+    }
 
-    vec3 normal = texture(uNormalMap, texCoords).xyz;
-    normal = normal * 2.0 - 1.0;
-    normal = normalize(vTBN * normal);    
-
+    vec3 normal = vNormal;
+    if(hasNormalMap == 1)
+    {
+        normal = texture(uNormalMap, texCoords).xyz;
+        normal = normal * 2.0 - 1.0;
+        normal = normalize(vTBN * normal);
+    }
+    
     oAlbedo = texture(uTexture, texCoords);
     oNormal = vec4(normal, 1.0);
     oPosition = vec4(vPosition, 1.0);

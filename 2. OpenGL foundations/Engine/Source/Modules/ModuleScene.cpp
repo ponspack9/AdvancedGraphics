@@ -38,14 +38,12 @@ bool ModuleScene::Init()
 	patricio2->index = "2";
 	models.push_back(patricio2);
 
-	//Model* cube = M_Resources->LoadModel("Box/Cube.fbx");
-	//cube->position = { 0,0,0 };
-	//cube->scale = { 0.02f, 0.02f, 0.02f };
-	//cube->index = "3";
-	//cube->useReliefMap = true;
-	//Material* material = M_Resources->materials[cube->materialIdx[0]];
-	//material->bumpTexture = M_Resources->LoadTexture2D("Box/Cube/toy_box_disp.png");
-	//models.push_back(cube);
+	Model* cube = M_Resources->LoadModel("Box/Cube.fbx");
+	cube->position = { 0,0,0 };
+	cube->scale = { 0.02f, 0.02f, 0.02f };
+	cube->index = "3";
+	M_Resources->materials[cube->materialIdx[0]]->bumpTexture = M_Resources->LoadTexture2D("Box/Cube/toy_box_disp.png");
+	models.push_back(cube);
 
 	Model* plane = new Model(*M_Resources->plane);
 	plane->position = { 0,-4,0 };
