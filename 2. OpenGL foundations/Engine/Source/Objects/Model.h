@@ -17,7 +17,7 @@ public:
     vec3 scale = { 1.0f, 1.0f, 1.0f };
 
     bool hasBumpTexture = false;
-    float bumpiness = 1.0f; //for relief mapping
+    float bumpiness = 0.15f; //for relief mapping
 
     // ImGui things
     std::string index = "0";

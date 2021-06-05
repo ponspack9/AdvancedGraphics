@@ -106,7 +106,7 @@ void ModuleRenderer::GeometryPass(Program* program)
 			model->hasBumpTexture = (submeshMaterial->bumpTexture != nullptr);
 			glUniform1f(glGetUniformLocation(program->handle, "bumpiness"), model->bumpiness);
 			glUniform1i(glGetUniformLocation(program->handle, "hasNormalMap"), (int)hasNormalMap);
-			glUniform1i(glGetUniformLocation(program->handle, "hasReliefMap"), (int)model->hasBumpTexture);
+			glUniform1i(glGetUniformLocation(program->handle, "hasBumpTexture"), (int)model->hasBumpTexture);
 
 			// Pass the Textures in Order
 			glActiveTexture(GL_TEXTURE0);

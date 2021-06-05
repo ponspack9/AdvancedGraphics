@@ -25,14 +25,14 @@ void main()
 {
 	vTexCoord = aTexCoord;
     vPosition = vec3(uModel * vec4(aPosition, 1.0));
-    vNormal = vec3(uModel * vec4(aNormal, 0.0));
-    vViewDir = normalize(uCameraPos - vPosition);
+    vNormal =   vec3(uModel * vec4(aNormal, 0.0));
+    vViewDir =  normalize(uCameraPos - vPosition);
 
     vec3 T = normalize(vec3(uModel * vec4(aTangent, 0.0)));
-    vec3 N = normalize(vec3(uModel * vec4(aNormal, 0.0)));
-    vec3 B = cross(N, T);
-
+    vec3 B = normalize(vec3(uModel * vec4(aBitangent, 0.0)));
+    vec3 N = normalize(vec3(vNormal));
     vTBN = mat3(T,B,N);
+    
     gl_Position = uViewProjection * vec4(vPosition, 1.0);
 }
 
@@ -67,101 +67,41 @@ float LinearizeDepth(float depth)
     return (2.0 * near * far) / (far + near - z * (far - near));	
 }
 
-vec2 reliefMapping(vec2 texCoords, vec3 viewDir)
-{
-    int numSteps = 15;
-
-    //Compute the view ray in texture space
-    vec3 viewRay = transpose(vTBN) * vViewDir;
-
-    ivec2 textureSize2D = textureSize(uBumpTexture,0);
-
-
-    // Increment
-    vec3 rayIncrement;
-    rayIncrement.xy = bumpiness * viewRay.xy / abs(viewRay.z * textureSize2D.y);
-    rayIncrement.z = 1.0 / numSteps;
-
-    //Sampling state
-    vec3 samplePos = vec3(texCoords, 0.0);
-    float sampleDepth = 1.0 - texture(uBumpTexture, samplePos.xy).r;
-
-    //Linear search
-    while(samplePos.z < sampleDepth)
-    {
-        samplePos += rayIncrement;
-        sampleDepth = 1.0 - texture(uBumpTexture, samplePos.xy).r;
-    }
-
-    return samplePos.xy;
-}
-
-vec2 parallaxMapping(vec2 T, vec3 V)
+vec2 parallaxMapping(vec2 texCoords, vec3 viewDir)
 {
    float numLayers = 30;
 
-   V = transpose(vTBN) * V;
-
-   float layerHeight = 1.0 / numLayers;         // height of each layer
-   float currentLayerHeight = 0;                // depth of current layer
-   vec2 dtex = 0.1 * V.xy / V.z / numLayers;    // shift of texture coordinates for each iteration
+   float height = 1.0 / numLayers;        
+   float currentHeight = 0.0;               
+   vec2 dtex = (viewDir.xy / viewDir.z * bumpiness) / numLayers;
 
    
-   vec2 currentTextureCoords = T;                                           // current texture coordinates
-   float heightFromTexture = texture(uBumpTexture, currentTextureCoords).r;     // get first depth from heightmap
+   vec2 currentTexCoords = texCoords;                                       // current texture coordinates
+   float texHeight = texture(uBumpTexture, currentTexCoords).r;     // get first depth from heightmap
 
-   // while point is above surface
-   while(heightFromTexture > currentLayerHeight)
+   while(currentHeight < texHeight)
    {
-      currentLayerHeight += layerHeight;                                // to the next layer
-      currentTextureCoords -= dtex;                                     // shift texture coordinates along vector V
-      heightFromTexture = texture(uBumpTexture, currentTextureCoords).r;    // get new depth from heightmap
-   }
-    
-   // --- Start of Relief Mapping ---
-
-   // decrease shift and height of layer by half
-   vec2 deltaTexCoord = dtex / 2;
-   float deltaHeight = layerHeight / 2;
-
-   // return to the mid point of previous layer
-   currentTextureCoords += deltaTexCoord;
-   currentLayerHeight -= deltaHeight;
-
-   // binary search to increase precision of Steep Paralax Mapping
-   const int numSearches = 5;
-   for(int i=0; i<numSearches; i++)
-   {
-      // decrease shift and height of layer by half
-      deltaTexCoord /= 2;
-      deltaHeight /= 2;
-
-      // new depth from heightmap
-      heightFromTexture = texture(uBumpTexture, currentTextureCoords).r;
-
-      // shift along or agains vector V
-      if(heightFromTexture > currentLayerHeight) // below the surface
-      {
-         currentTextureCoords -= deltaTexCoord;
-         currentLayerHeight += deltaHeight;
-      }
-      else // above the surface
-      {
-         currentTextureCoords += deltaTexCoord;
-         currentLayerHeight -= deltaHeight;
-      }
+      currentTexCoords -= dtex;                               // shift texture coordinates along vector V
+      texHeight = texture(uBumpTexture, currentTexCoords).r;  // get new depth from heightmap
+      currentHeight += height;                                // to the next layer
    }
 
-   return currentTextureCoords;
+   vec2 prevTexCoords = currentTexCoords + dtex;
+   float after = texHeight - currentHeight;
+   float before = texture(uBumpTexture, prevTexCoords).r - currentHeight + height;
+   float weight = after / (after - before);
+   
+   vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+   return finalTexCoords;
 }
 
-
+//---------------
 void main()
 {
     vec2 texCoords = vTexCoord;
     if (hasBumpTexture == 1)
     {
-        texCoords = parallaxMapping(vTexCoord, vViewDir);
+        texCoords = parallaxMapping(vTexCoord, transpose(vTBN) * vViewDir);
     }
 
     vec3 normal = vNormal;
@@ -172,10 +112,10 @@ void main()
         normal = normalize(vTBN * normal);
     }
     
-    oAlbedo = texture(uTexture, texCoords);
-    oNormal = vec4(normal, 1.0);
+    oAlbedo =   texture(uTexture, texCoords);
+    oNormal =   vec4(normal, 1.0);
     oPosition = vec4(vPosition, 1.0);
-	oDepth = vec4(vec3(LinearizeDepth(gl_FragCoord.z) / far), 1.0);
+	oDepth =    vec4(vec3(LinearizeDepth(gl_FragCoord.z) / far), 1.0);
 }
 
 #endif
