@@ -33,6 +33,7 @@ public:
 	GBuffer gbuffer;
 
     bool applySSAO = true;
+    float SSAOIntensity = 1.0f;
 
 private:
     GLint maxUniformBufferSize;

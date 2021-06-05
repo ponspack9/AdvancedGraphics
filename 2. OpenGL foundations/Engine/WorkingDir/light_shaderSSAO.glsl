@@ -37,6 +37,7 @@ uniform sampler2D oDepth;
 layout(location = 0) out vec4 oColor;
 uniform vec3 uLightColor;
 uniform vec3 uLightDirection;
+uniform float intensity;
 
 float rand(vec2 co) {
     return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
@@ -132,7 +133,7 @@ void main(void) {
         occlusion += (sampleDepth < sampleSphere.z ? 1.0 : 0.0);
     }
 
-    float ao = 1.0 - (occlusion / 16.0);
+    float ao = intensity - (occlusion / 16.0);
 
     oColor = mix(vec4(final_color, 1.0), vec4(0.0, 0.0, 0.0, 1.0), ao);
     oColor = mix(vec4(final_color, 1.0), vec4(final_color*0.5, 1.0), ao);

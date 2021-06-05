@@ -160,6 +160,8 @@ void ModuleRenderer::LightPass(Program* dirLight_program, Program* pointLight_pr
 	glUniform3f(glGetUniformLocation(dirLight_program->handle, "uLightDirection"), M_Scene->dirLight->direction.x, M_Scene->dirLight->direction.y, M_Scene->dirLight->direction.z);
 	glUniform3f(glGetUniformLocation(dirLight_program->handle, "uLightColor"), M_Scene->dirLight->color.x, M_Scene->dirLight->color.y, M_Scene->dirLight->color.z);
 
+	glUniform1f(glGetUniformLocation(dirLight_program->handle, "intensity"), SSAOIntensity);
+
 	// Draw
 	glBindVertexArray(M_Resources->quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
