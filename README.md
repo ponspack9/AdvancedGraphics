@@ -24,28 +24,28 @@ The engine has three windows:
 * Click and drag to rotate.
 
 ## Renders
-<p align="center"><img src="/2.%20OpenGL%20foundations/Renders/main.gif" width="75%" height="75%"/></p>
+<p align="center"><img src="/Renders/main.gif" width="75%" height="75%"/></p>
 
 
 **SSAO**
 
 
-![SSAO](https://github.com/ponspack9/AdvancedGraphics/blob/main/2.%20OpenGL%20foundations/Renders/SSAOFull.png?raw=true)
+![SSAO](https://github.com/ponspack9/AdvancedGraphics/blob/main/Renders/SSAOFull.png?raw=true)
 
 You can enable or disable these effects with this options
 
-![SSAOOptions](https://github.com/ponspack9/AdvancedGraphics/blob/main/2.%20OpenGL%20foundations/Renders/SSAOinspector.png?raw=true)
+![SSAOOptions](https://github.com/ponspack9/AdvancedGraphics/blob/main/Renders/SSAOinspector.png?raw=true)
 
 The corresponding shader file is **SSAO.glsl**
 
 
 **Relief Mapping**
 
-![Relief Mapping](https://github.com/ponspack9/AdvancedGraphics/blob/main/2.%20OpenGL%20foundations/Renders/RMFull.png?raw=true)
+![Relief Mapping](https://github.com/ponspack9/AdvancedGraphics/blob/main/Renders/RMFull.png?raw=true)
 
 You can enable or disable these effects with this options inside the cube.fbx3 panel (only this model features relief mapping)
 
-![SSAOOptions](https://github.com/ponspack9/AdvancedGraphics/blob/main/2.%20OpenGL%20foundations/Renders/RMInspector.png?raw=true)
+![SSAOOptions](https://github.com/ponspack9/AdvancedGraphics/blob/main/Renders/RMInspector.png?raw=true)
 
 
 The corresponding shader file is **relief_mapping.glsl**
