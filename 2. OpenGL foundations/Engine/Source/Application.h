@@ -36,11 +36,10 @@ public:
     ivec2 displaySize; // Maintained by platform
 
     // program indices
-    u32 texturedGeometryProgramIdx;
+    u32 reliefMappingProgramIdx;
     u32 dirLightProgramIdx;
     u32 pointLightProgramIdx;
     u32 SSAOProgramIdx;
-    u32 reliefMappingProgramIdx;
 
     // texture indices
     u32 diceTexIdx;

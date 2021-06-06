@@ -48,10 +48,11 @@ bool ModuleRenderer::Update(float dt)
 	GeometryPass(M_Resources->programs[App->reliefMappingProgramIdx]);
 	
 	// --- Light Pass
+	LightPass(M_Resources->programs[App->dirLightProgramIdx], M_Resources->programs[App->pointLightProgramIdx]);
+
+	// --- SSAO
 	if (applySSAO)
-		LightPass(M_Resources->programs[App->SSAOProgramIdx], M_Resources->programs[App->SSAOProgramIdx]);
-	else
-		LightPass(M_Resources->programs[App->dirLightProgramIdx], M_Resources->programs[App->pointLightProgramIdx]);
+		SSAOPass(M_Resources->programs[App->SSAOProgramIdx]);
 
 	// --- Render to Screen
 	RenderType();
@@ -158,8 +159,6 @@ void ModuleRenderer::LightPass(Program* dirLight_program, Program* pointLight_pr
 	glUniform3f(glGetUniformLocation(dirLight_program->handle, "uLightDirection"), M_Scene->dirLight->direction.x, M_Scene->dirLight->direction.y, M_Scene->dirLight->direction.z);
 	glUniform3f(glGetUniformLocation(dirLight_program->handle, "uLightColor"), M_Scene->dirLight->color.x, M_Scene->dirLight->color.y, M_Scene->dirLight->color.z);
 
-	glUniform1f(glGetUniformLocation(dirLight_program->handle, "intensity"), SSAOIntensity);
-
 	// Draw
 	glBindVertexArray(M_Resources->quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -205,6 +204,39 @@ void ModuleRenderer::LightPass(Program* dirLight_program, Program* pointLight_pr
 	//}
 
 	//glUseProgram(0); // Disable Shader
+}
+
+void ModuleRenderer::SSAOPass(Program* program)
+{
+	glUseProgram(program->handle); // Enable Directional Light Shader
+	glDepthMask(false);
+
+	// Pass the Textures in Order
+	glUniform1i(glGetUniformLocation(program->handle, "oAlbedo"), 0);
+	glUniform1i(glGetUniformLocation(program->handle, "oNormal"), 1);
+	glUniform1i(glGetUniformLocation(program->handle, "oPosition"), 2);
+	glUniform1i(glGetUniformLocation(program->handle, "oDepth"), 3);
+	glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[1]);
+	glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[2]);
+	glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[3]);
+	glActiveTexture(GL_TEXTURE3); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[4]);
+
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
+	glUniform3f(glGetUniformLocation(program->handle, "uCameraPos"), M_Scene->camera->pos.x, M_Scene->camera->pos.y, M_Scene->camera->pos.z);
+	glUniformMatrix4fv(glGetUniformLocation(program->handle, "uViewProjection"), 1, GL_FALSE, (GLfloat*)&M_Scene->camera->GetViewProjectionMatrix());
+
+	glUniform3f(glGetUniformLocation(program->handle, "uLightDirection"), M_Scene->dirLight->direction.x, M_Scene->dirLight->direction.y, M_Scene->dirLight->direction.z);
+	glUniform3f(glGetUniformLocation(program->handle, "uLightColor"), M_Scene->dirLight->color.x, M_Scene->dirLight->color.y, M_Scene->dirLight->color.z);
+
+	glUniform1f(glGetUniformLocation(program->handle, "intensity"), SSAOIntensity);
+
+	// Draw
+	glBindVertexArray(M_Resources->quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+
+	glDepthMask(true);
+	glUseProgram(0); // Disable Shader
 }
 
 //--------------------------------------------------------------------

@@ -21,6 +21,7 @@ public:
 
 	void GeometryPass(Program* program);
 	void LightPass(Program* dirLight_program, Program* pointLight_program);
+    void SSAOPass(Program* program);
 
 private:
 	GLuint FindVAO(Mesh* mesh, u32 submeshIndex, const Program* program);

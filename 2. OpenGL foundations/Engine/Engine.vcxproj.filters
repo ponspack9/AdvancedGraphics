@@ -178,5 +178,6 @@
     </None>
     <None Include="WorkingDir\light_shader.glsl" />
     <None Include="WorkingDir\relief_mapping.glsl" />
+    <None Include="WorkingDir\SSAO.glsl" />
   </ItemGroup>
 </Project>

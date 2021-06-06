@@ -99,6 +99,7 @@
     <None Include="WorkingDir\light_shader.glsl" />
     <None Include="WorkingDir\relief_mapping.glsl" />
     <None Include="WorkingDir\shaders.glsl" />
+    <None Include="WorkingDir\SSAO.glsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
