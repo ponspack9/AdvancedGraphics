@@ -38,12 +38,14 @@ void Model::DrawInspector()
         ImGui::SetNextItemWidth(60.0f);
         ImGui::DragFloat(std::string("z##scale" + index).c_str(), &scale.z);
 
+        ImGui::Checkbox("Normal Map", &hasNormalMap);
+        ImGui::Checkbox("Bump Texture", &hasBumpTexture);
         if (hasBumpTexture)
         {
             ImGui::Text("Bumpiness");
             ImGui::SameLine();
             ImGui::SetNextItemWidth(60.0f);
-            ImGui::DragFloat(std::string("##bumpiness" + index).c_str(), &bumpiness);
+            ImGui::DragFloat(std::string("##bumpiness" + index).c_str(), &bumpiness, 0.01f);
         }
 
         for (int i = 0; i < materialIdx.size(); ++i)

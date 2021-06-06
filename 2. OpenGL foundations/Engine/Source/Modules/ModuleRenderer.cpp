@@ -102,17 +102,15 @@ void ModuleRenderer::GeometryPass(Program* program)
 			glUniformMatrix4fv(glGetUniformLocation(program->handle, "uViewProjection"), 1, GL_FALSE, (GLfloat*)&M_Scene->camera->GetViewProjectionMatrix());
 			glUniform3f(glGetUniformLocation(program->handle, "uCameraPos"), M_Scene->camera->pos.x, M_Scene->camera->pos.y, M_Scene->camera->pos.z);
 
-			bool hasNormalMap = (submeshMaterial->normalsTexture != nullptr);
-			model->hasBumpTexture = (submeshMaterial->bumpTexture != nullptr);
 			glUniform1f(glGetUniformLocation(program->handle, "bumpiness"), model->bumpiness);
-			glUniform1i(glGetUniformLocation(program->handle, "hasNormalMap"), (int)hasNormalMap);
+			glUniform1i(glGetUniformLocation(program->handle, "hasNormalMap"), model->hasNormalMap);
 			glUniform1i(glGetUniformLocation(program->handle, "hasBumpTexture"), (int)model->hasBumpTexture);
 
 			// Pass the Textures in Order
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, submeshMaterial->albedoTexture->handle);
 			glUniform1i(glGetUniformLocation(program->handle, "uTexture"), 0);
-			if (hasNormalMap)
+			if (model->hasNormalMap)
 			{
 				glActiveTexture(GL_TEXTURE1);
 				glBindTexture(GL_TEXTURE_2D, submeshMaterial->normalsTexture->handle);

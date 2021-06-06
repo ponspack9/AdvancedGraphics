@@ -43,6 +43,7 @@ bool ModuleScene::Init()
 	cube->scale = { 0.02f, 0.02f, 0.02f };
 	cube->index = "3";
 	M_Resources->materials[cube->materialIdx[0]]->bumpTexture = M_Resources->LoadTexture2D("Box/Cube/toy_box_disp.png");
+	cube->hasNormalMap = cube->hasBumpTexture = true;
 	models.push_back(cube);
 
 	Model* plane = new Model(*M_Resources->plane);
