@@ -38,6 +38,7 @@ layout(location = 0) out vec4 oColor;
 uniform vec3 uLightColor;
 uniform vec3 uLightDirection;
 uniform float intensity;
+uniform bool showOnlySSAO;
 
 float rand(vec2 co) {
     return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
@@ -135,9 +136,15 @@ void main(void) {
 
     float ao = intensity - (occlusion / 16.0);
 
-    oColor = mix(vec4(final_color, 1.0), vec4(0.0, 0.0, 0.0, 1.0), ao);
-    oColor = mix(vec4(final_color, 1.0), vec4(final_color*0.5, 1.0), ao);
-    //oColor = vec4(final_color, 1.0);
+    if (showOnlySSAO)
+    {
+        //oColor = mix(vec4(final_color, 1.0), vec4(0.0, 0.0, 0.0, 1.0), ao);
+        oColor = vec4(1.0-ao);
+    }
+    else
+    {
+        oColor = mix(vec4(final_color, 1.0), vec4(0.0, 0.0, 0.0, 1.0), ao);
+    }
 }
 
 #endif

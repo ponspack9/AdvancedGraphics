@@ -229,6 +229,7 @@ void ModuleRenderer::SSAOPass(Program* program)
 	glUniform3f(glGetUniformLocation(program->handle, "uLightColor"), M_Scene->dirLight->color.x, M_Scene->dirLight->color.y, M_Scene->dirLight->color.z);
 
 	glUniform1f(glGetUniformLocation(program->handle, "intensity"), SSAOIntensity);
+	glUniform1i(glGetUniformLocation(program->handle, "showOnlySSAO"), showOnlySSAO);
 
 	// Draw
 	glBindVertexArray(M_Resources->quadVAO);

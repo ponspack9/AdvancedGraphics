@@ -20,7 +20,10 @@ void PanelInspector::Draw()
 	ImGui::Checkbox("SSAO", &M_Renderer->applySSAO);
 	
 	if (M_Renderer->applySSAO)
+	{
 		ImGui::DragFloat("Intensity", &M_Renderer->SSAOIntensity, 0.05f,0.0f);
+		ImGui::Checkbox("Show SSAO occlusion", &M_Renderer->showOnlySSAO);
+	}
 
 	
 
