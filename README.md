@@ -24,6 +24,8 @@ The engine has three windows:
 * Click and drag to rotate.
 
 ## Renders
+<img src="/2.%20OpenGL%20foundations/Renders/main.gif" width="75%" height="75%"/>
+
 
 **SSAO**
 
