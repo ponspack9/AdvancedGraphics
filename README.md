@@ -24,11 +24,19 @@ The engine has three windows:
 * Click and drag to rotate.
 
 ## Renders
+<p align="center"><img src="/2.%20OpenGL%20foundations/Renders/main.gif" width="75%" height="75%"/></p>
+
 
 **SSAO**
 
 
 ![Without SSAO](https://github.com/ponspack9/AdvancedGraphics/blob/main/2.%20OpenGL%20foundations/Renders/SSAOFull.png?raw=true)
+
+You can enable or disable these effects with this options
+
+![SSAOOptions](https://github.com/ponspack9/AdvancedGraphics/blob/main/2.%20OpenGL%20foundations/Renders/SSAOinspector.png?raw=true)
+
+The corresponding shader file is SSAO.glsl
 
 
 **Relief Mapping**
