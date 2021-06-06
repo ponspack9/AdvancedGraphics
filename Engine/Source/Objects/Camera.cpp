@@ -18,6 +18,8 @@ Camera::Camera(vec3 _pos, vec3 _center, float _fov, float _aspect, float _near_p
 	move_speed = 5.0f;
 	yaw = 0.0f;
 	pitch = 0.0f;
+	free_yaw = 0.0f;
+	free_pitch = 0.0f;
 
 	isOrbital = true;
 	isFree = false;
@@ -34,9 +36,45 @@ void Camera::DrawInspector()
 {
 	if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		if (ImGui::Checkbox("Orbital Camera", &isOrbital)) isFree = !isOrbital;
+		if (ImGui::Checkbox("Orbital Camera", &isOrbital))
+		{
+			isFree = !isOrbital;
+
+			if (isFree)
+			{
+				pos = glm::vec3(6.072f, 8.112f, 16.498f);
+				free_yaw = -112.7f;
+				free_pitch = -16.4f;
+			}
+			else if (isOrbital)
+			{
+				pos = glm::vec3(9.0f, 0.0f, 14.0f);
+				center = glm::vec3(0.0f, 0.0f, 0.0f);
+				up = WORLD_UP;
+				yaw = 0.0f;
+				pitch = 0.0f;
+			}
+		}
 		ImGui::SameLine();
-		if(ImGui::Checkbox("Free Move Camera", &isFree)) isOrbital = !isFree;
+		if (ImGui::Checkbox("Free Move Camera", &isFree))
+		{
+			isOrbital = !isFree;
+			
+			if (isFree)
+			{
+				pos = glm::vec3(6.072f, 8.112f, 16.498f);
+				free_yaw = -112.7f;
+				free_pitch = -16.4f;
+			}
+			else if (isOrbital)
+			{
+				pos = glm::vec3(9.0f, 0.0f, 14.0f);
+				center = glm::vec3(0.0f, 0.0f, 0.0f);
+				up = WORLD_UP;
+				yaw = 0.0f;
+				pitch = 0.0f;
+			}
+		}
 
 		if (isOrbital)
 		{
@@ -170,13 +208,13 @@ void Camera::MouseMovement(float xoffset, float yoffset)
 	xoffset *= sensitivity;
 	yoffset *= sensitivity;
 
-	yaw += xoffset;
-	pitch += yoffset;
+	free_yaw += xoffset;
+	free_pitch += yoffset;
 
-	if (pitch > 89.0f)
-		pitch = 89.0f;
-	if (pitch < -89.0f)
-		pitch = -89.0f;
+	if (free_pitch > 89.0f)
+		free_pitch = 89.0f;
+	if (free_pitch < -89.0f)
+		free_pitch = -89.0f;
 
 	UpdateVectors();
 }
@@ -216,9 +254,9 @@ glm::mat4 Camera::GetViewProjectionMatrix()
 
 void Camera::UpdateVectors()
 {
-	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	front.y = sin(glm::radians(pitch));
-	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	front.x = cos(glm::radians(free_yaw)) * cos(glm::radians(free_pitch));
+	front.y = sin(glm::radians(free_pitch));
+	front.z = sin(glm::radians(free_yaw)) * cos(glm::radians(free_pitch));
 
 	front = glm::normalize(front);
 	right = glm::normalize(glm::cross(front, WORLD_UP));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.

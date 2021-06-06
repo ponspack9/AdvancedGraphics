@@ -29,6 +29,9 @@ public:
     float yaw; //horizontal
     float pitch; //vertical
 
+    float free_yaw;
+    float free_pitch;
+
     float orbit_speed;
     float move_speed;
     float sensitivity;
