@@ -30,18 +30,25 @@ The engine has three windows:
 **SSAO**
 
 
-![Without SSAO](https://github.com/ponspack9/AdvancedGraphics/blob/main/2.%20OpenGL%20foundations/Renders/SSAOFull.png?raw=true)
+![SSAO](https://github.com/ponspack9/AdvancedGraphics/blob/main/2.%20OpenGL%20foundations/Renders/SSAOFull.png?raw=true)
 
 You can enable or disable these effects with this options
 
 ![SSAOOptions](https://github.com/ponspack9/AdvancedGraphics/blob/main/2.%20OpenGL%20foundations/Renders/SSAOinspector.png?raw=true)
 
-The corresponding shader file is SSAO.glsl
+The corresponding shader file is **SSAO.glsl**
 
 
 **Relief Mapping**
 
+![Relief Mapping](https://github.com/ponspack9/AdvancedGraphics/blob/main/2.%20OpenGL%20foundations/Renders/RMFull.png?raw=true)
 
+You can enable or disable these effects with this options inside the cube.fbx3 panel (only this model features relief mapping)
+
+![SSAOOptions](https://github.com/ponspack9/AdvancedGraphics/blob/main/2.%20OpenGL%20foundations/Renders/RMInspector.png?raw=true)
+
+
+The corresponding shader file is **relief_mapping.glsl**
 ## Shader Files
 * **light_shader.glsl:** Light shader, contains Directional Light shader and Point Light shader.
 * **SSAO.glsl:** Screen Space Ambient Occlusion shader.
