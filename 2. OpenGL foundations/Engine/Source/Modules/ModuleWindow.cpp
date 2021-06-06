@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ModuleWindow.h"
+#include "ModuleScene.h"
 #include <PanelInfo.h>
 
 
@@ -13,9 +14,12 @@ void OnGlfwError(int errorCode, const char* errorMessage)
 void OnGlfwMouseMoveEvent(GLFWwindow* window, double xpos, double ypos)
 {
     App->input.mouseDelta.x = xpos - App->input.mousePos.x;
-    App->input.mouseDelta.y = ypos - App->input.mousePos.y;
+    App->input.mouseDelta.y = App->input.mousePos.y - ypos;
     App->input.mousePos.x = xpos;
     App->input.mousePos.y = ypos;
+
+    if (M_Window->mouse_click && M_Scene->camera->isFree)
+        M_Scene->camera->MouseMovement(App->input.mouseDelta.x, App->input.mouseDelta.y);
 }
 
 void OnGlfwMouseEvent(GLFWwindow* window, int button, int event, int modifiers)
@@ -23,20 +27,20 @@ void OnGlfwMouseEvent(GLFWwindow* window, int button, int event, int modifiers)
     switch (event) {
     case GLFW_PRESS:
         switch (button) {
-        case GLFW_MOUSE_BUTTON_RIGHT: App->input.mouseButtons[RIGHT] = BUTTON_PRESS; break;
-        case GLFW_MOUSE_BUTTON_LEFT:  App->input.mouseButtons[LEFT] = BUTTON_PRESS; break;
+        case GLFW_MOUSE_BUTTON_RIGHT: App->input.mouseButtons[RIGHT] = BUTTON_PRESS; M_Window->mouse_click = true; break;
+        case GLFW_MOUSE_BUTTON_LEFT:  App->input.mouseButtons[LEFT] = BUTTON_PRESS;  M_Window->mouse_click = true; break;
         } break;
     case GLFW_RELEASE:
         switch (button) {
-        case GLFW_MOUSE_BUTTON_RIGHT: App->input.mouseButtons[RIGHT] = BUTTON_RELEASE; break;
-        case GLFW_MOUSE_BUTTON_LEFT:  App->input.mouseButtons[LEFT] = BUTTON_RELEASE; break;
+        case GLFW_MOUSE_BUTTON_RIGHT: App->input.mouseButtons[RIGHT] = BUTTON_RELEASE; M_Window->mouse_click = false; break;
+        case GLFW_MOUSE_BUTTON_LEFT:  App->input.mouseButtons[LEFT] = BUTTON_RELEASE;  M_Window->mouse_click = false; break;
         } break;
     }
 }
 
 void OnGlfwScrollEvent(GLFWwindow* window, double xoffset, double yoffset)
 {
-    // Nothing do yet... maybe zoom in/out in the future?
+    M_Scene->camera->MouseScroll(yoffset);
 }
 
 void OnGlfwKeyboardEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -144,6 +148,11 @@ bool ModuleWindow::Init()
     App->deltaTime = 1.0f / 60.0f;
     App->displaySize = ivec2(WINDOW_WIDTH, WINDOW_HEIGHT);
     App->isRunning = true;
+
+    if (GLVersion.major > 4 || (GLVersion.major == 4 && GLVersion.minor >= 3))
+    {
+        glDebugMessageCallback(Log::OnGlError, App);
+    }
 	return true;
 }
 
@@ -159,47 +168,6 @@ bool ModuleWindow::PreUpdate(float dt)
 
 bool ModuleWindow::Update(float dt)
 {
-
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Shaded model");
-    switch (App->mode)
-    {
-    case Mode_TexturedQuad:
-    {
-        // TODO: Draw your textured quad here!
-        // - clear the framebuffer
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // - set the viewport
-        glViewport(0, 0, App->displaySize.x, App->displaySize.y);
-        // - bind the program 
-        Program& programTexturedGeometry = App->programs[App->texturedGeometryProgramIdx];
-        glUseProgram(programTexturedGeometry.handle);
-        glBindVertexArray(App->vao);
-
-        // - set the blending state
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        // - bind the texture into unit 0
-        glUniform1i(App->programUniformTexture, 0);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, App->textures[App->diceTexIdx].handle);
-
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
-
-        glBindVertexArray(0);
-        glUseProgram(0);
-        //   (...and make its texture sample from unit 0)
-        // - bind the vao
-        // - glDrawElements() !!!
-    }
-    break;
-
-    default:;
-    }
-
-    glPopDebugGroup();
 	return true;
 }
 

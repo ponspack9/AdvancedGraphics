@@ -81,6 +81,17 @@
     <ClCompile Include="Source\Modules\ModuleResources.cpp">
       <Filter>Engine\Modules</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Modules\ModuleRenderer.cpp">
+      <Filter>Engine\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Modules\ModuleScene.cpp">
+      <Filter>Engine\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Panels\PanelInspector.cpp" />
+    <ClCompile Include="Source\Objects\Camera.cpp" />
+    <ClCompile Include="Source\Objects\Light.cpp" />
+    <ClCompile Include="Source\Objects\Model.cpp" />
+    <ClCompile Include="Source\Utils\GBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThirdParty\imgui-docking\imconfig.h">
@@ -146,10 +157,27 @@
     <ClInclude Include="Source\Modules\ModuleResources.h">
       <Filter>Engine\Modules</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Modules\ModuleRenderer.h">
+      <Filter>Engine\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Modules\ModuleScene.h">
+      <Filter>Engine\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Utils\Primitives.h">
+      <Filter>Engine\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Panels\PanelInspector.h" />
+    <ClInclude Include="Source\Objects\Camera.h" />
+    <ClInclude Include="Source\Objects\Light.h" />
+    <ClInclude Include="Source\Objects\Model.h" />
+    <ClInclude Include="Source\Utils\GBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="WorkingDir\shaders.glsl">
       <Filter>Engine\Shaders</Filter>
     </None>
+    <None Include="WorkingDir\light_shader.glsl" />
+    <None Include="WorkingDir\relief_mapping.glsl" />
+    <None Include="WorkingDir\SSAO.glsl" />
   </ItemGroup>
 </Project>

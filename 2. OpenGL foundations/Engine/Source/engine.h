@@ -7,9 +7,6 @@
 
 #pragma region Defines
 
-#define VBO GL_ARRAY_BUFFER 
-#define EBO GL_ELEMENT_ARRAY_BUFFER
-
 #define ARRAY_COUNT(array) (sizeof(array)/sizeof(array[0]))
 
 #define ASSERT(condition, message) assert((condition) && message)
@@ -25,22 +22,22 @@
 
 #pragma region Typedef
 
-typedef glm::vec2  vec2;
-typedef glm::vec3  vec3;
-typedef glm::vec4  vec4;
-typedef glm::ivec2 ivec2;
-typedef glm::ivec3 ivec3;
-typedef glm::ivec4 ivec4;
-typedef char                   i8;
-typedef short                  i16;
-typedef int                    i32;
-typedef long long int          i64;
-typedef unsigned char          u8;
-typedef unsigned short         u16;
-typedef unsigned int           u32;
-typedef unsigned long long int u64;
-typedef float                  f32;
-typedef double                 f64;
+typedef glm::vec2               vec2;
+typedef glm::vec3               vec3;
+typedef glm::vec4               vec4;
+typedef glm::ivec2              ivec2;
+typedef glm::ivec3              ivec3;
+typedef glm::ivec4              ivec4;
+typedef char                    i8;
+typedef short                   i16;
+typedef int                     i32;
+typedef long long int           i64;
+typedef unsigned char           u8;
+typedef unsigned short          u16;
+typedef unsigned int            u32;
+typedef unsigned long long int  u64;
+typedef float                   f32;
+typedef double                  f64;
 
 #pragma endregion
 
@@ -91,41 +88,113 @@ enum ButtonState {
         std::string filepath;
     };
 
-    struct Program
-    {
-        GLuint             handle;
-        std::string        filepath;
-        std::string        programName;
-        u64                lastWriteTimestamp;
-    };
-
     struct Input {
         glm::vec2   mousePos;
         glm::vec2   mouseDelta;
         ButtonState mouseButtons[MOUSE_BUTTON_COUNT];
         ButtonState keys[KEY_COUNT];
     };
-
-    struct VertexV3V2
+    
+    // Buffer
+    struct Buffer
     {
-        vec3 pos;
-        vec2 uv;
+        GLuint handle;
+        GLenum type;
+        u32 size;
+        u32 head;
+        void* data;
     };
+
+    // VBO
+    struct VertexBufferAttribute
+    {
+        u8 location;
+        u8 componentCount;
+        u8 offset;
+    };
+
+    struct VertexBufferLayout
+    {
+        std::vector<VertexBufferAttribute> attributes;
+        u8 stride;
+    };
+
+    // Shader
+    struct VertexShaderAttribute
+    {
+        u8 location;
+        u8 componentCount;
+    };
+
+    struct VertexShaderLayout
+    {
+        std::vector<VertexShaderAttribute> attributes;
+    };
+
+    struct Program
+    {
+        GLuint             handle;
+        std::string        filepath;
+        std::string        programName;
+        u64                lastWriteTimestamp;
+        VertexShaderLayout vertexShaderLayout;
+    };
+
+    // VBO + Shader
+    struct VAO
+    {
+        GLuint handle;
+        GLuint programHandle;
+    };
+
+    // Models
+    struct Submesh
+    {
+        VertexBufferLayout vertexBufferLayout;
+        std::vector<float> vertices;
+        std::vector<u32> indices;
+        u32 vertexOffset;
+        u32 indexOffset;
+
+        std::vector<VAO> vaos; // to use different shaders to each submesh
+    };
+
+    struct Mesh
+    {
+        std::vector<Submesh> submeshes;
+        GLuint vertexBufferHandle;
+        GLuint indexBufferHandle;
+    };
+
+    struct Material
+    {
+        std::string name;
+        vec3 albedo;
+        vec3 emissive;
+        f32 smoothness;
+        Texture* albedoTexture;
+        Texture* emissiveTexture;
+        Texture* specularTexture;
+        Texture* normalsTexture;
+        Texture* bumpTexture;
+
+        std::vector<Texture*> GetTextures()
+        {
+            std::vector<Texture*> tex;
+            tex.push_back(albedoTexture);
+            tex.push_back(emissiveTexture);
+            tex.push_back(specularTexture);
+            tex.push_back(normalsTexture);
+            tex.push_back(bumpTexture);
+
+            return tex;
+        }
+    };
+
+
 
 #pragma endregion
 
 #pragma region Globals
-    const VertexV3V2 vertices[] =
-    {
-        { vec3(-0.5, -0.5, 0.0), vec2(0.0,0.0)},
-        { vec3( 0.5, -0.5, 0.0), vec2(1.0,0.0)},
-        { vec3( 0.5,  0.5, 0.0), vec2(1.0,1.0)},
-        { vec3(-0.5,  0.5, 0.0), vec2(0.0,1.0)}
-    };
 
-    const u16 indices[] =
-    {
-        0, 1, 2,
-        0, 2, 3
-    };
 #pragma endregion

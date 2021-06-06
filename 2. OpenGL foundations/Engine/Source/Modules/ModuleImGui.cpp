@@ -2,6 +2,7 @@
 #include "ModuleImGui.h"
 #include "ModuleWindow.h"
 #include <PanelInfo.h>
+#include <PanelInspector.h>
 
 ModuleImGui* M_Gui = nullptr;
 
@@ -34,12 +35,12 @@ bool ModuleImGui::Init()
     ImGui::StyleColorsDarcula();
 
     // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-    ImGuiStyle& style = ImGui::GetStyle();
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    /*if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
+        ImGuiStyle& style = ImGui::GetStyle();
         style.WindowRounding = 0.0f;
-        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-    }
+        style.Colors[ImGuiCol_WindowBg].w = 0.2f;
+    }*/
 
     if (!ImGui_ImplGlfw_InitForOpenGL(M_Window->window, true))
     {
@@ -54,8 +55,9 @@ bool ModuleImGui::Init()
     }
 
 
+    // Panels
     panels.push_back(new PanelInfo());
-
+    panels.push_back(new PanelInspector());
 	return true;
 }
 
@@ -74,6 +76,11 @@ bool ModuleImGui::PreUpdate(float dt)
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     //Gui();
+
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    // Begin dock space
+    /*if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+        DockSpace();*/
     
 
 	return true;
@@ -96,6 +103,9 @@ bool ModuleImGui::Update(float dt)
 
 bool ModuleImGui::PostUpdate(float dt)
 {
+    /*if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_DockingEnable)
+        ImGui::End();*/
+
     ImGui::Render();
 
     // Clear input state if required by ImGui
@@ -141,6 +151,8 @@ void ModuleImGui::Draw()
 	{
 		panel->Draw();
 	}
+
+    
 }
 
 bool ModuleImGui::CleanUp()
@@ -152,3 +164,30 @@ bool ModuleImGui::CleanUp()
 }
 
 
+void ModuleImGui::DockSpace() const
+{
+    // --- Adapt to Window changes like resizing ---
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::SetNextWindowBgAlpha(0.7f);
+
+    static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoBackground;
+
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 1.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(1.0f, 1.0f));
+    //ImGui::PushStyleVar(ImGuiStyleVar_Alpha,255.0f);
+
+    static bool p_open = true;
+    ImGui::Begin("DockSpace Demo", &p_open, window_flags);
+    ImGui::PopStyleVar(3);
+
+    ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
+    ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+}

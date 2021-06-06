@@ -23,286 +23,84 @@ ModuleResources::~ModuleResources()
 
 bool ModuleResources::Init()
 {
-    if (GLVersion.major > 4 || (GLVersion.major == 4 && GLVersion.minor >= 3))
-    {
-        glDebugMessageCallback(Log::OnGlError, App);
-    }
-    //panels.push_back(new PanelInfo());
-    // TODO: Initialize your resources here!
-    // - programs (and retrieve uniform indices)
-    // - textures
-
-    // VBO
-    glGenBuffers(1, &App->embeddedVertices);
-    glBindBuffer(VBO, App->embeddedVertices);
-    glBufferData(VBO, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glBindBuffer(VBO, 0);
-
-    // EBO
-    glGenBuffers(1, &App->embeddedElements);
-    glBindBuffer(EBO, App->embeddedElements);
-    glBufferData(EBO, sizeof(indices), indices, GL_STATIC_DRAW);
-    glBindBuffer(EBO, 0);
-
-    // VAO
-    // Element 0, has 3 components, that are floats, no need to normalize, 
-    glGenVertexArrays(1, &App->vao);
-    glBindVertexArray(App->vao);
-    glBindBuffer(VBO, App->embeddedVertices);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)12);
-    glEnableVertexAttribArray(1);
-
-    glBindBuffer(EBO, App->embeddedElements);
-    glBindVertexArray(0);
-
-
     // Programs
-    App->texturedGeometryProgramIdx = M_Resources->LoadProgram("shaders.glsl", "TEXTURED_GEOMETRY");
+    App->reliefMappingProgramIdx = LoadProgram("relief_mapping.glsl", "RELIEF_MAPPING");
+    App->dirLightProgramIdx = LoadProgram("light_shader.glsl", "DIRECTIONAL_LIGHT");
+    App->pointLightProgramIdx = LoadProgram("light_shader.glsl", "POINT_LIGHT");
+    App->SSAOProgramIdx = LoadProgram("SSAO.glsl", "SSAO");
 
-    Program& texturedGeometryProgram = App->programs[App->texturedGeometryProgramIdx];
-
-    App->programUniformTexture = glGetUniformLocation(texturedGeometryProgram.handle, "uTexture");
-
-    // Textures
-    App->diceTexIdx = M_Resources->LoadTexture2D("dice.png");
-    App->whiteTexIdx = M_Resources->LoadTexture2D("color_white.png");
-    App->blackTexIdx = M_Resources->LoadTexture2D("color_black.png");
-    App->normalTexIdx = M_Resources->LoadTexture2D("color_normal.png");
-    App->magentaTexIdx = M_Resources->LoadTexture2D("color_magenta.png");
-
-
+    // Primitives
+    CreateQuad();
+    CreateSphere();
+    plane = LoadModel("plane.obj");
+    
     App->mode = Mode::Mode_TexturedQuad;
 
+    //LoadModel("cube.obj");
+
     return true;;
 }
 
-bool ModuleResources::Start()
-{
-    return true;;
-}
-
-bool ModuleResources::PreUpdate(float dt)
-{
-    return true;;
-}
 
 bool ModuleResources::Update(float dt)
 {
     // hot reload
-    for (int i = 0; i < App->programs.size(); ++i)
+    for (int i = 0; i < M_Resources->programs.size(); ++i)
     {
-        Program& program = App->programs[i];
-        u64 currentTimeStamp = ModuleResources::GetFileLastWriteTimestamp(program.filepath.c_str());
+        Program* program = M_Resources->programs[i];
+        u64 currentTimeStamp = ModuleResources::GetFileLastWriteTimestamp(program->filepath.c_str());
 
-        if (currentTimeStamp > program.lastWriteTimestamp)
+        if (currentTimeStamp > program->lastWriteTimestamp)
         {
-            glDeleteProgram(program.handle);
-            std::string programSource = ModuleResources::ReadTextFile(program.filepath.c_str());
+            glDeleteProgram(program->handle);
+            std::string programSource = ModuleResources::ReadTextFile(program->filepath.c_str());
 
-            program.handle = ModuleResources::CreateProgramFromSource(programSource, program.programName.c_str());
-            program.lastWriteTimestamp = currentTimeStamp;
+            program->handle = ModuleResources::CreateProgramFromSource(programSource, program->programName.c_str());
+            program->lastWriteTimestamp = currentTimeStamp;
+
+            LOG_DEBUG("Successfully reloaded shader '{0}'", program->programName);
         }
     }
     return true;;
 }
 
-bool ModuleResources::PostUpdate(float dt)
-{
-    return true;;
-}
-
 bool ModuleResources::CleanUp()
 {
-    return true;;
+    for (int i = 0; i < textures.size(); ++i)
+    {
+        delete(textures[i]);
+    }
+    textures.clear();
+
+    for (int i = 0; i < materials.size(); ++i)
+    {
+        delete(materials[i]);
+    }
+    materials.clear();
+
+    for (int i = 0; i < meshes.size(); ++i)
+    {
+        delete(meshes[i]);
+    }
+    meshes.clear();
+
+    for (int i = 0; i < programs.size(); ++i)
+    {
+        delete(programs[i]);
+    }
+    programs.clear();
+
+    return true;
 }
+
+
 
 #pragma endregion
 
-#pragma region Static
-std::string ModuleResources::GetDirectoryPart(std::string path)
-{
-    size_t pos = path.rfind('/');
-    if (pos == std::string::npos)
-        pos = path.rfind('\\');
 
-    if (pos != std::string::npos)
-        return path.substr(0, path.length() - pos);
+#pragma region Private
 
-    LOG_ERROR("Could not get directory part from {0}", path);
-    return path; // not found
-}
-
-std::string ModuleResources::ReadTextFile(const char* filepath)
-{
-    std::ifstream ifs(filepath);
-
-    if (ifs)
-    {
-        std::string fileText((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
-        return  fileText;
-    }
-
-    LOG_ERROR("fopen() failed reading file {0}", filepath);
-    return "ERROR";
-}
-
-u64 ModuleResources::GetFileLastWriteTimestamp(const char* filepath)
-{
-#ifdef _WIN32
-    union Filetime2u64 {
-        FILETIME filetime;
-        u64      u64time;
-    } conversor;
-
-    WIN32_FILE_ATTRIBUTE_DATA Data;
-    if (GetFileAttributesExA(filepath, GetFileExInfoStandard, &Data)) {
-        conversor.filetime = Data.ftLastWriteTime;
-        return(conversor.u64time);
-    }
-#else
-    // NOTE: This has not been tested in unix-like systems
-    struct stat attrib;
-    if (stat(filepath, &attrib) == 0) {
-        return attrib.st_mtime;
-    }
-#endif
-
-    return 0;
-}
-
-GLuint ModuleResources::CreateProgramFromSource(std::string programSource, const char* shaderName)
-{
-    GLchar  infoLogBuffer[1024] = {};
-    GLsizei infoLogBufferSize = sizeof(infoLogBuffer);
-    GLsizei infoLogSize;
-    GLint   success;
-
-    char versionString[] = "#version 430\n";
-    char shaderNameDefine[128];
-    sprintf(shaderNameDefine, "#define %s\n", shaderName);
-    char vertexShaderDefine[] = "#define VERTEX\n";
-    char fragmentShaderDefine[] = "#define FRAGMENT\n";
-
-    const GLchar* vertexShaderSource[] = {
-        versionString,
-        shaderNameDefine,
-        vertexShaderDefine,
-        programSource.c_str()
-    };
-    const GLint vertexShaderLengths[] = {
-        (GLint)strlen(versionString),
-        (GLint)strlen(shaderNameDefine),
-        (GLint)strlen(vertexShaderDefine),
-        (GLint)programSource.length()
-    };
-    const GLchar* fragmentShaderSource[] = {
-        versionString,
-        shaderNameDefine,
-        fragmentShaderDefine,
-        programSource.c_str()
-    };
-    const GLint fragmentShaderLengths[] = {
-        (GLint)strlen(versionString),
-        (GLint)strlen(shaderNameDefine),
-        (GLint)strlen(fragmentShaderDefine),
-        (GLint)programSource.length()
-    };
-
-    GLuint vshader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vshader, ARRAY_COUNT(vertexShaderSource), vertexShaderSource, vertexShaderLengths);
-    glCompileShader(vshader);
-    glGetShaderiv(vshader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vshader, infoLogBufferSize, &infoLogSize, infoLogBuffer);
-        LOG_ERROR("glCompileShader() failed with vertex shader %s\nReported message:\n%s\n", shaderName, infoLogBuffer);
-    }
-
-    GLuint fshader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fshader, ARRAY_COUNT(fragmentShaderSource), fragmentShaderSource, fragmentShaderLengths);
-    glCompileShader(fshader);
-    glGetShaderiv(fshader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fshader, infoLogBufferSize, &infoLogSize, infoLogBuffer);
-        LOG_ERROR("glCompileShader() failed with fragment shader %s\nReported message:\n%s\n", shaderName, infoLogBuffer);
-    }
-
-    GLuint programHandle = glCreateProgram();
-    glAttachShader(programHandle, vshader);
-    glAttachShader(programHandle, fshader);
-    glLinkProgram(programHandle);
-    glGetProgramiv(programHandle, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(programHandle, infoLogBufferSize, &infoLogSize, infoLogBuffer);
-        LOG_ERROR("glLinkProgram() failed with program %s\nReported message:\n%s\n", shaderName, infoLogBuffer);
-    }
-
-    glUseProgram(0);
-
-    glDetachShader(programHandle, vshader);
-    glDetachShader(programHandle, fshader);
-    glDeleteShader(vshader);
-    glDeleteShader(fshader);
-
-    return programHandle;
-}
-
-Image ModuleResources::ReadImage(const char* filename)
-{
-    Image img = {};
-    stbi_set_flip_vertically_on_load(true);
-    img.pixels = stbi_load(filename, &img.size.x, &img.size.y, &img.nchannels, 0);
-    if (img.pixels)
-    {
-        img.stride = img.size.x * img.nchannels;
-    }
-    else
-    {
-        LOG_ERROR("Could not open file %s", filename);
-    }
-    return img;
-}
-
-void ModuleResources::FreeImage(Image image)
-{
-    stbi_image_free(image.pixels);
-}
-
-GLuint ModuleResources::CreateTexture2DFromImage(Image image)
-{
-    GLenum internalFormat = GL_RGB8;
-    GLenum dataFormat = GL_RGB;
-    GLenum dataType = GL_UNSIGNED_BYTE;
-
-    switch (image.nchannels)
-    {
-    case 3: dataFormat = GL_RGB; internalFormat = GL_RGB8; break;
-    case 4: dataFormat = GL_RGBA; internalFormat = GL_RGBA8; break;
-    default: LOG_ERROR("LoadTexture2D() - Unsupported number of channels");
-    }
-
-    GLuint texHandle;
-    glGenTextures(1, &texHandle);
-    glBindTexture(GL_TEXTURE_2D, texHandle);
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.size.x, image.size.y, 0, dataFormat, dataType, image.pixels);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    return texHandle;
-}
-
-/*
+// Assimp
 
 void ModuleResources::ProcessAssimpMesh(const aiScene* scene, aiMesh* mesh, Mesh* myMesh, u32 baseMeshMaterialIndex, std::vector<u32>& submeshMaterialIndices)
 {
@@ -390,7 +188,7 @@ void ModuleResources::ProcessAssimpMesh(const aiScene* scene, aiMesh* mesh, Mesh
     myMesh->submeshes.push_back(submesh);
 }
 
-void ModuleResources::ProcessAssimpMaterial(App* app, aiMaterial* material, Material& myMaterial, String directory)
+void ModuleResources::ProcessAssimpMaterial(aiMaterial* material, Material* myMaterial, std::string directory)
 {
     aiString name;
     aiColor3D diffuseColor;
@@ -403,46 +201,46 @@ void ModuleResources::ProcessAssimpMaterial(App* app, aiMaterial* material, Mate
     material->Get(AI_MATKEY_COLOR_SPECULAR, specularColor);
     material->Get(AI_MATKEY_SHININESS, shininess);
 
-    myMaterial.name = name.C_Str();
-    myMaterial.albedo = vec3(diffuseColor.r, diffuseColor.g, diffuseColor.b);
-    myMaterial.emissive = vec3(emissiveColor.r, emissiveColor.g, emissiveColor.b);
-    myMaterial.smoothness = shininess / 256.0f;
+    myMaterial->name = name.C_Str();
+    myMaterial->albedo = vec3(diffuseColor.r, diffuseColor.g, diffuseColor.b);
+    myMaterial->emissive = vec3(emissiveColor.r, emissiveColor.g, emissiveColor.b);
+    myMaterial->smoothness = shininess / 256.0f;
 
     aiString aiFilename;
     if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
     {
         material->GetTexture(aiTextureType_DIFFUSE, 0, &aiFilename);
-        String filename = MakeString(aiFilename.C_Str());
-        String filepath = MakePath(directory, filename);
-        myMaterial.albedoTextureIdx = LoadTexture2D(app, filepath.str);
+        //std::string filename = MakeString(aiFilename.C_Str());
+        std::string filepath = directory + "/" + aiFilename.C_Str();
+        myMaterial->albedoTexture = LoadTexture2D(filepath.c_str());
+    }
+    else
+    {
+        myMaterial->albedoTexture = LoadTexture2D("color_white.png");
     }
     if (material->GetTextureCount(aiTextureType_EMISSIVE) > 0)
     {
         material->GetTexture(aiTextureType_EMISSIVE, 0, &aiFilename);
-        String filename = MakeString(aiFilename.C_Str());
-        String filepath = MakePath(directory, filename);
-        myMaterial.emissiveTextureIdx = LoadTexture2D(app, filepath.str);
+        std::string filepath = directory + "/" + aiFilename.C_Str();
+        myMaterial->emissiveTexture = LoadTexture2D(filepath.c_str());
     }
     if (material->GetTextureCount(aiTextureType_SPECULAR) > 0)
     {
         material->GetTexture(aiTextureType_SPECULAR, 0, &aiFilename);
-        String filename = MakeString(aiFilename.C_Str());
-        String filepath = MakePath(directory, filename);
-        myMaterial.specularTextureIdx = LoadTexture2D(app, filepath.str);
+        std::string filepath = directory + "/" + aiFilename.C_Str();
+        myMaterial->specularTexture = LoadTexture2D(filepath.c_str());
     }
     if (material->GetTextureCount(aiTextureType_NORMALS) > 0)
     {
         material->GetTexture(aiTextureType_NORMALS, 0, &aiFilename);
-        String filename = MakeString(aiFilename.C_Str());
-        String filepath = MakePath(directory, filename);
-        myMaterial.normalsTextureIdx = LoadTexture2D(app, filepath.str);
+        std::string filepath = directory + "/" + aiFilename.C_Str();
+        myMaterial->normalsTexture = LoadTexture2D(filepath.c_str());
     }
     if (material->GetTextureCount(aiTextureType_HEIGHT) > 0)
     {
         material->GetTexture(aiTextureType_HEIGHT, 0, &aiFilename);
-        String filename = MakeString(aiFilename.C_Str());
-        String filepath = MakePath(directory, filename);
-        myMaterial.bumpTextureIdx = LoadTexture2D(app, filepath.str);
+        std::string filepath = directory + "/" + aiFilename.C_Str();
+        myMaterial->bumpTexture = LoadTexture2D(filepath.c_str());
     }
 
     //myMaterial.createNormalFromBump();
@@ -464,9 +262,279 @@ void ModuleResources::ProcessAssimpNode(const aiScene* scene, aiNode* node, Mesh
     }
 }
 
-u32 ModuleResources::LoadModel(const char* filename)
+#pragma endregion
+
+
+#pragma region Static
+// Files
+std::string ModuleResources::GetDirectoryPart(std::string path)
 {
-    /*const aiScene* scene = aiImportFile(filename,
+    size_t pos = path.rfind('/');
+    if (pos == std::string::npos)
+        pos = path.rfind('\\');
+
+    if (pos != std::string::npos)
+    {
+       std::string tmp_path = path.substr(0, path.length() - pos);
+       if (tmp_path.find(".") != std::string::npos)
+           return tmp_path.substr(0, tmp_path.length() - 1);
+    }
+
+    if (pos != std::string::npos)
+        return path.substr(0, path.length() - pos);
+
+    //LOG_WARN("Could not get directory part from {0}", path);
+    return path; // not found
+}
+std::string ModuleResources::GetFileNamePart(std::string path)
+{
+    size_t pos = path.rfind('/');
+    if (pos == std::string::npos)
+        pos = path.rfind('\\');
+
+    if (pos != std::string::npos)
+        return path.substr(pos, path.length()-1);
+
+    //LOG_ERROR("Could not get directory part from {0}", path);
+    return path; // not found
+}
+std::string ModuleResources::ReadTextFile(const char* filepath)
+{
+    std::ifstream ifs(filepath);
+
+    if (ifs)
+    {
+        std::string fileText((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+        return  fileText;
+    }
+
+    LOG_ERROR("fopen() failed reading file {0}", filepath);
+    return "ERROR";
+}
+u64 ModuleResources::GetFileLastWriteTimestamp(const char* filepath)
+{
+#ifdef _WIN32
+    union Filetime2u64 {
+        FILETIME filetime;
+        u64      u64time;
+    } conversor;
+
+    WIN32_FILE_ATTRIBUTE_DATA Data;
+    if (GetFileAttributesExA(filepath, GetFileExInfoStandard, &Data)) {
+        conversor.filetime = Data.ftLastWriteTime;
+        return(conversor.u64time);
+    }
+#else
+    // NOTE: This has not been tested in unix-like systems
+    struct stat attrib;
+    if (stat(filepath, &attrib) == 0) {
+        return attrib.st_mtime;
+    }
+#endif
+
+    return 0;
+}
+
+// Programs
+GLuint ModuleResources::CreateProgramFromSource(std::string programSource, const char* shaderName)
+{
+    GLchar  infoLogBuffer[1024] = {};
+    GLsizei infoLogBufferSize = sizeof(infoLogBuffer);
+    GLsizei infoLogSize;
+    GLint   success;
+
+    char versionString[] = "#version 430\n";
+    char shaderNameDefine[128];
+    sprintf(shaderNameDefine, "#define %s\n", shaderName);
+    char vertexShaderDefine[] = "#define VERTEX\n";
+    char fragmentShaderDefine[] = "#define FRAGMENT\n";
+
+    const GLchar* vertexShaderSource[] = {
+        versionString,
+        shaderNameDefine,
+        vertexShaderDefine,
+        programSource.c_str()
+    };
+    const GLint vertexShaderLengths[] = {
+        (GLint)strlen(versionString),
+        (GLint)strlen(shaderNameDefine),
+        (GLint)strlen(vertexShaderDefine),
+        (GLint)programSource.length()
+    };
+    const GLchar* fragmentShaderSource[] = {
+        versionString,
+        shaderNameDefine,
+        fragmentShaderDefine,
+        programSource.c_str()
+    };
+    const GLint fragmentShaderLengths[] = {
+        (GLint)strlen(versionString),
+        (GLint)strlen(shaderNameDefine),
+        (GLint)strlen(fragmentShaderDefine),
+        (GLint)programSource.length()
+    };
+
+    GLuint vshader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vshader, ARRAY_COUNT(vertexShaderSource), vertexShaderSource, vertexShaderLengths);
+    glCompileShader(vshader);
+    glGetShaderiv(vshader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(vshader, infoLogBufferSize, &infoLogSize, infoLogBuffer);
+        LOG_ERROR("glCompileShader() failed with vertex shader {0}\nReported message:\n{1}\n", shaderName, infoLogBuffer);
+    }
+
+    GLuint fshader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fshader, ARRAY_COUNT(fragmentShaderSource), fragmentShaderSource, fragmentShaderLengths);
+    glCompileShader(fshader);
+    glGetShaderiv(fshader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(fshader, infoLogBufferSize, &infoLogSize, infoLogBuffer);
+        LOG_ERROR("glCompileShader() failed with fragment shader {0}\nReported message:\n{1}\n", shaderName, infoLogBuffer);
+    }
+
+    GLuint programHandle = glCreateProgram();
+    glAttachShader(programHandle, vshader);
+    glAttachShader(programHandle, fshader);
+    glLinkProgram(programHandle);
+    glGetProgramiv(programHandle, GL_LINK_STATUS, &success);
+    if (!success)
+    {
+        glGetProgramInfoLog(programHandle, infoLogBufferSize, &infoLogSize, infoLogBuffer);
+        LOG_ERROR("glLinkProgram() failed with program {0}\nReported message:\n{1}\n", shaderName, infoLogBuffer);
+    }
+
+    glUseProgram(0);
+
+    glDetachShader(programHandle, vshader);
+    glDetachShader(programHandle, fshader);
+    glDeleteShader(vshader);
+    glDeleteShader(fshader);
+
+    return programHandle;
+}
+
+// Images and textures
+Image ModuleResources::ReadImage(const char* filename)
+{
+    Image img = {};
+    stbi_set_flip_vertically_on_load(true);
+    img.pixels = stbi_load(filename, &img.size.x, &img.size.y, &img.nchannels, 0);
+    if (img.pixels)
+    {
+        img.stride = img.size.x * img.nchannels;
+    }
+    else
+    {
+        LOG_ERROR("Could not open file {0}", filename);
+    }
+    return img;
+}
+void ModuleResources::FreeImage(Image image)
+{
+    stbi_image_free(image.pixels);
+}
+GLuint ModuleResources::CreateTexture2DFromImage(Image image)
+{
+    GLenum internalFormat = GL_RGB8;
+    GLenum dataFormat = GL_RGB;
+    GLenum dataType = GL_UNSIGNED_BYTE;
+
+    switch (image.nchannels)
+    {
+    case 3: dataFormat = GL_RGB; internalFormat = GL_RGB8; break;
+    case 4: dataFormat = GL_RGBA; internalFormat = GL_RGBA8; break;
+    default: LOG_ERROR("LoadTexture2D() - Unsupported number of channels");
+    }
+
+    GLuint texHandle;
+    glGenTextures(1, &texHandle);
+    glBindTexture(GL_TEXTURE_2D, texHandle);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.size.x, image.size.y, 0, dataFormat, dataType, image.pixels);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return texHandle;
+}
+
+#pragma endregion
+
+
+#pragma region Public 
+
+u32 ModuleResources::LoadProgram(const char* filepath, const char* programName)
+{
+    std::string programSource = ModuleResources::ReadTextFile(filepath);
+
+    Program* program = new Program();
+    program->handle = CreateProgramFromSource(programSource, programName);
+    program->filepath = filepath;
+    program->programName = programName;
+    program->lastWriteTimestamp = ModuleResources::GetFileLastWriteTimestamp(filepath);
+
+    // getting info from the shader
+    GLint attributeSize = 0;
+    GLenum attributeType = 0;
+    const GLsizei bufferSize = 64;
+    GLchar attributeName[bufferSize];
+
+    GLint attributeCount = 0;
+    glGetProgramiv(program->handle, GL_ACTIVE_ATTRIBUTES, &attributeCount);
+
+    for (int i = 0; i < attributeCount; ++i)
+    {
+        VertexShaderAttribute attribute = {};
+        GLsizei attributeNameLength = 0;
+
+        glGetActiveAttrib(program->handle, (GLuint)i, bufferSize,
+            &attributeNameLength, &attributeSize, &attributeType, attributeName);
+
+        attribute.componentCount = attributeSize;
+        attribute.location = glGetAttribLocation(program->handle, attributeName);
+
+        program->vertexShaderLayout.attributes.push_back(attribute);
+    }
+
+    M_Resources->programs.push_back(program);
+    return M_Resources->programs.size() - 1;
+}
+
+Texture* ModuleResources::LoadTexture2D(const char* filepath)
+{
+    //for (u32 texIdx = 0; texIdx < M_Resources->textures.size(); ++texIdx)
+    for (Texture* tex : M_Resources->textures)
+        if (tex->filepath == filepath)
+            return tex;
+
+    Image image = ReadImage(filepath);
+
+    if (image.pixels)
+    {
+        Texture* tex = new Texture();
+        tex->handle = CreateTexture2DFromImage(image);
+        tex->filepath = filepath;
+
+        //u32 texIdx = M_Resources->textures.size();
+        M_Resources->textures.push_back(tex);
+
+        FreeImage(image);
+        return tex;
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+Model* ModuleResources::LoadModel(const char* filename)
+{
+    const aiScene* scene = aiImportFile(filename,
         aiProcess_Triangulate |
         aiProcess_GenSmoothNormals |
         aiProcess_CalcTangentSpace |
@@ -478,120 +546,154 @@ u32 ModuleResources::LoadModel(const char* filename)
 
     if (!scene)
     {
-        ELOG("Error loading mesh %s: %s", filename, aiGetErrorString());
-        return UINT32_MAX;
+        LOG_ERROR("Error loading mesh {0}: {1}", filename, aiGetErrorString());
+        return nullptr;
     }
 
-    App->meshes.push_back(Mesh{});
-    Mesh& mesh = App->meshes.back();
-    u32 meshIdx = (u32)App->meshes.size() - 1u;
+    Mesh* mesh = new Mesh();
+    M_Resources->meshes.push_back(mesh);
+    //u32 meshIdx = (u32)M_Resources->meshes.size() - 1u;
 
-    App->models.push_back(Model{});
-    Model& model = App->models.back();
-    model.meshIdx = meshIdx;
-    u32 modelIdx = (u32)App->models.size() - 1u;
+    Model* model = new Model();
+    model->mesh = mesh;
+    model->name = GetFileNamePart(filename);
 
-    String directory = GetDirectoryPart(MakeString(filename));
+    //u32 modelIdx = (u32)M_Resources->models.size() - 1u;
+
+    std::string directory = GetDirectoryPart(filename);
 
     // Create a list of materials
-    u32 baseMeshMaterialIndex = (u32)App->materials.size();
+    u32 baseMeshMaterialIndex = (u32)M_Resources->materials.size();
     for (unsigned int i = 0; i < scene->mNumMaterials; ++i)
     {
-        App->materials.push_back(Material{});
-        Material& material = App->materials.back();
-        ProcessAssimpMaterial(app, scene->mMaterials[i], material, directory);
+        Material* material = new Material();
+        M_Resources->materials.push_back(material);
+        ProcessAssimpMaterial(scene->mMaterials[i], material, directory);
     }
 
-    ProcessAssimpNode(scene, scene->mRootNode, &mesh, baseMeshMaterialIndex, model.materialIdx);
+    ProcessAssimpNode(scene, scene->mRootNode, mesh, baseMeshMaterialIndex, model->materialIdx);
 
     aiReleaseImport(scene);
 
     u32 vertexBufferSize = 0;
     u32 indexBufferSize = 0;
 
-    for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+    for (u32 i = 0; i < mesh->submeshes.size(); ++i)
     {
-        vertexBufferSize += mesh.submeshes[i].vertices.size() * sizeof(float);
-        indexBufferSize += mesh.submeshes[i].indices.size() * sizeof(u32);
+        vertexBufferSize += mesh->submeshes[i].vertices.size() * sizeof(float);
+        indexBufferSize += mesh->submeshes[i].indices.size() * sizeof(u32);
     }
 
-    glGenBuffers(1, &mesh.vertexBufferHandle);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh.vertexBufferHandle);
+    glGenBuffers(1, &mesh->vertexBufferHandle);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh->vertexBufferHandle);
     glBufferData(GL_ARRAY_BUFFER, vertexBufferSize, NULL, GL_STATIC_DRAW);
 
-    glGenBuffers(1, &mesh.indexBufferHandle);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.indexBufferHandle);
+    glGenBuffers(1, &mesh->indexBufferHandle);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->indexBufferHandle);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, NULL, GL_STATIC_DRAW);
 
     u32 indicesOffset = 0;
     u32 verticesOffset = 0;
 
-    for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+    for (u32 i = 0; i < mesh->submeshes.size(); ++i)
     {
-        const void* verticesData = mesh.submeshes[i].vertices.data();
-        const u32   verticesSize = mesh.submeshes[i].vertices.size() * sizeof(float);
+        const void* verticesData = mesh->submeshes[i].vertices.data();
+        const u32   verticesSize = mesh->submeshes[i].vertices.size() * sizeof(float);
         glBufferSubData(GL_ARRAY_BUFFER, verticesOffset, verticesSize, verticesData);
-        mesh.submeshes[i].vertexOffset = verticesOffset;
+        mesh->submeshes[i].vertexOffset = verticesOffset;
         verticesOffset += verticesSize;
 
-        const void* indicesData = mesh.submeshes[i].indices.data();
-        const u32   indicesSize = mesh.submeshes[i].indices.size() * sizeof(u32);
+        const void* indicesData = mesh->submeshes[i].indices.data();
+        const u32   indicesSize = mesh->submeshes[i].indices.size() * sizeof(u32);
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, indicesOffset, indicesSize, indicesData);
-        mesh.submeshes[i].indexOffset = indicesOffset;
+        mesh->submeshes[i].indexOffset = indicesOffset;
         indicesOffset += indicesSize;
     }
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    return modelIdx;
+    return model;
     return 0;
 }
-*/
-#pragma endregion
 
-#pragma region Public 
-u32 ModuleResources::LoadProgram(const char* filepath, const char* programName)
+void ModuleResources::CreateQuad()
 {
-    std::string programSource = ModuleResources::ReadTextFile(filepath);
-
-    Program program = {};
-    program.handle = CreateProgramFromSource(programSource, programName);
-    program.filepath = filepath;
-    program.programName = programName;
-    program.lastWriteTimestamp = ModuleResources::GetFileLastWriteTimestamp(filepath);
-    App->programs.push_back(program);
-
-    return App->programs.size() - 1;
+    // Create Quad VAO & VBO
+    float quadVertices[] = {
+        // positions        // texture Coords
+        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+         1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+         1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+    };
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 }
 
-
-u32 ModuleResources::LoadTexture2D(const char* filepath)
+void ModuleResources::CreateSphere(int stacks, int slices) 
 {
-    for (u32 texIdx = 0; texIdx < App->textures.size(); ++texIdx)
-        if (App->textures[texIdx].filepath == filepath)
-            return texIdx;
+    std::vector<float> positions;
+    std::vector<GLuint> indices;
 
-    Image image = ReadImage(filepath);
+    // loop through stacks.
+    for (int i = 0; i <= stacks; ++i) {
 
-    if (image.pixels)
-    {
-        Texture tex = {};
-        tex.handle = CreateTexture2DFromImage(image);
-        tex.filepath = filepath;
+        float V = (float)i / (float)stacks;
+        float phi = V * PI;
 
-        u32 texIdx = App->textures.size();
-        App->textures.push_back(tex);
+        // loop through the slices.
+        for (int j = 0; j <= slices; ++j) {
 
-        FreeImage(image);
-        return texIdx;
+            float U = (float)j / (float)slices;
+            float theta = U * (PI * 2);
+
+            // use spherical coordinates to calculate the positions.
+            float x = cos(theta) * sin(phi);
+            float y = cos(phi);
+            float z = sin(theta) * sin(phi);
+
+            positions.push_back(x);
+            positions.push_back(y);
+            positions.push_back(z);
+        }
     }
-    else
-    {
-        return UINT32_MAX;
+
+    // Calc The Index Positions
+    for (int i = 0; i < slices * stacks + slices; ++i) {
+        indices.push_back(GLuint(i));
+        indices.push_back(GLuint(i + slices + 1));
+        indices.push_back(GLuint(i + slices));
+
+        indices.push_back(GLuint(i + slices + 1));
+        indices.push_back(GLuint(i));
+        indices.push_back(GLuint(i + 1));
     }
+
+    // upload geometry to GPU.
+    glGenVertexArrays(1, &sphereVAO);
+    glBindVertexArray(sphereVAO);
+
+    glGenBuffers(1, &spherePosVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, spherePosVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * positions.size(), positions.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glEnableVertexAttribArray(0);
+
+    glGenBuffers(1, &sphereIdxVBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereIdxVBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), indices.data(), GL_STATIC_DRAW);
+
+    sphereIdxCount = indices.size();
 }
-
 #pragma endregion
 
 
