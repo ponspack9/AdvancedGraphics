@@ -25,8 +25,11 @@ The engine has three windows:
 
 ## Renders
 
-
 **SSAO**
+
+
+![Without SSAO](https://github.com/ponspack9/AdvancedGraphics/blob/main/2.%20OpenGL%20foundations/Renders/SSAOFull.png?raw=true)
+
 
 **Relief Mapping**
 
