@@ -34,7 +34,7 @@ public:
 	GBuffer gbuffer;
 
     bool applySSAO = true;
-    float SSAOIntensity = 0.6f;
+    float SSAOIntensity = 1.5f;
     bool showOnlySSAO = false;
 
 private:
