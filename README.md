@@ -21,7 +21,7 @@ The engine has three windows:
 * WASD to move.
 * QE to move up/down.
 * Mouse Scroll to zoom in/out;
-* Click and drag to rotate.
+* Click and Drag to rotate.
 
 ## Renders
 <p align="center"><img src="/Renders/main.gif" width="75%" height="75%"/></p>
