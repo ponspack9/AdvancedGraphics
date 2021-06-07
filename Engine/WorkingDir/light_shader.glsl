@@ -67,65 +67,58 @@ void main()
 #if defined(VERTEX) ///////////////////////////////////////////////////
 
 layout(location = 0) in vec3 aPosition;
-out vec4 fsPos;
+layout(location = 1) in vec3 aNormal;
+layout(location = 2) in vec2 aTexCoord;
+
+out vec2 vTexCoord;
 
 uniform mat4 uViewProjection;
-uniform float uLightRadius;
-uniform vec3 uLightPosition;
+uniform mat4 uModel;
 
 void main()
 {
-	vec4 pos = uViewProjection * vec4((aPosition * uLightRadius) + uLightPosition, 1.0);
-	gl_Position = pos;
-    fsPos = pos;
-}
+    vTexCoord = aTexCoord;
+    gl_Position = uViewProjection * vec4(vec3(uModel * vec4(aPosition, 1.0)), 1.0);}
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
 
-in vec4 fsPos;
+in vec2 vTexCoord;
 
 uniform sampler2D oAlbedo;
 uniform sampler2D oNormal;
 uniform sampler2D oPosition;
 
-uniform float uLightRadius;
+uniform vec3 uCameraPos;
+
 uniform vec3 uLightPosition;
 uniform vec3 uLightColor;
-
-uniform vec3 uCameraPos;
+uniform float uLightK;
+uniform float uLightL;
+uniform float uLightQ;
 
 layout(location = 0) out vec4 oColor;
 
 void main()
 {
-    vec2 uv = (fsPos.xy / fsPos.w) * 0.5 + 0.5;
+    vec3 Albedo   = texture(oAlbedo, vTexCoord).rgb;
+	vec3 Normal   = normalize(texture(oNormal, vTexCoord).rgb);
+    vec3 Position = texture(oPosition, vTexCoord).rgb;
+  	
+    // diffuse 
+    vec3 lightDir = normalize(uLightPosition - Position);
+    vec3 diffuse  = max(dot(Normal, lightDir), 0.0) * Albedo * uLightColor;  
     
-    vec3 albedo    = texture(oAlbedo, uv).xyz;
-    vec3 normal    = normalize(texture(oNormal, uv).xyz);
-    vec3 position  = texture(oPosition, uv).xyz;
+    // specular
+    vec3 viewDir    = normalize(uCameraPos - Position);
+    vec3 reflectDir = reflect(-lightDir, Normal);  
+    vec3 specular   = uLightColor * pow(max(dot(viewDir, reflectDir), 0.0), 10.0);
     
-    vec3 lightToPos = position - uLightPosition;
-    float lightDist = length(lightToPos);
-    vec3 l = -lightToPos / (lightDist);
-    float ztest = step(0.0, uLightRadius - lightDist);
-    
-    // Attenuation
-    float d = lightDist / uLightRadius;
-    float attenuation = 1.0 - d;
-    vec3 v = normalize(uCameraPos - position);
-    vec3 h = normalize(l + v);
-    
-    vec3 diffuse = max(0.0, dot(normal, l)) * albedo * uLightColor;
-    vec3 specular = pow(max(0.0, dot(h, normal)), 12.0) * uLightColor;
-    
-    vec3 lightColor = diffuse + specular;
-    //lightColor *= ztest * attenuation;
-    
-    // Final Color
-    oColor = vec4(lightColor, 1.0);
-
-    //oColor = vec4(1.0, 0.0, 0.0, 1.0);
-}
+    // attenuation
+    float distance    = length(uLightPosition - Position);
+    float attenuation = 1.0 / (uLightK + uLightL * distance + uLightQ * (distance * distance));    
+        
+    vec3 result = attenuation * (diffuse + specular);
+    oColor = vec4(result, 1.0);}
 
 #endif
 #endif

@@ -46,13 +46,13 @@ bool ModuleRenderer::Update(float dt)
 
 	// --- Geometry Pass
 	GeometryPass(M_Resources->programs[App->reliefMappingProgramIdx]);
-	
-	// --- Light Pass
-	LightPass(M_Resources->programs[App->dirLightProgramIdx], M_Resources->programs[App->pointLightProgramIdx]);
 
 	// --- SSAO
 	if (applySSAO)
 		SSAOPass(M_Resources->programs[App->SSAOProgramIdx]);
+
+	// --- Light Pass
+	LightPass(M_Resources->programs[App->dirLightProgramIdx], M_Resources->programs[App->pointLightProgramIdx]);
 
 	// --- Render to Screen
 	RenderType();
@@ -168,48 +168,60 @@ void ModuleRenderer::LightPass(Program* dirLight_program, Program* pointLight_pr
 	glUseProgram(0); // Disable Shader
 
 
-	//// --- POINT LIGHTS ---
-	//// Set Flags
-	//glDisable(GL_DEPTH_TEST);
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_ONE, GL_ONE);
-	//glFrontFace(GL_CW); // render only the inner faces of the light sphere
+	// --- POINT LIGHTS ---
+	// Set Flags
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE);
+	glFrontFace(GL_CW); // render only the inner faces of the light sphere
 
-	//// Enable Point Light Shader
-	//glUseProgram(pointLight_program->handle);
+	// Enable Point Light Shader
+	glUseProgram(pointLight_program->handle);
 
-	//// Pass the Textures in Order
-	//glUniform1i(glGetUniformLocation(pointLight_program->handle, "oAlbedo"), 0);
-	//glUniform1i(glGetUniformLocation(pointLight_program->handle, "oNormal"), 1);
-	//glUniform1i(glGetUniformLocation(pointLight_program->handle, "oPosition"), 2);
-	//glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[1]);
-	//glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[2]);
-	//glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[3]);
+	// Pass the Textures in Order
+	glUniform1i(glGetUniformLocation(pointLight_program->handle, "oAlbedo"), 0);
+	glUniform1i(glGetUniformLocation(pointLight_program->handle, "oNormal"), 1);
+	glUniform1i(glGetUniformLocation(pointLight_program->handle, "oPosition"), 2);
+	glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[1]);
+	glActiveTexture(GL_TEXTURE1); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[2]);
+	glActiveTexture(GL_TEXTURE2); glBindTexture(GL_TEXTURE_2D, gbuffer.textures[3]);
 
-	//glUniform3f(glGetUniformLocation(pointLight_program->handle, "uCameraPos"), M_Scene->camera->pos.x, M_Scene->camera->pos.y, M_Scene->camera->pos.z);
-	//glUniformMatrix4fv(glGetUniformLocation(pointLight_program->handle, "uViewProjection"), 1, GL_FALSE, (GLfloat*)&M_Scene->camera->GetViewProjectionMatrix());
+	glUniform3f(glGetUniformLocation(pointLight_program->handle, "uCameraPos"), M_Scene->camera->pos.x, M_Scene->camera->pos.y, M_Scene->camera->pos.z);
+	glUniformMatrix4fv(glGetUniformLocation(pointLight_program->handle, "uViewProjection"), 1, GL_FALSE, (GLfloat*)&M_Scene->camera->GetViewProjectionMatrix());
 
-	//for (PointLight* light : M_Scene->pointLights)
-	//{
-	//	glDrawBuffer(GL_COLOR_ATTACHMENT0);
-	//	
-	//	glUniform1f(glGetUniformLocation(pointLight_program->handle, "uLightRadius"), light->radius);
-	//	glUniform3f(glGetUniformLocation(pointLight_program->handle, "uLightPosition"), light->position.x, light->position.y, light->position.z);
-	//	glUniform3f(glGetUniformLocation(pointLight_program->handle, "uLightColor"), light->color.x, light->color.y, light->color.z);
+	for (PointLight* light : M_Scene->pointLights)
+	{
+		if (!light->active) continue;
 
-	//	// draw sphere
-	//	glBindVertexArray(M_Resources->sphereVAO);
-	//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, M_Resources->sphereIdxVBO);
-	//	glDrawElements(GL_TRIANGLES, M_Resources->sphereIdxCount, GL_UNSIGNED_INT, NULL);
-	//}
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
-	//glUseProgram(0); // Disable Shader
+		glm::mat4 transform = glm::mat4(1.0f);
+		transform = glm::translate(transform, light->position);
+		transform = glm::rotate(transform, glm::radians(00.0f), glm::vec3(0.0, 0.0, 1.0));
+		transform = glm::scale(transform, glm::vec3(light->radius));
+		glUniformMatrix4fv(glGetUniformLocation(pointLight_program->handle, "uModel"), 1, GL_FALSE, (GLfloat*)&transform);
+
+		glUniform3f(glGetUniformLocation(pointLight_program->handle, "uLightPosition"), light->position.x, light->position.y, light->position.z);
+		glUniform3f(glGetUniformLocation(pointLight_program->handle, "uLightColor"), light->color.x, light->color.y, light->color.z);
+		glUniform1f(glGetUniformLocation(pointLight_program->handle, "uLightK"), 1.0f);
+		glUniform1f(glGetUniformLocation(pointLight_program->handle, "uLightL"), 0.35f);
+		glUniform1f(glGetUniformLocation(pointLight_program->handle, "uLightQ"), 0.44f);
+
+		// draw sphere
+		glBindVertexArray(M_Resources->sphereVAO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, M_Resources->sphereIdxVBO);
+		glDrawElements(GL_TRIANGLES, M_Resources->sphereIdxCount, GL_UNSIGNED_INT, NULL);
+	}
+
+	glUseProgram(0); // Disable Shader
 }
 
 void ModuleRenderer::SSAOPass(Program* program)
 {
 	glUseProgram(program->handle); // Enable Directional Light Shader
-	glDepthMask(false);
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
 
 	// Pass the Textures in Order
 	glUniform1i(glGetUniformLocation(program->handle, "oAlbedo"), 0);

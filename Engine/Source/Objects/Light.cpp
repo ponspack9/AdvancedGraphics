@@ -30,6 +30,8 @@ void PointLight::DrawInspector(int count)
 
 	if (ImGui::CollapsingHeader(name.c_str(), ImGuiTreeNodeFlags_SpanAvailWidth))
 	{
+		ImGui::Checkbox(std::string("Active##" + name).c_str() , &active);
+
 		ImGui::Text("Color");
 		ImGui::SameLine();
 		ImGui::ColorEdit3(std::string("##color" + name).c_str(), glm::value_ptr(color));

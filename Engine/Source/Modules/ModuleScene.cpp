@@ -55,12 +55,10 @@ bool ModuleScene::Init()
 	// Directional Light
 	dirLight = new DirectionalLight(glm::vec3(0.26f, 0.91f, 0.87f), glm::vec3(-2.0f, 5.0f, 3.0f));
 
-	//// Point Lights
-	//PointLight* plight1 = new PointLight(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(2.0f, 5.0f, 3.0f), 1.0f);	pointLights.push_back(plight1);
-	//PointLight* plight2 = new PointLight(glm::vec3(0.7f, 0.5f, 0.2f), glm::vec3(2.0f, 0.0f, 5.0f), 3.6f);	pointLights.push_back(plight2);
-	//PointLight* plight3 = new PointLight(glm::vec3(1.0f, 0.8f, 0.8f), glm::vec3(-4.0f, 5.0f, 9.0f), 5.0f);	pointLights.push_back(plight3);
-	//PointLight* plight4 = new PointLight(glm::vec3(0.0f, 0.5f, 0.9f), glm::vec3(-1.0f, 5.0f, 2.0f), 0.5f);	pointLights.push_back(plight4);
-	//PointLight* plight5 = new PointLight(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f, 2.0f, -3.0f), 2.0f);	pointLights.push_back(plight5);
+	// Point Lights
+	PointLight* plight1 = new PointLight(glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(2.0f, 5.0f, 3.0f), 1.0f);	pointLights.push_back(plight1);
+	PointLight* plight2 = new PointLight(glm::vec3(0.7f, 0.5f, 0.2f), glm::vec3(2.0f, 0.0f, 5.0f), 3.6f);	pointLights.push_back(plight2);
+	PointLight* plight5 = new PointLight(glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f, 2.0f, -3.0f), 2.0f);	pointLights.push_back(plight5);
 
 	return true;
 }
