@@ -230,6 +230,7 @@ void ModuleRenderer::SSAOPass(Program* program)
 
 	glUniform1f(glGetUniformLocation(program->handle, "intensity"), SSAOIntensity);
 	glUniform1i(glGetUniformLocation(program->handle, "showOnlySSAO"), showOnlySSAO);
+	glUniform1i(glGetUniformLocation(program->handle, "time"), (float)ImGui::GetTime());
 
 	// Draw
 	glBindVertexArray(M_Resources->quadVAO);

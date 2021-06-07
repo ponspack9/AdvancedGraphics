@@ -10,7 +10,9 @@ void PanelInspector::Draw()
 	char fps[64];
 	sprintf_s(fps, 64, "FPS: %f", 1.0f / App->deltaTime);
 	ImGui::Text(fps);
-
+	ImGui::Text("Time: "); ImGui::SameLine();
+	ImGui::Text(std::to_string(ImGui::GetTime()).c_str());
+	
 	const char* items[] = { "Final Scene", "Albedo", "Normals", "Position", "Depth" };
 	static int item_current = 0;
 	ImGui::Combo("Textures", &item_current, items, IM_ARRAYSIZE(items));
@@ -18,7 +20,8 @@ void PanelInspector::Draw()
 	ImGui::Separator();
 
 	ImGui::Checkbox("SSAO", &M_Renderer->applySSAO);
-	
+
+
 	if (M_Renderer->applySSAO)
 	{
 		ImGui::DragFloat("Intensity", &M_Renderer->SSAOIntensity, 0.05f,0.0f);
