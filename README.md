@@ -27,7 +27,7 @@ The engine has three windows:
 <p align="center"><img src="/Renders/main.gif" width="75%" height="75%"/></p>
 
 
-**SSAO**
+### **SSAO**
 
 ![SSAO](https://github.com/ponspack9/AdvancedGraphics/blob/main/Renders/SSAO.PNG?raw=true)
 ![SSAO](https://github.com/ponspack9/AdvancedGraphics/blob/main/Renders/SSAOFull.png?raw=true)
@@ -39,7 +39,7 @@ You can enable or disable these effects with this options
 The corresponding shader file is **SSAO.glsl**
 
 
-**Relief Mapping**
+### **Relief Mapping**
 
 ![Relief Mapping](https://github.com/ponspack9/AdvancedGraphics/blob/main/Renders/1.PNG?raw=true)
 ![Relief Mapping](https://github.com/ponspack9/AdvancedGraphics/blob/main/Renders/RMFull.png?raw=true)
